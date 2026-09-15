@@ -355,16 +355,56 @@ function CallUpDetail() {
         <h1 className="mt-3 text-display text-3xl md:text-4xl font-bold leading-tight">
           {formatWhen(cu.starts_at)}
         </h1>
-        <div className="mt-3 space-y-1 text-ink/70">
-          {cu.place && <p className="flex items-center gap-2"><MapPin size={16}/> {cu.place}</p>}
-          {cu.objetivo && (
-            <div className="mt-3 rounded-xl border-2 border-ink bg-lime/20 px-4 py-3">
-              <div className="text-xs font-mono uppercase tracking-wider text-ink/60">Objetivo del entreno</div>
-              <p className="mt-1 font-semibold text-ink">{cu.objetivo}</p>
+
+        {isAdmin && editing ? (
+          <form
+            onSubmit={(e) => { e.preventDefault(); setEditError(""); editMut.mutate(); }}
+            className="mt-6 space-y-6 rounded-2xl border-2 border-ink bg-card p-5"
+          >
+            <p className="text-sm text-ink/60">
+              Cambia lo que haga falta. Las respuestas que ya dieron tus jugadoras se mantienen, y les
+              llega un aviso si cambias la fecha, la hora o la cancha.
+            </p>
+
+            <CallUpFields
+              value={form}
+              onChange={(p) => setForm((prev) => ({ ...prev, ...p }))}
+              showObjetivo={isEntreno}
+              disabled={editMut.isPending}
+            />
+
+            {editError && (
+              <div className="rounded-lg border-2 border-pa-red bg-pa-red/10 px-3 py-2 text-sm font-medium text-pa-red">
+                {editError}
+              </div>
+            )}
+
+            <div className="flex items-center gap-3">
+              <button type="submit" disabled={editMut.isPending} className="btn-primary">
+                {editMut.isPending ? "Guardando..." : "Guardar cambios"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEditing(false); setEditError(""); }}
+                disabled={editMut.isPending}
+                className="btn-ghost"
+              >
+                Cancelar
+              </button>
             </div>
-          )}
-          {cu.note && <p className="mt-2 rounded-xl border-2 border-ink/10 bg-card px-4 py-3 text-sm">{cu.note}</p>}
-        </div>
+          </form>
+        ) : (
+          <div className="mt-3 space-y-1 text-ink/70">
+            {cu.place && <p className="flex items-center gap-2"><MapPin size={16}/> {cu.place}</p>}
+            {cu.objetivo && (
+              <div className="mt-3 rounded-xl border-2 border-ink bg-lime/20 px-4 py-3">
+                <div className="text-xs font-mono uppercase tracking-wider text-ink/60">Objetivo del entreno</div>
+                <p className="mt-1 font-semibold text-ink">{cu.objetivo}</p>
+              </div>
+            )}
+            {cu.note && <p className="mt-2 rounded-xl border-2 border-ink/10 bg-card px-4 py-3 text-sm">{cu.note}</p>}
+          </div>
+        )}
 
         {isPlayer && myRow && (
           <PlayerResponse
