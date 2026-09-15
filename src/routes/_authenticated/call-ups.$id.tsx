@@ -325,12 +325,22 @@ function CallUpDetail() {
             <ArrowLeft size={16} /> Volver
           </Link>
           {isAdmin && (
-            <button
-              onClick={() => { if (confirm(isEntreno ? "¿Eliminar este entreno?" : "¿Eliminar este partido?")) deleteMut.mutate(); }}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-pa-red hover:opacity-70"
-            >
-              <Trash2 size={14} /> Eliminar
-            </button>
+            <div className="flex items-center gap-4">
+              {!editing && (
+                <button
+                  onClick={openEdit}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold hover:opacity-70"
+                >
+                  <Pencil size={14} /> Editar
+                </button>
+              )}
+              <button
+                onClick={() => { if (confirm(isEntreno ? "¿Eliminar este entreno?" : "¿Eliminar este partido?")) deleteMut.mutate(); }}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-pa-red hover:opacity-70"
+              >
+                <Trash2 size={14} /> Eliminar
+              </button>
+            </div>
           )}
         </div>
       </header>
