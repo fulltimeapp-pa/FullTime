@@ -1,60 +1,44 @@
-Recomiendo atacar tres mejoras de alto impacto que están conectadas: la landing promete más de lo que el producto entrega hoy, el dashboard del profe tiene un selector que no filtra nada, y falta la funcionalidad de asistencia que ya se menciona en la landing.
+# Cerrar el acceso a los datos de contacto del plantel
 
-````text
-Foco: landing → onboarding → uso diario → asistencia real
-````
+## El problema (confirmado)
 
-## 1. Landing: alinear promesas y mejorar conversión móvil
+La regla de lectura actual de la tabla de jugadoras dice, literalmente: "cualquier persona que sea miembro del club puede leer todas las filas de jugadoras de ese club". Como las jugadoras entran al club como miembros, cualquiera de ellas puede pedir por la API el correo, el teléfono y la fecha de nacimiento de todas sus compañeras. La pantalla no lo muestra, pero el dato sale.
 
-**Problema detectado:**
-- En "Cómo funciona" se promete "Asistencia, minutos, wellness y carga por semana", pero hoy no hay asistencia ni minutos.
-- En "Herramientas" se habla de "microciclos, cargas y objetivos por semana", pero las plantillas de entreno no cubren eso todavía.
-- La navegación móvil no tiene menú hamburguesa: los links desaparecen en pantallas pequeñas.
-- No hay toasts globales en la app (el paquete `sonner` está instalado pero no se monta `<Toaster />`).
+## Qué voy a cambiar
 
-**Qué construir:**
-- Reescribir el paso 4 de `HowItWorks` y la tarjeta de periodización en `Features` para que solo prometan lo que ya existe: convocatorias, entrenos con plan, wellness/RPE, calendario y avisos push. Mover "minutos", "carga" y "microciclos" a "Lo que viene".
-- Agregar un menú hamburguesa en `Nav.tsx` para móvil con los mismos anclas y botones de autenticación.
-- Montar `<Toaster />` en `src/routes/__root.tsx` para poder mostrar confirmaciones y errores en toda la app.
-- Agregar una imagen `og:image` absoluta en `src/routes/index.tsx` usando el hero optimizado (la ruta raíz no tiene una ahora; la global está, pero una propia del héroe es mejor).
+Una sola cosa: la regla de lectura de la tabla de jugadoras. Queda así:
 
-## 2. Dashboard de entrenadora: que el selector de categoría sí filtre
+- Cuerpo técnico del club (dueña, admin y entrenadoras) → ve todas las jugadoras de su club, con todos los datos. Sin cambios respecto a hoy.
+- Jugadora → solo ve su propia ficha. Nada de sus compañeras.
 
-**Problema detectado:**
-- En `dashboard.tsx` hay un `selectedCatId` que se inicializa pero no se usa para filtrar los partidos, entrenos ni la tarjeta de plantel. El selector no hace nada.
+Reviso también que ninguna pantalla se rompa. Ya lo verifiqué leyendo el código:
 
-**Qué construir:**
-- Filtrar `partidosQuery` y `entrenosQuery` por `category_id` cuando `selectedCatId` tenga valor.
-- Actualizar la tarjeta "Plantel" para que muestre el conteo de jugadoras de la categoría seleccionada (no siempre la primera).
-- Si no hay categorías, mostrar un CTA claro a `/roster`.
-- Reemplazar los textos "Cargando..." por skeleton cards en el dashboard.
+- Plantel, asistencia, calendario, crear convocatoria, crear entreno, panel y equipo: son pantallas de cuerpo técnico, siguen viendo todo.
+- Inicio de la jugadora, Mi perfil y Mis convocatorias: solo consultan su propia ficha, siguen funcionando igual.
+- Detalle de una convocatoria: la jugadora entra a esta pantalla, pero la parte que muestra nombres del resto del plantel solo se dibuja para el cuerpo técnico. Ella solo usa su propia fila para confirmar "Voy" / "No puedo". Sigue funcionando.
+- Las invitaciones y los avisos automáticos corren del lado del servidor con permisos propios, no les afecta.
 
-## 3. Asistencia real en convocatorias y entrenos
+## Por qué así y no de otra forma
 
-**Problema detectado:**
-- La landing y "Cómo funciona" mencionan asistencia, pero hoy solo hay respuesta "voy/no voy". No hay forma de registrar quién realmente llegó.
+La alternativa sería dejar que la jugadora siga viendo la lista completa pero tapando solo las tres columnas sensibles. Es más código, más piezas nuevas (una vista aparte y cambios en las consultas) y más cosas que pueden romperse. Como ninguna pantalla de jugadora necesita ver la ficha de sus compañeras, la opción sencilla es también la más segura. Recomiendo esta.
 
-**Qué construir:**
-- Agregar una columna `attended` (boolean/null) y `attended_at` en `call_up_players`.
-- En el detalle de convocatoria/entreno (`call-ups.$id.tsx`), mostrar un toggle o check para que la entrenadora marque quién asistió, solo después de la hora de inicio.
-- En la vista de entrenadora, agregar un resumen: "X confirmaron · Y asistieron".
-- En el detalle de jugadora, mostrar un indicador de asistencia pasada (ej. "Asististe" / "No asististe").
-- (Opcional) Exportar la lista de asistencia del evento a texto plano para pegar en WhatsApp si alguien lo necesita.
+## Detalle técnico
 
-**Base de datos:**
-- Migración para agregar `attended` y `attended_at` a `call_up_players`, con RLS que permita a staff del club actualizar esos campos y a jugadoras solo ver su propia fila.
+- Migración única sobre `public.players`: se reemplaza la política `Club members can view players` por una política SELECT con
+  `is_club_staff(auth.uid(), club_id) OR user_id = auth.uid()`.
+- No se tocan las políticas de INSERT, UPDATE ni DELETE (siguen en `is_club_admin`), ni los GRANT, ni ninguna función existente.
+- No se toca código de la aplicación. Cero librerías nuevas.
+- Reversible: volver atrás es recrear la política anterior.
 
-## Orden de trabajo
+## Comprobación antes de darlo por hecho
 
-1. Landing (copy + menú móvil + toasts + og:image).
-2. Dashboard (selector funcional + skeletons).
-3. Asistencia (migración + UI de entrenadora + UI de jugadora).
+Después de aplicarlo, pruebo entrando a la app como jugadora y confirmo dos cosas: que puede abrir su convocatoria y responder, y que al pedir el plantel por la API solo le devuelve su propia ficha. Si no lo puedo probar, te lo digo.
 
-## Criterio de éxito
+## Cómo queda cada rol
 
-- La landing no promete funciones que no existen.
-- Desde el celular se puede navegar por todas las secciones.
-- El selector de categoría en el dashboard filtra partidos, entrenos y el conteo de jugadoras.
-- La entrenadora puede marcar asistencia y ver el resumen.
-
-¿Avanzamos con este plan?
+| Rol | Puede leer |
+| --- | --- |
+| Dueña / Admin | Todas las jugadoras de su club, todos los datos |
+| Entrenadora (cuerpo técnico) | Todas las jugadoras de su club, todos los datos |
+| Jugadora | Solo su propia ficha |
+| Persona fuera del club | Nada |
