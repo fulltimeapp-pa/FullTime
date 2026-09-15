@@ -7,7 +7,11 @@ import { buildCallUpMessage, sendToSubscriptions } from "./push-notify.server";
 // ninguna vía para que un usuario envíe texto o enlaces arbitrarios a otros
 // usuarios: el mensaje se construye en el servidor a partir de la convocatoria
 // y la autorización la da la RLS del propio usuario sobre esa convocatoria.
-const inputSchema = z.object({ call_up_id: z.string().uuid() });
+const inputSchema = z.object({
+  call_up_id: z.string().uuid(),
+  // true = la convocatoria cambió de fecha/hora/lugar (aviso de cambio).
+  updated: z.boolean().optional(),
+});
 
 export const sendPush = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -24,7 +28,7 @@ export const sendPush = createServerFn({ method: "POST" })
     if (error) throw error;
     if (!cu) return { sent: 0, failed: 0 };
 
-    const message = buildCallUpMessage(cu as any);
+    const message = buildCallUpMessage(cu as any, data.updated === true);
 
     const { data: rows, error: rErr } = await supabaseAdmin
       .from("call_up_players")
