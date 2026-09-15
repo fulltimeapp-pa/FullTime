@@ -27,8 +27,10 @@ export function buildCallUpMessage(cu: {
   starts_at: string;
   place: string | null;
   objetivo: string | null;
-}): PushBody {
-  const title = cu.kind === "entreno" ? "Nuevo entreno" : "Nueva convocatoria";
+}, updated = false): PushBody {
+  const title = updated
+    ? (cu.kind === "entreno" ? "Cambio en el entreno" : "Cambio en el partido")
+    : (cu.kind === "entreno" ? "Nuevo entreno" : "Nueva convocatoria");
   const parts = [formatWhenShort(cu.starts_at)];
   if (cu.place?.trim()) parts.push(cu.place.trim());
   if (cu.kind === "entreno" && cu.objetivo?.trim()) parts.push(cu.objetivo.trim().slice(0, 60));

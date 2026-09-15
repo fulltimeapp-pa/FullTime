@@ -2,7 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy, Pencil } from "lucide-react";
+import { sendPush } from "@/lib/push.functions";
+import { CallUpFields, type CallUpFieldsValue } from "@/components/call-ups/CallUpFields";
 import { supabase } from "@/integrations/supabase/client";
 import { formatWhen, kindLabel, type CallUp, type CallUpPlayerRow, type ResponseStatus } from "@/lib/call-ups";
 import { PlanView } from "@/components/training/PlanView";
@@ -205,6 +207,76 @@ function CallUpDetail() {
   }
 
 
+  // --- Edición de la convocatoria (sólo cuerpo técnico) ---
+  const [editing, setEditing] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [form, setForm] = useState<CallUpFieldsValue>({
+    date: "", time: "", place: "", note: "", objetivo: "",
+  });
+
+  function openEdit() {
+    const c = cuQ.data;
+    if (!c) return;
+    const d = new Date(c.starts_at);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    setForm({
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      place: c.place ?? "",
+      note: c.note ?? "",
+      objetivo: c.objetivo ?? "",
+    });
+    setEditError("");
+    setEditing(true);
+  }
+
+  const editMut = useMutation({
+    mutationFn: async () => {
+      const c = cuQ.data!;
+      if (!form.place.trim()) throw new Error("Indica el lugar.");
+      const dt = new Date(`${form.date}T${form.time}:00`);
+      if (Number.isNaN(dt.getTime())) throw new Error("Revisa la fecha y la hora.");
+      const startsAt = dt.toISOString();
+      const horaCambio = startsAt !== new Date(c.starts_at).toISOString();
+      const lugarCambio = form.place.trim() !== (c.place ?? "");
+
+      const { error } = await supabase
+        .from("call_ups")
+        .update({
+          starts_at: startsAt,
+          place: form.place.trim(),
+          note: form.note.trim() || null,
+          ...(c.kind === "entreno" ? { objetivo: form.objetivo.trim() || null } : {}),
+        })
+        .eq("id", id);
+      if (error) throw error;
+
+      // Si cambió el horario, los recordatorios automáticos vuelven a salir.
+      if (horaCambio) {
+        await supabase
+          .from("call_up_players")
+          .update({ remind_night_before_at: null, remind_soon_at: null })
+          .eq("call_up_id", id);
+      }
+      return { avisar: horaCambio || lugarCambio };
+    },
+    onSuccess: async ({ avisar }) => {
+      setEditing(false);
+      qc.invalidateQueries({ queryKey: ["call-up", id] });
+      qc.invalidateQueries({ queryKey: ["call-ups"] });
+      qc.invalidateQueries({ queryKey: ["entrenos"] });
+      toast.success("Cambio guardado");
+      if (!avisar) return;
+      try {
+        await sendPush({ data: { call_up_id: id, updated: true } });
+      } catch (e) {
+        console.warn("No se pudo enviar el aviso", e);
+        toast.error("Se guardó el cambio, pero no pudimos avisar a las jugadoras.");
+      }
+    },
+    onError: (e: any) => setEditError(e?.message || "No pudimos guardar el cambio. Intenta de nuevo."),
+  });
+
   const deleteMut = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("call_ups").delete().eq("id", id);
@@ -253,12 +325,22 @@ function CallUpDetail() {
             <ArrowLeft size={16} /> Volver
           </Link>
           {isAdmin && (
-            <button
-              onClick={() => { if (confirm(isEntreno ? "¿Eliminar este entreno?" : "¿Eliminar este partido?")) deleteMut.mutate(); }}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-pa-red hover:opacity-70"
-            >
-              <Trash2 size={14} /> Eliminar
-            </button>
+            <div className="flex items-center gap-4">
+              {!editing && (
+                <button
+                  onClick={openEdit}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold hover:opacity-70"
+                >
+                  <Pencil size={14} /> Editar
+                </button>
+              )}
+              <button
+                onClick={() => { if (confirm(isEntreno ? "¿Eliminar este entreno?" : "¿Eliminar este partido?")) deleteMut.mutate(); }}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-pa-red hover:opacity-70"
+              >
+                <Trash2 size={14} /> Eliminar
+              </button>
+            </div>
           )}
         </div>
       </header>
@@ -273,16 +355,56 @@ function CallUpDetail() {
         <h1 className="mt-3 text-display text-3xl md:text-4xl font-bold leading-tight">
           {formatWhen(cu.starts_at)}
         </h1>
-        <div className="mt-3 space-y-1 text-ink/70">
-          {cu.place && <p className="flex items-center gap-2"><MapPin size={16}/> {cu.place}</p>}
-          {cu.objetivo && (
-            <div className="mt-3 rounded-xl border-2 border-ink bg-lime/20 px-4 py-3">
-              <div className="text-xs font-mono uppercase tracking-wider text-ink/60">Objetivo del entreno</div>
-              <p className="mt-1 font-semibold text-ink">{cu.objetivo}</p>
+
+        {isAdmin && editing ? (
+          <form
+            onSubmit={(e) => { e.preventDefault(); setEditError(""); editMut.mutate(); }}
+            className="mt-6 space-y-6 rounded-2xl border-2 border-ink bg-card p-5"
+          >
+            <p className="text-sm text-ink/60">
+              Cambia lo que haga falta. Las respuestas que ya dieron tus jugadoras se mantienen, y les
+              llega un aviso si cambias la fecha, la hora o la cancha.
+            </p>
+
+            <CallUpFields
+              value={form}
+              onChange={(p) => setForm((prev) => ({ ...prev, ...p }))}
+              showObjetivo={isEntreno}
+              disabled={editMut.isPending}
+            />
+
+            {editError && (
+              <div className="rounded-lg border-2 border-pa-red bg-pa-red/10 px-3 py-2 text-sm font-medium text-pa-red">
+                {editError}
+              </div>
+            )}
+
+            <div className="flex items-center gap-3">
+              <button type="submit" disabled={editMut.isPending} className="btn-primary">
+                {editMut.isPending ? "Guardando..." : "Guardar cambios"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEditing(false); setEditError(""); }}
+                disabled={editMut.isPending}
+                className="btn-ghost"
+              >
+                Cancelar
+              </button>
             </div>
-          )}
-          {cu.note && <p className="mt-2 rounded-xl border-2 border-ink/10 bg-card px-4 py-3 text-sm">{cu.note}</p>}
-        </div>
+          </form>
+        ) : (
+          <div className="mt-3 space-y-1 text-ink/70">
+            {cu.place && <p className="flex items-center gap-2"><MapPin size={16}/> {cu.place}</p>}
+            {cu.objetivo && (
+              <div className="mt-3 rounded-xl border-2 border-ink bg-lime/20 px-4 py-3">
+                <div className="text-xs font-mono uppercase tracking-wider text-ink/60">Objetivo del entreno</div>
+                <p className="mt-1 font-semibold text-ink">{cu.objetivo}</p>
+              </div>
+            )}
+            {cu.note && <p className="mt-2 rounded-xl border-2 border-ink/10 bg-card px-4 py-3 text-sm">{cu.note}</p>}
+          </div>
+        )}
 
         {isPlayer && myRow && (
           <PlayerResponse

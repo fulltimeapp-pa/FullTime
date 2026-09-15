@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { getMyActiveClub } from "@/lib/active-club";
 import { sendPush } from "@/lib/push.functions";
+import { CallUpFields } from "@/components/call-ups/CallUpFields";
 
 export const Route = createFileRoute("/_authenticated/call-ups/new")({
   head: () => ({
@@ -158,40 +159,15 @@ function NewCallUp() {
           </div>
 
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Fecha</label>
-              <input
-                type="date" required value={date} onChange={(e) => setDate(e.target.value)}
-                className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Hora</label>
-              <input
-                type="time" required value={time} onChange={(e) => setTime(e.target.value)}
-                className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Lugar</label>
-            <input
-              type="text" required value={place} onChange={(e) => setPlace(e.target.value)}
-              placeholder="Cancha del Maracaná, Panamá"
-              className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Nota (opcional)</label>
-            <textarea
-              value={note} onChange={(e) => setNote(e.target.value)} rows={3}
-              placeholder="Llegar 30 minutos antes. Traer camisa clara."
-              className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 resize-none"
-            />
-          </div>
+          <CallUpFields
+            value={{ date, time, place, note, objetivo: "" }}
+            onChange={(p) => {
+              if (p.date !== undefined) setDate(p.date);
+              if (p.time !== undefined) setTime(p.time);
+              if (p.place !== undefined) setPlace(p.place);
+              if (p.note !== undefined) setNote(p.note);
+            }}
+          />
 
           <div>
             <div className="flex items-center justify-between">
