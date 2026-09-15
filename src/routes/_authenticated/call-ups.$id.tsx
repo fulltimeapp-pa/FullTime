@@ -2,7 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy, Pencil } from "lucide-react";
+import { sendPush } from "@/lib/push.functions";
+import { CallUpFields, type CallUpFieldsValue } from "@/components/call-ups/CallUpFields";
 import { supabase } from "@/integrations/supabase/client";
 import { formatWhen, kindLabel, type CallUp, type CallUpPlayerRow, type ResponseStatus } from "@/lib/call-ups";
 import { PlanView } from "@/components/training/PlanView";
@@ -204,6 +206,76 @@ function CallUpDetail() {
     });
   }
 
+
+  // --- Edición de la convocatoria (sólo cuerpo técnico) ---
+  const [editing, setEditing] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [form, setForm] = useState<CallUpFieldsValue>({
+    date: "", time: "", place: "", note: "", objetivo: "",
+  });
+
+  function openEdit() {
+    const c = cuQ.data;
+    if (!c) return;
+    const d = new Date(c.starts_at);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    setForm({
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      place: c.place ?? "",
+      note: c.note ?? "",
+      objetivo: c.objetivo ?? "",
+    });
+    setEditError("");
+    setEditing(true);
+  }
+
+  const editMut = useMutation({
+    mutationFn: async () => {
+      const c = cuQ.data!;
+      if (!form.place.trim()) throw new Error("Indica el lugar.");
+      const dt = new Date(`${form.date}T${form.time}:00`);
+      if (Number.isNaN(dt.getTime())) throw new Error("Revisa la fecha y la hora.");
+      const startsAt = dt.toISOString();
+      const horaCambio = startsAt !== new Date(c.starts_at).toISOString();
+      const lugarCambio = form.place.trim() !== (c.place ?? "");
+
+      const { error } = await supabase
+        .from("call_ups")
+        .update({
+          starts_at: startsAt,
+          place: form.place.trim(),
+          note: form.note.trim() || null,
+          ...(c.kind === "entreno" ? { objetivo: form.objetivo.trim() || null } : {}),
+        })
+        .eq("id", id);
+      if (error) throw error;
+
+      // Si cambió el horario, los recordatorios automáticos vuelven a salir.
+      if (horaCambio) {
+        await supabase
+          .from("call_up_players")
+          .update({ remind_night_before_at: null, remind_soon_at: null })
+          .eq("call_up_id", id);
+      }
+      return { avisar: horaCambio || lugarCambio };
+    },
+    onSuccess: async ({ avisar }) => {
+      setEditing(false);
+      qc.invalidateQueries({ queryKey: ["call-up", id] });
+      qc.invalidateQueries({ queryKey: ["call-ups"] });
+      qc.invalidateQueries({ queryKey: ["entrenos"] });
+      toast.success("Cambio guardado");
+      if (!avisar) return;
+      try {
+        await sendPush({ data: { call_up_id: id, updated: true } });
+      } catch (e) {
+        console.warn("No se pudo enviar el aviso", e);
+        toast.error("Se guardó el cambio, pero no pudimos avisar a las jugadoras.");
+      }
+    },
+    onError: (e: any) => setEditError(e?.message || "No pudimos guardar el cambio. Intenta de nuevo."),
+  });
 
   const deleteMut = useMutation({
     mutationFn: async () => {
