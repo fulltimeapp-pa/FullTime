@@ -32,8 +32,8 @@ export function Nav() {
           </span>
         </a>
 
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-7 text-sm font-medium">
+        {/* Desktop links (desde 1024px; abajo de eso, menú hamburguesa) */}
+        <div className="hidden lg:flex items-center gap-7 text-sm font-medium whitespace-nowrap">
           {links.map((l) => (
             <a key={l.href} href={l.href} className="hover:text-lime-deep transition-colors">
               {l.label}
@@ -44,7 +44,7 @@ export function Nav() {
         {/* Auth + mobile toggle */}
         <div className="flex items-center gap-2 min-h-[36px]">
           {loading ? null : isAuthenticated ? (
-            <div className="hidden md:flex flex-col items-end gap-0.5">
+            <div className="hidden lg:flex flex-col items-end gap-0.5">
               <Link to="/dashboard" className="btn-primary !py-2 !px-4 !text-sm">
                 Ir a mi panel
               </Link>
@@ -57,7 +57,7 @@ export function Nav() {
               </button>
             </div>
           ) : (
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2">
               <a href="/auth?mode=login" className="text-sm font-semibold hover:underline underline-offset-4">
                 Entrar
               </a>
@@ -70,7 +70,7 @@ export function Nav() {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-ink bg-paper"
+            className="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-ink bg-paper"
             aria-label={open ? "Cerrar menú" : "Abrir menú"}
           >
             {open ? <X size={20} /> : <Menu size={20} />}
@@ -80,7 +80,7 @@ export function Nav() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden border-t border-ink/10 bg-paper px-5 py-4">
+        <div className="lg:hidden border-t border-ink/10 bg-paper px-5 py-4">
           <div className="flex flex-col gap-3">
             {links.map((l) => (
               <a

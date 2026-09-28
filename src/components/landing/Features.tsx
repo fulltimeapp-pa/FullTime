@@ -14,7 +14,7 @@ export function Features() {
         </div>
 
         {/* Bento grid — 4 cols x 4 rows, sin huecos */}
-        <div className="grid gap-4 md:grid-cols-4 md:auto-rows-[13rem]">
+        <div className="grid gap-4 md:grid-cols-4 md:auto-rows-[minmax(13rem,auto)]">
           {/* 01 Convocatorias — destacada 2x2 */}
           <article className="reveal group md:col-span-2 md:row-span-2 bg-card border-2 border-ink rounded-2xl p-7 md:p-9 relative overflow-hidden hover:shadow-[8px_8px_0_0_var(--color-ink)] hover:-translate-y-0.5 transition-all flex flex-col">
             <div className="chip mb-6 !text-[10px] self-start">01 · Estrella</div>
@@ -119,14 +119,14 @@ export function Features() {
           {/* 06 Próximamente — full width */}
           <article className="reveal md:col-span-4 bg-cream border-2 border-dashed border-ink/40 rounded-2xl p-6 md:p-7" data-delay="300">
             <div className="flex flex-col md:flex-row md:items-center md:gap-8">
-              <div className="md:flex-1">
+              <div className="md:w-72 md:shrink-0">
                 <div className="chip mb-3 !text-[10px] !border-ink/40 !text-muted-foreground">En camino</div>
                 <h3 className="text-display text-xl font-bold mb-1">Lo que viene</h3>
                 <p className="text-sm text-muted-foreground max-w-xl">
                   Todavía no están listas, pero ya vienen en camino. Te avisamos cuando las soltemos.
                 </p>
               </div>
-              <ul className="mt-4 md:mt-0 flex flex-wrap gap-2">
+              <ul className="mt-4 md:mt-0 md:flex-1 flex flex-wrap gap-2">
                 {["Chat del equipo", "Asistente con IA", "Estadísticas y minutos", "Periodización (microciclos y carga)", "Biblioteca de tareas", "Pizarra táctica"].map((t) => (
                   <li key={t} className="text-xs font-semibold bg-paper border-2 border-ink/40 border-dashed rounded-full px-3 py-1.5">
                     {t} <span className="font-mono text-[10px] text-muted-foreground">— próximamente</span>
