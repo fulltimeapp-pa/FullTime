@@ -19,7 +19,8 @@ le facilita la vida? Si la respuesta es no, cuestióname la decisión.
 
 ## Estado real
 
-- La app existe. Se construyó en Lovable y se publica desde Lovable.
+- La app existe. Se construyó en Lovable, pero desde el 29-sep-2026 ya no usa Lovable:
+  el código está en GitHub, se publica en Vercel y la base es un Supabase propio.
 - NO se reconstruye. Se repara lo que bloquea meter al primer equipo.
 - 0 equipos usándola. El cuello de botella es conseguir usuarios, no
   funcionalidades. No propongas nada nuevo a menos que te lo pida.
@@ -31,7 +32,8 @@ le facilita la vida? Si la respuesta es no, cuestióname la decisión.
 TanStack Start · Vite · React · TypeScript · Tailwind · shadcn/ui
 Supabase (auth, base de datos, RLS, edge functions)
 PWA con push hecho a mano (Web Crypto, VAPID)
-Publicación: Lovable, conectado a GitHub. No migrar a otro hosting.
+Publicación: Vercel, desde GitHub (`main` publica solo). Base: Supabase propio.
+No migrar a otro hosting ni volver a Lovable sin preguntar.
 
 ## No tocar sin preguntar
 
