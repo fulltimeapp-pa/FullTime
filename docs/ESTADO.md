@@ -70,8 +70,9 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 
 - Entrar con Google: crear credenciales en Google Cloud y activarlas en Supabase
   (hasta entonces el botón da error).
-- Avisos push: no probados (0 celulares suscritos). Probar en Android y en iPhone con la app
-  instalada en la pantalla de inicio.
+- Avisos push: **funcionan en iPhone** (probado el 29-sep con la app instalada en la pantalla de
+  inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
+  probar con Chrome en la Mac (misma vía que Android): jugadora en Chrome, entrenadora en Safari.
 - Tareas 2 a 8 del plan (privacidad, registro, coach, editar convocatoria, "¿llegó el aviso?",
   errores visibles, recordatorios).
 - Agregar Vitest para tener tests en el repo.
