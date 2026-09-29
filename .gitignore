@@ -41,3 +41,4 @@ dist-ssr
 
 # Supabase CLI
 supabase/.temp
+!.env.production
