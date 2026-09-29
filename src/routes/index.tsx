@@ -12,9 +12,9 @@ import { VoiceAgent } from "@/components/landing/VoiceAgent";
 import { useReveal } from "@/hooks/use-reveal";
 import heroAvif800 from "@/assets/hero-celebration-800.avif.asset.json";
 import heroWebp1200 from "@/assets/hero-celebration-1200.webp.asset.json";
+import { SITE_URL } from "@/lib/site";
 
-const PUBLISHED_URL = "https://fulltime-pa.lovable.app";
-const heroOgImage = `${PUBLISHED_URL}${heroWebp1200.url}`;
+const heroOgImage = `${SITE_URL}${heroWebp1200.url}`;
 
 export const Route = createFileRoute("/")({
   head: () => ({

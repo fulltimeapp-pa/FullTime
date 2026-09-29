@@ -30,3 +30,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vercel
+.vercel
+
+# Variables de entorno (valores reales nunca van al repo; ver .env.example)
+.env
+.env.*
+!.env.example
+
+# Supabase CLI
+supabase/.temp

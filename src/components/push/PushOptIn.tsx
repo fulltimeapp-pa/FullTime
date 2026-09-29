@@ -41,7 +41,8 @@ export function PushOptIn() {
       else if (state === "denied")
         setError("No diste permiso. Actívalo en los ajustes de notificaciones de tu navegador.");
       else setError("Tu dispositivo no soporta notificaciones por ahora.");
-    } catch {
+    } catch (e) {
+      console.error("No se pudieron activar los avisos:", e);
       setError("No pudimos activar las notificaciones. Intenta de nuevo.");
     } finally {
       setBusy(false);

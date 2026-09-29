@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { siteUrl } from "@/lib/site";
 
 export const Route = createFileRoute("/_authenticated/panel-fulltime")({
   head: () => ({
@@ -18,7 +19,6 @@ export const Route = createFileRoute("/_authenticated/panel-fulltime")({
   component: PanelFullTime,
 });
 
-const BASE_URL = "https://fulltime-pa.lovable.app";
 
 type ClubRow = {
   club_id: string;
@@ -171,7 +171,7 @@ function AddPlayerForm({ clubId }: { clubId: string }) {
       setMsg(reasons[res?.reason ?? ""] ?? "No se pudo agregar.");
       return;
     }
-    setNewLink(`${BASE_URL}/unirse/${res.invite_token}`);
+    setNewLink(siteUrl(`/unirse/${res.invite_token}`));
     setName("");
     setEmail("");
     void qc.invalidateQueries({ queryKey: ["club-pending-players", clubId] });
@@ -261,7 +261,7 @@ function PendingList({ clubId }: { clubId: string }) {
 
   const conToken = (data ?? []).filter((p) => p.invite_token);
   const todos = conToken
-    .map((p) => `${p.full_name}: ${BASE_URL}/unirse/${p.invite_token}`)
+    .map((p) => `${p.full_name}: ${siteUrl(`/unirse/${p.invite_token}`)}`)
     .join("\n");
 
   if (!data?.length)
@@ -295,7 +295,7 @@ function PendingList({ clubId }: { clubId: string }) {
               )}
               {p.invite_token ? (
                 <CopyButton
-                  value={`${BASE_URL}/unirse/${p.invite_token}`}
+                  value={siteUrl(`/unirse/${p.invite_token}`)}
                   label="Copiar enlace de invitación"
                 />
               ) : (

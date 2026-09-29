@@ -4,9 +4,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 
-export const VAPID_PUBLIC_KEY =
-  (import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined) ||
-  "BNaW3HodtlI90cGwIw8NvpFfrqMGgQOK_O7pjx3bA-PqTywgIz9U04x1OKVfgpgRzmQgEcBXzrVsTLvV2VsCXSY";
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
 
 export type PushState = "granted" | "denied" | "unsupported";
 
@@ -47,6 +45,11 @@ export async function enablePush(): Promise<PushState> {
   if (Notification.permission !== "granted") {
     const perm = await Notification.requestPermission();
     if (perm !== "granted") return "denied";
+  }
+
+  if (!VAPID_PUBLIC_KEY) {
+    // Sin llave no hay avisos: mejor fallar claro que suscribir con una llave equivocada.
+    throw new Error("Falta la variable VITE_VAPID_PUBLIC_KEY: los avisos al celular no están configurados.");
   }
 
   const reg = await getRegistration();

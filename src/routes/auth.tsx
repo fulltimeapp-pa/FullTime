@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-r
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { getPlayerInvite, signupWithPlayerInvite } from "@/lib/invites.functions";
 import { Logo } from "@/components/brand/Logo";
 
@@ -221,10 +220,11 @@ async function googleSignIn(setError: (m: string) => void, redirect?: string) {
     window.sessionStorage.removeItem("fulltime_auth_redirect");
   }
 
-  const result = await lovable.auth.signInWithOAuth("google", {
-    redirect_uri: window.location.origin + "/auth/callback",
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: window.location.origin + "/auth/callback" },
   });
-  if (result.error) setError("No pudimos abrir Google. Vuelve a intentarlo.");
+  if (error) setError("No pudimos abrir Google. Vuelve a intentarlo.");
 }
 
 function GoogleButton({ label, onError, redirect }: { label: string; onError: (m: string) => void; redirect?: string }) {
