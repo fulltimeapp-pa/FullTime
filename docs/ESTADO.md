@@ -46,6 +46,12 @@ Reemplaza la Tarea 1.
 - Nueva página pública `/privacidad` (borrador aprobado por Bárbara, pendiente de revisión legal).
   Enlazada en el pie de la portada. Contacto: fulltimeapp.pa@gmail.com.
 
+### Entrar con Google (30-sep)
+- Proyecto "FullTime" en Google Cloud (cuenta fulltimeapp.pa@gmail.com), cliente web
+  "FullTime web", app publicada (solo pide nombre y correo, no requiere revisión de Google).
+- Activado en Supabase → Auth → Providers → Google. Probado: entrar con Google reconoce la cuenta
+  que ya existía con correo (no duplica usuario).
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
@@ -82,11 +88,10 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 
 ## Pendiente
 
-- Entrar con Google: crear credenciales en Google Cloud y activarlas en Supabase
-  (hasta entonces el botón da error).
 - Avisos push: **funcionan en iPhone** (probado el 29-sep con la app instalada en la pantalla de
   inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
-  probar con Chrome en la Mac (misma vía que Android): jugadora en Chrome, entrenadora en Safari.
+  se probará con la primera jugadora real que tenga Android (revisar en la base que tenga
+  suscripción `fcm.googleapis.com` y que le lleguen).
 - Tareas 2 a 8 del plan (privacidad, registro, coach, editar convocatoria, "¿llegó el aviso?",
   errores visibles, recordatorios).
 - Agregar Vitest para tener tests en el repo.
