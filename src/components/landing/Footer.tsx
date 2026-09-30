@@ -39,6 +39,7 @@ export function Footer() {
 
         <div className="mt-10 pt-6 border-t border-ink/15 flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground font-mono">
           <span>© {new Date().getFullYear()} FullTime · Todos los derechos reservados.</span>
+          <a href="/privacidad" className="hover:underline underline-offset-4">Privacidad</a>
           <span>v1.0 · Beta abierta</span>
         </div>
       </div>

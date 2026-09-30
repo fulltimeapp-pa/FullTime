@@ -34,6 +34,18 @@ Reemplaza la Tarea 1.
 - Portada: la caja "Lo que viene" ya no se desborda y el menú usa hamburguesa hasta 1024px.
 - TypeScript: 0 errores.
 
+### Tarea 2 — Privacidad de menores (30-sep)
+- `players`: la jugadora solo ve su propia ficha (migración de Lovable del 15-sep, ya aplicada).
+- `call_up_players`: nueva migración `20260930120000_respuestas_solo_staff_o_propia.sql`. La
+  jugadora solo lee su propia respuesta; motivo de "No puedo", bienestar, RPE y asistencia de las
+  compañeras quedan solo para el cuerpo técnico. Probado con 21 casos (owner, coach, 2 jugadoras,
+  extraño) en PGlite y aplicado en Supabase.
+- Resultado: la jugadora hoy no ve nada de sus compañeras (ni nombre). Es más estricto que "nombre,
+  foto y estado"; si algún día se quiere mostrar la lista del equipo, hacerlo con una vista que
+  exponga solo esos campos.
+- Nueva página pública `/privacidad` (borrador aprobado por Bárbara, pendiente de revisión legal).
+  Enlazada en el pie de la portada. Contacto: fulltimeapp.pa@gmail.com.
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
@@ -41,6 +53,8 @@ Reemplaza la Tarea 1.
 - **Confirmación de correo apagada** en Supabase: el correo gratis de Supabase solo llega al
   equipo de Supabase, no a los usuarios. Para volver a encenderla hace falta dominio propio + SMTP
   (por ejemplo Resend).
+- **Menores:** el club es responsable de tener la autorización de madre, padre o tutor antes de
+  cargar a una jugadora menor (así lo dice la política de privacidad).
 - **Vercel plan Hobby:** sirve para probar; al cobrar hay que pasar a Pro (uso comercial).
 
 ## Variables de entorno
