@@ -219,7 +219,7 @@ function CallUpDetail() {
   // Plantel de la categoría, para poder sumar jugadoras al editar.
   const catPlayersQ = useQuery({
     queryKey: ["players-of-cat", cuQ.data?.category_id],
-    enabled: editing && !!cuQ.data?.category_id,
+    enabled: isStaff && !!cuQ.data?.category_id,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("players").select("id, full_name, jersey_number")
@@ -577,6 +577,9 @@ function CallUpDetail() {
             copying={attendanceMut.isPending}
             onRemind={() => remindMut.mutate()}
             reminding={remindMut.isPending}
+            notCalled={(catPlayersQ.data ?? []).filter(
+              (p) => !(rowsQ.data ?? []).some((r) => r.player_id === p.id),
+            )}
           />
         )}
 
@@ -665,7 +668,7 @@ function PlayerResponse({ row, started, onGoing, onDecline, pending }: {
   );
 }
 
-function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendance, copying, onRemind, reminding }: {
+function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendance, copying, onRemind, reminding, notCalled }: {
   rows: Row[];
   loading: boolean;
   started: boolean;
@@ -674,6 +677,7 @@ function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendanc
   copying: boolean;
   onRemind: () => void;
   reminding: boolean;
+  notCalled: { id: string; full_name: string; jersey_number: number | null }[];
 }) {
   const going = rows.filter((r) => r.status === "going");
   const declined = rows.filter((r) => r.status === "declined");
@@ -726,6 +730,28 @@ function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendanc
         <Group title="No puede" count={declined.length} color="red" icon={<X size={14}/>} rows={declined} showReason />
         <Group title="Leída sin responder" count={read.length} color="blue" icon={<Eye size={14}/>} rows={read} />
         <Group title="Sin responder" count={unread.length} color="gray" icon={<Clock size={14}/>} rows={unread} />
+        {notCalled.length > 0 && (
+          <div className="rounded-2xl border-2 border-dashed border-ink/30 bg-paper overflow-hidden">
+            <div className="px-4 py-2.5 flex items-center gap-2 text-ink/60">
+              <X size={14} />
+              <span className="font-display font-bold uppercase tracking-wide text-sm">No convocadas</span>
+              <span className="ml-auto font-mono text-xs">{notCalled.length}</span>
+            </div>
+            <ul className="divide-y divide-ink/10">
+              {notCalled.map((p) => (
+                <li key={p.id} className="px-4 py-3 flex items-center gap-3 text-ink/60">
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ink/30 font-display font-bold text-sm">
+                    {p.jersey_number ?? p.full_name.charAt(0).toUpperCase()}
+                  </span>
+                  <p className="font-semibold truncate">{p.full_name}</p>
+                </li>
+              ))}
+            </ul>
+            <p className="px-4 py-2.5 text-xs text-ink/50 border-t border-ink/10">
+              Para convocarlas, toca Editar arriba.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

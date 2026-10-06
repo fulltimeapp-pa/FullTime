@@ -77,6 +77,10 @@ Reemplaza la Tarea 1.
   ya respondió). Las nuevas reciben "Nueva convocatoria"; las que ya estaban, el aviso de cambio.
 - Nuevo: botón "Recordar a las que no han respondido (N)" en el detalle. Dice a cuántas les llegó
   y a cuántas les faltan los avisos activados.
+- Nuevo (pedido de Bárbara): en el detalle, lista gris "No convocadas" con las jugadoras del
+  plantel que no están en la convocatoria (solo cuerpo técnico).
+- Probado en la web real (6-oct): sumar, quitar con confirmación y recordatorio; el recordatorio
+  llegó al iPhone al instante.
 - `sendPush` ahora exige ser del cuerpo técnico del club (antes una jugadora podía disparar avisos
   a todo el equipo) y devuelve cuántas jugadoras tenían avisos activados (base para la Tarea 6).
 
