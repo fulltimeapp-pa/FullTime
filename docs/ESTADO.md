@@ -64,6 +64,13 @@ Reemplaza la Tarea 1.
 - Vercel bloqueó un deploy por una vulnerabilidad en `@tanstack/react-start` 1.168.32: se
   actualizó a 1.168.60 (con react-router y router-plugin) y se quitó `bun.lock` (ya no se usa bun).
 
+### Tarea 4 — Rol coach (6-oct, opción A)
+- Migración `20261006120000_permisos_coach.sql`: el coach maneja plantel, categorías,
+  convocatorias, entrenos, plantillas y fotos de jugadoras. Solo owner/admin: nombre y escudo del
+  club, invitar o quitar cuerpo técnico.
+- `call-ups.$id.tsx`: el detalle muestra respuestas y botones a todo el cuerpo técnico.
+- Probado con 34 casos de acceso en PGlite y en la web real con la cuenta de coach "Pepe".
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
@@ -104,6 +111,11 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
   se probará con la primera jugadora real que tenga Android (revisar en la base que tenga
   suscripción `fcm.googleapis.com` y que le lleguen).
-- Tareas 4 a 8 del plan (coach, editar convocatoria, "¿llegó el aviso?", errores visibles,
+- Tareas 5 a 8 del plan (editar convocatoria, "¿llegó el aviso?", errores visibles,
   recordatorios).
 - Agregar Vitest para tener tests en el repo.
+- **Más adelante — límites por plan** (recordatorio de Bárbara, 6-oct): hay Plan Equipo (un solo
+  equipo) y Plan Academia (varios equipos, precio por equipo). Hoy la app deja crear categorías sin
+  límite. Hay que limitar según el plan, idealmente controlado desde el panel de la dueña
+  (`/panel-fulltime`). Ojo: en la base nueva `platform_admins` está vacía, así que hoy nadie entra
+  a ese panel; hay que agregar a Bárbara.
