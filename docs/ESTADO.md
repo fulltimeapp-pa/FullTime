@@ -59,6 +59,10 @@ Reemplaza la Tarea 1.
 - Si después de registrarse no se puede iniciar sesión (por ejemplo, si algún día se vuelve a
   exigir confirmar el correo), ahora se explica qué hacer en vez de "No pudimos crear tu club".
 - `/onboarding` (crear club entrando con Google) se deja como está: los dos caminos funcionan.
+- Probado en la web real (6-oct): invitación al cuerpo técnico → cuenta nueva "Pepe" → entró a
+  Prueba FC como coach. En la base: 1 club, roles admin + jugadora + coach, sin club de más.
+- Vercel bloqueó un deploy por una vulnerabilidad en `@tanstack/react-start` 1.168.32: se
+  actualizó a 1.168.60 (con react-router y router-plugin) y se quitó `bun.lock` (ya no se usa bun).
 
 ## Decisiones tomadas
 
