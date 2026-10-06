@@ -71,6 +71,15 @@ Reemplaza la Tarea 1.
 - `call-ups.$id.tsx`: el detalle muestra respuestas y botones a todo el cuerpo técnico.
 - Probado con 34 casos de acceso en PGlite y en la web real con la cuenta de coach "Pepe".
 
+### Tarea 5 — Editar y reenviar convocatoria (6-oct)
+- Ya existía: editar fecha, hora, lugar y nota sin perder respuestas, con aviso de cambio.
+- Nuevo: al editar se pueden sumar o quitar jugadoras (pide confirmar si se quita a alguien que
+  ya respondió). Las nuevas reciben "Nueva convocatoria"; las que ya estaban, el aviso de cambio.
+- Nuevo: botón "Recordar a las que no han respondido (N)" en el detalle. Dice a cuántas les llegó
+  y a cuántas les faltan los avisos activados.
+- `sendPush` ahora exige ser del cuerpo técnico del club (antes una jugadora podía disparar avisos
+  a todo el equipo) y devuelve cuántas jugadoras tenían avisos activados (base para la Tarea 6).
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
@@ -80,6 +89,13 @@ Reemplaza la Tarea 1.
   (por ejemplo Resend).
 - **Menores:** el club es responsable de tener la autorización de madre, padre o tutor antes de
   cargar a una jugadora menor (así lo dice la política de privacidad).
+- **Orden de trabajo (6-oct):** Tarea 5 → entrenos repetidos del mes → Tareas 6, 7, 8 →
+  ordenar historial.
+- **Entrenos repetidos:** "Repetir" por días de la semana con su horario, hasta fin de mes o una
+  fecha, con vista previa para quitar días. Un solo aviso de resumen a las jugadoras. Recordatorio
+  de inicio de mes como recuadro en el panel del entrenador (no push).
+- **Historial:** no se borra (de ahí sale la asistencia). Se esconde lo pasado en una sección
+  "Historial" y la asistencia se filtra "desde tal fecha".
 - **Vercel plan Hobby:** sirve para probar; al cobrar hay que pasar a Pro (uso comercial).
 
 ## Variables de entorno
@@ -111,7 +127,7 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
   se probará con la primera jugadora real que tenga Android (revisar en la base que tenga
   suscripción `fcm.googleapis.com` y que le lleguen).
-- Tareas 5 a 8 del plan (editar convocatoria, "¿llegó el aviso?", errores visibles,
+- Tareas 6 a 8 del plan ( "¿llegó el aviso?", errores visibles,
   recordatorios).
 - Agregar Vitest para tener tests en el repo.
 - **Más adelante — límites por plan** (recordatorio de Bárbara, 6-oct): hay Plan Equipo (un solo

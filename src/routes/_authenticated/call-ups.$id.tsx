@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy, Pencil } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy, Pencil, Bell } from "lucide-react";
 import { sendPush } from "@/lib/push.functions";
 import { CallUpFields, type CallUpFieldsValue } from "@/components/call-ups/CallUpFields";
 import { supabase } from "@/integrations/supabase/client";
@@ -213,6 +213,41 @@ function CallUpDetail() {
   const [form, setForm] = useState<CallUpFieldsValue>({
     date: "", time: "", place: "", note: "", objetivo: "",
   });
+  // Jugadoras convocadas mientras se edita (ids de players).
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Plantel de la categoría, para poder sumar jugadoras al editar.
+  const catPlayersQ = useQuery({
+    queryKey: ["players-of-cat", cuQ.data?.category_id],
+    enabled: editing && !!cuQ.data?.category_id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("players").select("id, full_name, jersey_number")
+        .eq("category_id", cuQ.data!.category_id).order("full_name");
+      if (error) throw error;
+      return (data ?? []) as { id: string; full_name: string; jersey_number: number | null }[];
+    },
+  });
+
+  // Plantel de la categoría + quien ya esté convocada aunque sea de otra categoría.
+  const editablePlayers = useMemo(() => {
+    const map = new Map<string, { id: string; full_name: string; jersey_number: number | null }>();
+    for (const p of catPlayersQ.data ?? []) map.set(p.id, p);
+    for (const r of rowsQ.data ?? []) {
+      if (r.player && !map.has(r.player_id)) {
+        map.set(r.player_id, { id: r.player_id, full_name: r.player.full_name, jersey_number: r.player.jersey_number });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.full_name.localeCompare(b.full_name));
+  }, [catPlayersQ.data, rowsQ.data]);
+
+  function toggleSelected(playerId: string) {
+    setSelectedIds((prev) => {
+      const n = new Set(prev);
+      if (n.has(playerId)) n.delete(playerId); else n.add(playerId);
+      return n;
+    });
+  }
 
   function openEdit() {
     const c = cuQ.data;
@@ -226,8 +261,23 @@ function CallUpDetail() {
       note: c.note ?? "",
       objetivo: c.objetivo ?? "",
     });
+    setSelectedIds(new Set((rowsQ.data ?? []).map((r) => r.player_id)));
     setEditError("");
     setEditing(true);
+  }
+
+  function submitEdit() {
+    setEditError("");
+    // Avisar antes de quitar a alguien que ya respondió: se pierde su respuesta.
+    const respondedRemoved = (rowsQ.data ?? []).filter(
+      (r) => !selectedIds.has(r.player_id) && r.status !== "pending",
+    );
+    if (respondedRemoved.length > 0) {
+      const names = respondedRemoved.map((r) => r.player?.full_name ?? "una jugadora").join(", ");
+      const ok = confirm(`Vas a quitar a ${names}, que ya respondió. Se pierde su respuesta. ¿Seguir?`);
+      if (!ok) return;
+    }
+    editMut.mutate();
   }
 
   const editMut = useMutation({
@@ -239,6 +289,12 @@ function CallUpDetail() {
       const startsAt = dt.toISOString();
       const horaCambio = startsAt !== new Date(c.starts_at).toISOString();
       const lugarCambio = form.place.trim() !== (c.place ?? "");
+      if (selectedIds.size === 0) throw new Error("Deja al menos una jugadora convocada.");
+
+      const current = new Set((rowsQ.data ?? []).map((r) => r.player_id));
+      const toAdd = Array.from(selectedIds).filter((pid) => !current.has(pid));
+      const toRemove = Array.from(current).filter((pid) => !selectedIds.has(pid));
+      const kept = Array.from(current).filter((pid) => selectedIds.has(pid));
 
       const { error } = await supabase
         .from("call_ups")
@@ -258,23 +314,63 @@ function CallUpDetail() {
           .update({ remind_night_before_at: null, remind_soon_at: null })
           .eq("call_up_id", id);
       }
-      return { avisar: horaCambio || lugarCambio };
+
+      if (toRemove.length > 0) {
+        const { error: dErr } = await supabase
+          .from("call_up_players").delete()
+          .eq("call_up_id", id).in("player_id", toRemove);
+        if (dErr) throw new Error("Se guardaron los datos, pero no pudimos quitar a las jugadoras. Intenta de nuevo.");
+      }
+      if (toAdd.length > 0) {
+        const { error: iErr } = await supabase
+          .from("call_up_players")
+          .insert(toAdd.map((pid) => ({ call_up_id: id, player_id: pid })));
+        if (iErr) throw new Error("Se guardaron los datos, pero no pudimos sumar a las jugadoras. Intenta de nuevo.");
+      }
+      return { avisar: horaCambio || lugarCambio, added: toAdd, kept };
     },
-    onSuccess: async ({ avisar }) => {
+    onSuccess: async ({ avisar, added, kept }) => {
       setEditing(false);
       qc.invalidateQueries({ queryKey: ["call-up", id] });
+      qc.invalidateQueries({ queryKey: ["call-up-rows", id] });
       qc.invalidateQueries({ queryKey: ["call-ups"] });
       qc.invalidateQueries({ queryKey: ["entrenos"] });
       toast.success("Cambio guardado");
-      if (!avisar) return;
       try {
-        await sendPush({ data: { call_up_id: id, updated: true } });
+        // Las nuevas reciben "Nueva convocatoria"; las que ya estaban, el aviso de cambio.
+        if (added.length > 0) {
+          await sendPush({ data: { call_up_id: id, kind: "new", player_ids: added } });
+        }
+        if (avisar && kept.length > 0) {
+          await sendPush({ data: { call_up_id: id, kind: "updated", player_ids: kept } });
+        }
       } catch (e) {
         console.warn("No se pudo enviar el aviso", e);
         toast.error("Se guardó el cambio, pero no pudimos avisar a las jugadoras.");
       }
     },
     onError: (e: any) => setEditError(e?.message || "No pudimos guardar el cambio. Intenta de nuevo."),
+  });
+
+  // Recordar solo a las que siguen sin responder.
+  const remindMut = useMutation({
+    mutationFn: async () => sendPush({ data: { call_up_id: id, kind: "reminder", only_pending: true } }),
+    onSuccess: (r) => {
+      if (r.targeted === 0) {
+        toast.success("Todas ya respondieron.");
+      } else if (r.reachable === 0) {
+        toast.warning(
+          `Ninguna de las ${r.targeted} tiene los avisos activados. Mándales el link de la convocatoria.`,
+        );
+      } else if (r.reachable < r.targeted) {
+        toast.success(
+          `Les recordamos a ${r.reachable} de ${r.targeted}. A ${r.targeted - r.reachable} les faltan los avisos: mándales el link.`,
+        );
+      } else {
+        toast.success(`Les recordamos a las ${r.targeted} que no han respondido.`);
+      }
+    },
+    onError: () => toast.error("No pudimos enviar el recordatorio. Intenta de nuevo."),
   });
 
   const deleteMut = useMutation({
@@ -358,12 +454,13 @@ function CallUpDetail() {
 
         {isStaff && editing ? (
           <form
-            onSubmit={(e) => { e.preventDefault(); setEditError(""); editMut.mutate(); }}
+            onSubmit={(e) => { e.preventDefault(); submitEdit(); }}
             className="mt-6 space-y-6 rounded-2xl border-2 border-ink bg-card p-5"
           >
             <p className="text-sm text-ink/60">
               Cambia lo que haga falta. Las respuestas que ya dieron tus jugadoras se mantienen, y les
-              llega un aviso si cambias la fecha, la hora o la cancha.
+              llega un aviso si cambias la fecha, la hora o la cancha. Si sumas a alguien, le llega
+              la convocatoria.
             </p>
 
             <CallUpFields
@@ -372,6 +469,39 @@ function CallUpDetail() {
               showObjetivo={isEntreno}
               disabled={editMut.isPending}
             />
+
+            <div>
+              <label className="text-xs font-mono uppercase tracking-wider text-ink/50">
+                Convocadas ({selectedIds.size} de {editablePlayers.length})
+              </label>
+              <div className="mt-2 rounded-xl border-2 border-ink bg-paper divide-y divide-ink/10 max-h-72 overflow-auto">
+                {catPlayersQ.isLoading ? (
+                  <p className="p-4 text-sm text-ink/50">Cargando plantel...</p>
+                ) : catPlayersQ.isError ? (
+                  <p className="p-4 text-sm text-pa-red">No pudimos cargar el plantel. Cierra y vuelve a abrir Editar.</p>
+                ) : (
+                  editablePlayers.map((p) => {
+                    const on = selectedIds.has(p.id);
+                    return (
+                      <button
+                        key={p.id} type="button"
+                        onClick={() => toggleSelected(p.id)}
+                        disabled={editMut.isPending}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-left ${on ? "bg-lime/20" : "hover:bg-cream"}`}
+                      >
+                        <span className={`inline-flex h-6 w-6 items-center justify-center rounded-md border-2 ${on ? "bg-ink border-ink text-lime" : "border-ink/30 bg-paper"}`}>
+                          {on && <Check size={14} strokeWidth={3} />}
+                        </span>
+                        <span className="font-semibold flex-1">{p.full_name}</span>
+                        {p.jersey_number != null && (
+                          <span className="font-mono text-xs text-ink/50">#{p.jersey_number}</span>
+                        )}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
 
             {editError && (
               <div className="rounded-lg border-2 border-pa-red bg-pa-red/10 px-3 py-2 text-sm font-medium text-pa-red">
@@ -445,6 +575,8 @@ function CallUpDetail() {
             onToggleAttendance={(rowId, attended) => attendanceMut.mutate({ rowId, attended })}
             onCopyAttendance={copyAttendanceList}
             copying={attendanceMut.isPending}
+            onRemind={() => remindMut.mutate()}
+            reminding={remindMut.isPending}
           />
         )}
 
@@ -533,13 +665,15 @@ function PlayerResponse({ row, started, onGoing, onDecline, pending }: {
   );
 }
 
-function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendance, copying }: {
+function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendance, copying, onRemind, reminding }: {
   rows: Row[];
   loading: boolean;
   started: boolean;
   onToggleAttendance: (id: string, attended: boolean) => void;
   onCopyAttendance: () => void;
   copying: boolean;
+  onRemind: () => void;
+  reminding: boolean;
 }) {
   const going = rows.filter((r) => r.status === "going");
   const declined = rows.filter((r) => r.status === "declined");
@@ -567,6 +701,19 @@ function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendanc
           </div>
         </div>
       </div>
+      {!started && pending.length > 0 && (
+        <button
+          type="button"
+          onClick={onRemind}
+          disabled={reminding}
+          className="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border-2 border-ink bg-lime px-5 py-3 font-semibold text-ink hover:shadow-[3px_3px_0_0_var(--color-ink)] disabled:opacity-60"
+        >
+          <Bell size={16} />
+          {reminding
+            ? "Enviando..."
+            : `Recordar a las que no han respondido (${pending.length})`}
+        </button>
+      )}
       {!started && (
         <p className="mt-3 text-xs font-semibold text-ink/50">
           Podrás marcar la asistencia después de que empiece.

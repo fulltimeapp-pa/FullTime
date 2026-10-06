@@ -21,16 +21,22 @@ export function formatWhenShort(iso: string): string {
   return `${fecha} · ${hora}`;
 }
 
+export type CallUpMessageKind = "new" | "updated" | "reminder";
+
+const TITLES: Record<CallUpMessageKind, { entreno: string; partido: string }> = {
+  new: { entreno: "Nuevo entreno", partido: "Nueva convocatoria" },
+  updated: { entreno: "Cambio en el entreno", partido: "Cambio en el partido" },
+  reminder: { entreno: "¿Vas al entreno? Confirma", partido: "¿Vas al partido? Confirma" },
+};
+
 export function buildCallUpMessage(cu: {
   id: string;
   kind: string;
   starts_at: string;
   place: string | null;
   objetivo: string | null;
-}, updated = false): PushBody {
-  const title = updated
-    ? (cu.kind === "entreno" ? "Cambio en el entreno" : "Cambio en el partido")
-    : (cu.kind === "entreno" ? "Nuevo entreno" : "Nueva convocatoria");
+}, kind: CallUpMessageKind = "new"): PushBody {
+  const title = TITLES[kind][cu.kind === "entreno" ? "entreno" : "partido"];
   const parts = [formatWhenShort(cu.starts_at)];
   if (cu.place?.trim()) parts.push(cu.place.trim());
   if (cu.kind === "entreno" && cu.objetivo?.trim()) parts.push(cu.objetivo.trim().slice(0, 60));

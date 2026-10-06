@@ -39,8 +39,11 @@ No migrar a otro hosting ni volver a Lovable sin preguntar.
 
 - RLS de las 15 tablas.
 - Cifrado y firma del push.
-- El push solo se dispara al crear una convocatoria, con texto armado en
-  el servidor. No existe push de texto libre y así se queda.
+- El push solo sale por convocatorias (crearla, cambiarla, sumar jugadoras o
+  recordar a las que no han respondido), siempre con texto armado en el
+  servidor y solo si quien lo dispara es del cuerpo técnico. Si se crean
+  varios entrenos de una vez, va un solo aviso de resumen (decidido 6-oct).
+  No existe push de texto libre y así se queda.
 
 ## Fuera del alcance
 

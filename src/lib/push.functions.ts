@@ -1,53 +1,92 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { buildCallUpMessage, sendToSubscriptions } from "./push-notify.server";
+import { buildCallUpMessage, sendToSubscriptions, type CallUpMessageKind } from "./push-notify.server";
 
 // Sólo se permiten avisos ligados a una convocatoria/entreno real. No existe
 // ninguna vía para que un usuario envíe texto o enlaces arbitrarios a otros
-// usuarios: el mensaje se construye en el servidor a partir de la convocatoria
-// y la autorización la da la RLS del propio usuario sobre esa convocatoria.
+// usuarios: el mensaje se construye en el servidor a partir de la convocatoria.
+// Solo el cuerpo técnico del club puede dispararlos.
 const inputSchema = z.object({
   call_up_id: z.string().uuid(),
-  // true = la convocatoria cambió de fecha/hora/lugar (aviso de cambio).
+  // "new" (por defecto) = nueva convocatoria; "updated" = cambió fecha/hora/lugar;
+  // "reminder" = recordatorio a las que no han respondido.
+  kind: z.enum(["new", "updated", "reminder"]).optional(),
+  // Compatibilidad: updated=true equivale a kind="updated".
   updated: z.boolean().optional(),
+  // Solo a estas jugadoras (deben estar en la convocatoria).
+  player_ids: z.array(z.string().uuid()).max(200).optional(),
+  // Solo a las que siguen sin responder.
+  only_pending: z.boolean().optional(),
 });
+
+export type SendPushResult = {
+  /** Jugadoras a las que les correspondía el aviso. */
+  targeted: number;
+  /** De esas, cuántas tienen los avisos activados en algún celular. */
+  reachable: number;
+  /** Celulares a los que el aviso salió bien. */
+  sent: number;
+  failed: number;
+};
 
 export const sendPush = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => inputSchema.parse(data))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<SendPushResult> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const empty: SendPushResult = { targeted: 0, reachable: 0, sent: 0, failed: 0 };
 
     // RLS del usuario: sólo puede disparar avisos de convocatorias que puede ver.
     const { data: cu, error } = await context.supabase
       .from("call_ups")
-      .select("id, kind, starts_at, place, objetivo")
+      .select("id, club_id, kind, starts_at, place, objetivo")
       .eq("id", data.call_up_id)
       .maybeSingle();
     if (error) throw error;
-    if (!cu) return { sent: 0, failed: 0 };
+    if (!cu) return empty;
 
-    const message = buildCallUpMessage(cu as any, data.updated === true);
+    // Y además tiene que ser del cuerpo técnico de ese club.
+    const { data: isStaff, error: staffErr } = await context.supabase.rpc("is_club_staff", {
+      _user_id: context.userId,
+      _club_id: cu.club_id,
+    });
+    if (staffErr) throw staffErr;
+    if (!isStaff) throw new Error("Solo el cuerpo técnico puede enviar avisos.");
+
+    const kind: CallUpMessageKind = data.kind ?? (data.updated ? "updated" : "new");
+    const message = buildCallUpMessage(cu as any, kind);
 
     const { data: rows, error: rErr } = await supabaseAdmin
       .from("call_up_players")
-      .select("players(user_id)")
+      .select("player_id, status, players(user_id)")
       .eq("call_up_id", data.call_up_id);
     if (rErr) throw rErr;
-    const userIds = (rows ?? [])
-      .map((r: any) => r.players?.user_id as string | null)
-      .filter((v: string | null): v is string => !!v && v !== context.userId);
 
-    if (userIds.length === 0) return { sent: 0, failed: 0 };
+    const wanted = data.player_ids ? new Set(data.player_ids) : null;
+    const targets = (rows ?? []).filter(
+      (r: any) =>
+        (!wanted || wanted.has(r.player_id)) && (!data.only_pending || r.status === "pending"),
+    );
+    const userIds = Array.from(
+      new Set(
+        targets
+          .map((r: any) => r.players?.user_id as string | null)
+          .filter((v: string | null): v is string => !!v && v !== context.userId),
+      ),
+    );
+
+    if (userIds.length === 0) return { ...empty, targeted: targets.length };
 
     const { data: subs, error: sErr } = await supabaseAdmin
       .from("push_subscriptions")
-      .select("id, endpoint, p256dh, auth")
+      .select("id, user_id, endpoint, p256dh, auth")
       .in("user_id", userIds);
     if (sErr) throw sErr;
 
-    return await sendToSubscriptions((subs ?? []) as any, message, async (ids) => {
+    const reachable = new Set((subs ?? []).map((s: any) => s.user_id as string)).size;
+    const res = await sendToSubscriptions((subs ?? []) as any, message, async (ids) => {
       await supabaseAdmin.from("push_subscriptions").delete().in("id", ids);
     });
+    return { targeted: targets.length, reachable, ...res };
   });
