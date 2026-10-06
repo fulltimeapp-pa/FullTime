@@ -59,11 +59,11 @@ function CallUpDetail() {
   });
 
 
-  const isAdminQ = useQuery({
-    queryKey: ["is-admin", cuQ.data?.club_id, user.id],
+  const isStaffQ = useQuery({
+    queryKey: ["is-staff", cuQ.data?.club_id, user.id],
     enabled: !!cuQ.data?.club_id,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("is_club_admin", { _user_id: user.id, _club_id: cuQ.data!.club_id });
+      const { data, error } = await supabase.rpc("is_club_staff", { _user_id: user.id, _club_id: cuQ.data!.club_id });
       if (error) throw error;
       return !!data;
     },
@@ -128,7 +128,7 @@ function CallUpDetail() {
     return (rowsQ.data ?? []).find((r) => r.player?.user_id === user.id) || null;
   }, [rowsQ.data, user.id]);
 
-  const isAdmin = !!isAdminQ.data;
+  const isStaff = !!isStaffQ.data;
   const isPlayer = !!myRow;
 
   useEffect(() => {
@@ -313,7 +313,7 @@ function CallUpDetail() {
     wellness_at: r.wellness_at,
     rpe: r.rpe,
   }));
-  const backTo = isAdmin ? (isEntreno ? "/entrenos" : "/call-ups") : "/mis-convocatorias";
+  const backTo = isStaff ? (isEntreno ? "/entrenos" : "/call-ups") : "/mis-convocatorias";
 
 
   const page = (
@@ -324,7 +324,7 @@ function CallUpDetail() {
           <Link to={backTo} className="flex items-center gap-2 text-sm font-semibold hover:opacity-70">
             <ArrowLeft size={16} /> Volver
           </Link>
-          {isAdmin && (
+          {isStaff && (
             <div className="flex items-center gap-4">
               {!editing && (
                 <button
@@ -356,7 +356,7 @@ function CallUpDetail() {
           {formatWhen(cu.starts_at)}
         </h1>
 
-        {isAdmin && editing ? (
+        {isStaff && editing ? (
           <form
             onSubmit={(e) => { e.preventDefault(); setEditError(""); editMut.mutate(); }}
             className="mt-6 space-y-6 rounded-2xl border-2 border-ink bg-card p-5"
@@ -437,7 +437,7 @@ function CallUpDetail() {
           />
         )}
 
-        {isAdmin && (
+        {isStaff && (
           <CoachView
             rows={rowsQ.data ?? []}
             loading={rowsQ.isLoading}
@@ -448,10 +448,10 @@ function CallUpDetail() {
           />
         )}
 
-        {isEntreno && isAdmin && cu.wellness_enabled && (
+        {isEntreno && isStaff && cu.wellness_enabled && (
           <WellnessSummary rows={summaryRows} />
         )}
-        {isEntreno && isAdmin && cu.rpe_enabled && (
+        {isEntreno && isStaff && cu.rpe_enabled && (
           <RpeSummary rows={summaryRows} />
         )}
       </main>
@@ -460,7 +460,7 @@ function CallUpDetail() {
   );
 
   // Solo el staff ve el menú lateral; la jugadora usa su propio header.
-  return isAdmin ? <StaffShell>{page}</StaffShell> : page;
+  return isStaff ? <StaffShell>{page}</StaffShell> : page;
 }
 
 
