@@ -264,6 +264,8 @@ function SignupForm() {
   const safeRedirect = safeRedirectPath(redirect);
   const isInvite = typeof safeRedirect === "string" && safeRedirect.startsWith("/unirse/");
   const inviteToken = isInvite ? safeRedirect.slice("/unirse/".length).split(/[?#]/)[0] : null;
+  // Invitación al cuerpo técnico: se une a un club que ya existe, no crea uno propio.
+  const isStaffInvite = typeof safeRedirect === "string" && safeRedirect.startsWith("/unirse-equipo/");
   const [fullName, setFullName] = useState("");
   const [clubName, setClubName] = useState("");
   const [email, setEmail] = useState("");
@@ -301,7 +303,7 @@ function SignupForm() {
     if (submitting) return;
     const errs: Record<string, string> = {};
     if (!fullName.trim()) errs.fullName = "Escribe tu nombre completo.";
-    if (!isInvite && !clubName.trim()) errs.clubName = "Escribe el nombre de tu club.";
+    if (!isInvite && !isStaffInvite && !clubName.trim()) errs.clubName = "Escribe el nombre de tu club.";
     if (!isInvite && (!email.trim() || !/^\S+@\S+\.\S+$/.test(email))) errs.email = "Escribe un correo válido.";
     if (!passwordValid(password)) errs.password = "La contraseña debe tener 8+ caracteres, una mayúscula y un número.";
     setErrors(errs);
@@ -362,7 +364,24 @@ function SignupForm() {
       }
 
       if (!signUpData.session) {
-        await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        // Si Supabase exige confirmar el correo, no hay sesión todavía: lo decimos claro
+        // en vez de intentar crear el club sin sesión.
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        if (signInError) {
+          setTopError(
+            /confirm/i.test(signInError.message)
+              ? "Tu cuenta se creó. Revisa tu correo para confirmarla y luego inicia sesión."
+              : "Tu cuenta se creó. Inicia sesión con tu correo y contraseña para continuar.",
+          );
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      if (isStaffInvite) {
+        // Vuelve a la invitación para aceptarla; el club ya existe.
+        navigate({ to: safeRedirect!, replace: true });
+        return;
       }
 
       const { error: rpcError } = await supabase.rpc("create_my_club", {
@@ -388,6 +407,8 @@ function SignupForm() {
       <h1 className="font-display text-3xl md:text-4xl font-bold leading-none">
         {isInvite ? (
           <>Crea tu <span className="marker-underline">contraseña</span></>
+        ) : isStaffInvite ? (
+          <>Crea tu <span className="marker-underline">cuenta</span></>
         ) : (
           <>Crea tu <span className="marker-underline">club</span></>
         )}
@@ -395,7 +416,9 @@ function SignupForm() {
       <p className="mt-3 text-sm text-muted-foreground">
         {isInvite
           ? "Ya casi. Elige una contraseña para entrar a tu equipo."
-          : "Empieza gratis. Sin tarjeta. Un minuto y estás dentro."}
+          : isStaffInvite
+            ? "Ya casi. Crea tu cuenta para unirte al cuerpo técnico."
+            : "Empieza gratis. Sin tarjeta. Un minuto y estás dentro."}
       </p>
 
       <div className="mt-6">
@@ -415,7 +438,7 @@ function SignupForm() {
           />
           <FieldError msg={errors.fullName} />
         </div>
-        {!isInvite && (
+        {!isInvite && !isStaffInvite && (
           <div>
             <label className="block text-sm font-semibold mb-1.5">Nombre del club</label>
             <input
@@ -471,7 +494,9 @@ function SignupForm() {
             ? "Creando cuenta..."
             : isInvite
               ? "Entrar a mi equipo"
-              : "Crear cuenta gratis"}
+              : isStaffInvite
+                ? "Crear cuenta y unirme"
+                : "Crear cuenta gratis"}
         </button>
       </form>
     </>

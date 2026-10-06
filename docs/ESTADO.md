@@ -52,6 +52,14 @@ Reemplaza la Tarea 1.
 - Activado en Supabase → Auth → Providers → Google. Probado: entrar con Google reconoce la cuenta
   que ya existía con correo (no duplica usuario).
 
+### Tarea 3 — Registro de punta a punta (6-oct)
+- `src/routes/auth.tsx`: si la persona llega desde una invitación al cuerpo técnico
+  (`/unirse-equipo/...`), el registro ya no pide nombre de club ni crea un club propio: crea la
+  cuenta y la devuelve a la invitación para aceptarla.
+- Si después de registrarse no se puede iniciar sesión (por ejemplo, si algún día se vuelve a
+  exigir confirmar el correo), ahora se explica qué hacer en vez de "No pudimos crear tu club".
+- `/onboarding` (crear club entrando con Google) se deja como está: los dos caminos funcionan.
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
@@ -92,6 +100,6 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
   se probará con la primera jugadora real que tenga Android (revisar en la base que tenga
   suscripción `fcm.googleapis.com` y que le lleguen).
-- Tareas 2 a 8 del plan (privacidad, registro, coach, editar convocatoria, "¿llegó el aviso?",
-  errores visibles, recordatorios).
+- Tareas 4 a 8 del plan (coach, editar convocatoria, "¿llegó el aviso?", errores visibles,
+  recordatorios).
 - Agregar Vitest para tener tests en el repo.
