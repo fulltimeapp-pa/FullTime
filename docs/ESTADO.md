@@ -84,6 +84,18 @@ Reemplaza la Tarea 1.
 - `sendPush` ahora exige ser del cuerpo técnico del club (antes una jugadora podía disparar avisos
   a todo el equipo) y devuelve cuántas jugadoras tenían avisos activados (base para la Tarea 6).
 
+### Entrenos repetidos del mes (6-oct)
+- "Nuevo entreno" tiene "Un día / Varios días". En varios días: se eligen los días de la semana,
+  cada uno con su hora, y "desde / hasta" (por defecto, fin de mes). Se ve la lista de fechas y
+  se puede quitar alguna (feriados). Máximo 60 de una vez.
+- Lógica de fechas en `src/lib/repetir.ts`, probada con 16 casos (meses, bisiesto, cambio de año,
+  tres zonas horarias).
+- Un solo aviso de resumen (`sendPushBulk`): "Tu profe publicó 14 entrenos · Del jue 1 oct al
+  vie 30 oct". Solo cuerpo técnico.
+- Panel: recuadro "Todavía no cargas los entrenos de {mes}" si no hay entrenos en el mes (desde el
+  día 25 mira el mes siguiente), con botón que abre "Varios días".
+- La app guarda solo la hora de inicio, no la de fin (pregunta abierta para Bárbara).
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).

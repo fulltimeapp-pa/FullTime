@@ -130,6 +130,34 @@ function Dashboard() {
   });
   const upcomingPartidos = partidosQuery.data ?? [];
 
+  // Recordatorio de cargar los entrenos del mes: desde el día 25 mira el mes siguiente.
+  const mesObjetivo = (() => {
+    const hoy = new Date();
+    const offset = hoy.getDate() >= 25 ? 1 : 0;
+    const inicio = new Date(hoy.getFullYear(), hoy.getMonth() + offset, 1);
+    const fin = new Date(hoy.getFullYear(), hoy.getMonth() + offset + 1, 1);
+    return {
+      desde: (offset ? inicio : hoy).toISOString(),
+      hasta: fin.toISOString(),
+      nombre: inicio.toLocaleDateString("es-PA", { month: "long" }),
+    };
+  })();
+  const entrenosMesQuery = useQuery({
+    queryKey: ["dashboard-entrenos-mes", clubId, mesObjetivo.desde.slice(0, 10)],
+    enabled: !!clubId,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("call_ups")
+        .select("id", { count: "exact", head: true })
+        .eq("club_id", clubId!)
+        .eq("kind", "entreno")
+        .gte("starts_at", mesObjetivo.desde)
+        .lt("starts_at", mesObjetivo.hasta);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
   const entrenosQuery = useQuery({
     queryKey: ["dashboard-call-ups", "entreno", clubId, selectedCatId],
     enabled: !!clubId,
@@ -326,6 +354,22 @@ function Dashboard() {
           </section>
         )}
 
+
+        {club && !showOnboarding && entrenosMesQuery.data === 0 && (
+          <section className="mt-6 max-w-3xl rounded-2xl border-2 border-ink bg-lime/30 p-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-display text-xl font-bold">
+                Todavía no cargas los entrenos de {mesObjetivo.nombre}
+              </h2>
+              <p className="text-sm text-ink/70">
+                Elige los días y horarios y los creamos todos de una vez. Tus jugadoras reciben un solo aviso.
+              </p>
+            </div>
+            <Link to="/entrenos/new" search={{ repetir: true }} className="btn-primary !py-2.5">
+              Cargar entrenos del mes
+            </Link>
+          </section>
+        )}
 
         <div className="mt-8 max-w-3xl">
           <PushOptIn />

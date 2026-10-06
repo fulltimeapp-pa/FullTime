@@ -1,15 +1,21 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, BookOpen, Save, X } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { getMyActiveClub } from "@/lib/active-club";
 import { PlanEditor } from "@/components/training/PlanEditor";
 import { newLocalId, type PlanActivity, type PlanPart, type Intensity } from "@/lib/training-plan";
-import { sendPush } from "@/lib/push.functions";
+import { sendPush, sendPushBulk } from "@/lib/push.functions";
+import { WEEKDAYS, buildRepeatDates, endOfMonth, shortDayLabel, MAX_REPEAT, type Weekday } from "@/lib/repetir";
 
 export const Route = createFileRoute("/_authenticated/entrenos/new")({
+  // ?repetir=1 abre directo en "Varios días" (desde el recordatorio del panel).
+  validateSearch: (s: Record<string, unknown>): { repetir?: boolean } => ({
+    repetir: s.repetir === 1 || s.repetir === "1" || s.repetir === true ? true : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "FullTime — Nuevo entreno" },
@@ -85,8 +91,40 @@ function NewEntreno() {
     if (!categoryId && catsQ.data?.length) setCategoryId(catsQ.data[0].id);
   }, [catsQ.data, categoryId]);
 
+  const { repetir } = Route.useSearch();
   const [date, setDate] = useState(todayLocalDate());
   const [time, setTime] = useState("18:00");
+  // Varios días: cada día de la semana elegido con su hora.
+  const [mode, setMode] = useState<"uno" | "varios">(repetir ? "varios" : "uno");
+  const [repeatDays, setRepeatDays] = useState<Map<Weekday, string>>(new Map());
+  const [until, setUntil] = useState(endOfMonth(todayLocalDate()));
+  const [skipped, setSkipped] = useState<Set<string>>(new Set());
+
+  const repeatAll = useMemo(
+    () =>
+      buildRepeatDates(
+        date,
+        until,
+        Array.from(repeatDays, ([weekday, t]) => ({ weekday, time: t })),
+      ),
+    [date, until, repeatDays],
+  );
+  const repeatDates = repeatAll.filter((d) => !skipped.has(d.date));
+
+  function toggleWeekday(wd: Weekday) {
+    setRepeatDays((prev) => {
+      const n = new Map(prev);
+      if (n.has(wd)) n.delete(wd); else n.set(wd, time);
+      return n;
+    });
+  }
+  function toggleSkipped(day: string) {
+    setSkipped((prev) => {
+      const n = new Set(prev);
+      if (n.has(day)) n.delete(day); else n.add(day);
+      return n;
+    });
+  }
   const [place, setPlace] = useState("");
   const [objetivo, setObjetivo] = useState("");
   const [note, setNote] = useState("");
@@ -199,6 +237,53 @@ function NewEntreno() {
       
       if (selected.size === 0) throw new Error("Selecciona al menos una jugadora.");
       const cleanActs = activities.filter((a) => a.name.trim().length > 0);
+
+      if (mode === "varios") {
+        if (repeatDays.size === 0) throw new Error("Elige al menos un día de la semana.");
+        if (repeatDates.length === 0) throw new Error("No hay fechas en ese rango. Revisa desde y hasta.");
+
+        const base = {
+          club_id: clubId, category_id: categoryId,
+          kind: "entreno" as const, place: place.trim(),
+          objetivo: objetivo.trim() || null,
+          wellness_enabled: wellnessEnabled,
+          rpe_enabled: rpeEnabled,
+          note: note.trim() || null, created_by: user.id,
+        };
+        const { data: cus, error: mErr } = await supabase
+          .from("call_ups")
+          .insert(repeatDates.map((d) => ({ ...base, starts_at: new Date(`${d.date}T${d.time}:00`).toISOString() })))
+          .select("id");
+        if (mErr) throw mErr;
+        const ids = (cus ?? []).map((c) => c.id as string);
+
+        const playerRows = ids.flatMap((cid) =>
+          Array.from(selected).map((pid) => ({ call_up_id: cid, player_id: pid })),
+        );
+        const { error: pErr } = await supabase.from("call_up_players").insert(playerRows);
+        if (pErr) throw new Error("Creamos los entrenos, pero no pudimos convocar a las jugadoras. Revísalos en la lista.");
+
+        if (cleanActs.length > 0) {
+          const actRows = ids.flatMap((cid) =>
+            cleanActs.map((a, i) => ({
+              call_up_id: cid, part: a.part, name: a.name.trim(),
+              duration_min: a.duration_min, intensity: a.intensity, note: a.note, sort_order: i,
+            })),
+          );
+          const { error: aErr } = await supabase.from("training_activities").insert(actRows);
+          if (aErr) throw new Error("Creamos los entrenos, pero no pudimos guardar el plan. Revísalos en la lista.");
+        }
+
+        // Un solo aviso de resumen para todas las jugadoras.
+        try {
+          await sendPushBulk({ data: { call_up_ids: ids } });
+        } catch (e) {
+          console.warn("No se pudo enviar el aviso de resumen", e);
+          toast.error("Creamos los entrenos, pero no pudimos avisar a las jugadoras.");
+        }
+        return { many: ids.length };
+      }
+
       const startsAt = new Date(`${date}T${time}:00`).toISOString();
 
       const { data: cu, error: cErr } = await supabase
@@ -239,9 +324,17 @@ function NewEntreno() {
       void sendPush({ data: { call_up_id: cu.id as string } }).catch((e) =>
         console.warn("No se pudo enviar el push", e),
       );
-      return cu.id as string;
+      return { id: cu.id as string };
     },
-    onSuccess: (id) => navigate({ to: "/call-ups/$id", params: { id } }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["entrenos"] });
+      if ("many" in r) {
+        toast.success(`Listo: creamos ${r.many} entrenos.`);
+        navigate({ to: "/entrenos" });
+      } else {
+        navigate({ to: "/call-ups/$id", params: { id: r.id } });
+      }
+    },
     onError: (e: any) => setError(e?.message || "No pudimos crear el entreno."),
   });
 
@@ -276,22 +369,121 @@ function NewEntreno() {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Fecha</label>
-              <input
-                type="date" required value={date} onChange={(e) => setDate(e.target.value)}
-                className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Hora</label>
-              <input
-                type="time" required value={time} onChange={(e) => setTime(e.target.value)}
-                className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
-              />
+          <div>
+            <label className="text-xs font-mono uppercase tracking-wider text-ink/50">¿Cuándo?</label>
+            <div className="mt-1.5 grid grid-cols-2 rounded-xl border-2 border-ink overflow-hidden" role="group">
+              {(["uno", "varios"] as const).map((m) => (
+                <button
+                  key={m} type="button" aria-pressed={mode === m}
+                  onClick={() => setMode(m)}
+                  className={`py-3 font-semibold ${mode === m ? "bg-ink text-lime" : "bg-paper hover:bg-cream"}`}
+                >
+                  {m === "uno" ? "Un día" : "Varios días"}
+                </button>
+              ))}
             </div>
           </div>
+
+          {mode === "uno" ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Fecha</label>
+                <input
+                  type="date" required value={date} onChange={(e) => setDate(e.target.value)}
+                  className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Hora</label>
+                <input
+                  type="time" required value={time} onChange={(e) => setTime(e.target.value)}
+                  className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-5 rounded-2xl border-2 border-ink bg-card p-4">
+              <div>
+                <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Días que entrenan</label>
+                <div className="mt-2 grid grid-cols-7 gap-1.5">
+                  {WEEKDAYS.map((w) => {
+                    const on = repeatDays.has(w.value);
+                    return (
+                      <button
+                        key={w.value} type="button" aria-pressed={on}
+                        onClick={() => toggleWeekday(w.value)}
+                        className={`rounded-lg border-2 py-2.5 text-sm font-bold ${on ? "bg-lime border-ink" : "border-ink/30 bg-paper"}`}
+                      >
+                        {w.short}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {repeatDays.size > 0 && (
+                <div className="space-y-2">
+                  {WEEKDAYS.filter((w) => repeatDays.has(w.value)).map((w) => (
+                    <div key={w.value} className="flex items-center justify-between gap-3">
+                      <span className="font-semibold">{w.long}</span>
+                      <input
+                        type="time" required value={repeatDays.get(w.value) ?? ""}
+                        aria-label={`Hora del ${w.long}`}
+                        onChange={(e) =>
+                          setRepeatDays((prev) => new Map(prev).set(w.value, e.target.value))
+                        }
+                        className="w-36 rounded-xl border-2 border-ink bg-paper px-3 py-2.5 font-semibold"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Desde</label>
+                  <input
+                    type="date" required value={date}
+                    onChange={(e) => { setDate(e.target.value); setUntil(endOfMonth(e.target.value)); }}
+                    className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Hasta</label>
+                  <input
+                    type="date" required value={until} min={date} onChange={(e) => setUntil(e.target.value)}
+                    className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+                  />
+                </div>
+              </div>
+
+              {repeatAll.length > 0 && (
+                <div>
+                  <p className="font-semibold">
+                    Se crearán {repeatDates.length} entrenos
+                  </p>
+                  <p className="text-xs text-ink/50">Toca una fecha para quitarla (por ejemplo, un feriado).</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {repeatAll.map((d) => {
+                      const off = skipped.has(d.date);
+                      return (
+                        <button
+                          key={d.date} type="button" onClick={() => toggleSkipped(d.date)}
+                          aria-pressed={!off}
+                          className={`rounded-full border-2 px-3 py-1.5 text-xs font-semibold ${off ? "border-ink/20 text-ink/40 line-through bg-paper" : "border-ink bg-lime/30"}`}
+                        >
+                          {shortDayLabel(d.date)} · {d.time}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {repeatAll.length >= MAX_REPEAT && (
+                    <p className="mt-2 text-xs text-pa-red">Máximo {MAX_REPEAT} entrenos de una vez. Acorta el rango.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Lugar (opcional)</label>
@@ -415,7 +607,11 @@ function NewEntreno() {
 
           <div className="flex items-center gap-3 pt-2">
             <button type="submit" disabled={createMut.isPending} className="btn-primary">
-              {createMut.isPending ? "Creando..." : "Crear entreno"}
+              {createMut.isPending
+                ? "Creando..."
+                : mode === "varios"
+                  ? `Crear ${repeatDates.length} entrenos`
+                  : "Crear entreno"}
             </button>
             <Link to="/entrenos" className="btn-ghost">Cancelar</Link>
           </div>

@@ -1,7 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { buildCallUpMessage, sendToSubscriptions, type CallUpMessageKind } from "./push-notify.server";
+import {
+  buildBulkTrainingMessage,
+  buildCallUpMessage,
+  sendToSubscriptions,
+  type CallUpMessageKind,
+} from "./push-notify.server";
 
 // Sólo se permiten avisos ligados a una convocatoria/entreno real. No existe
 // ninguna vía para que un usuario envíe texto o enlaces arbitrarios a otros
@@ -89,4 +94,65 @@ export const sendPush = createServerFn({ method: "POST" })
       await supabaseAdmin.from("push_subscriptions").delete().in("id", ids);
     });
     return { targeted: targets.length, reachable, ...res };
+  });
+
+// Varios entrenos creados de una vez: un solo aviso por jugadora.
+const bulkSchema = z.object({
+  call_up_ids: z.array(z.string().uuid()).min(1).max(60),
+});
+
+export const sendPushBulk = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => bulkSchema.parse(data))
+  .handler(async ({ data, context }): Promise<SendPushResult> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const empty: SendPushResult = { targeted: 0, reachable: 0, sent: 0, failed: 0 };
+
+    // RLS del usuario: solo ve convocatorias de su club.
+    const { data: cus, error } = await context.supabase
+      .from("call_ups")
+      .select("id, club_id, starts_at")
+      .in("id", data.call_up_ids);
+    if (error) throw error;
+    if (!cus || cus.length === 0) return empty;
+
+    // Tiene que ser cuerpo técnico de cada club involucrado (normalmente uno).
+    for (const clubId of new Set(cus.map((c) => c.club_id as string))) {
+      const { data: isStaff, error: staffErr } = await context.supabase.rpc("is_club_staff", {
+        _user_id: context.userId,
+        _club_id: clubId,
+      });
+      if (staffErr) throw staffErr;
+      if (!isStaff) throw new Error("Solo el cuerpo técnico puede enviar avisos.");
+    }
+
+    const message = buildBulkTrainingMessage(cus.map((c) => c.starts_at as string));
+
+    const { data: rows, error: rErr } = await supabaseAdmin
+      .from("call_up_players")
+      .select("player_id, players(user_id)")
+      .in("call_up_id", cus.map((c) => c.id as string));
+    if (rErr) throw rErr;
+
+    const targeted = new Set((rows ?? []).map((r: any) => r.player_id as string)).size;
+    const userIds = Array.from(
+      new Set(
+        (rows ?? [])
+          .map((r: any) => r.players?.user_id as string | null)
+          .filter((v: string | null): v is string => !!v && v !== context.userId),
+      ),
+    );
+    if (userIds.length === 0) return { ...empty, targeted };
+
+    const { data: subs, error: sErr } = await supabaseAdmin
+      .from("push_subscriptions")
+      .select("id, user_id, endpoint, p256dh, auth")
+      .in("user_id", userIds);
+    if (sErr) throw sErr;
+
+    const reachable = new Set((subs ?? []).map((s: any) => s.user_id as string)).size;
+    const res = await sendToSubscriptions((subs ?? []) as any, message, async (ids) => {
+      await supabaseAdmin.from("push_subscriptions").delete().in("id", ids);
+    });
+    return { targeted, reachable, ...res };
   });

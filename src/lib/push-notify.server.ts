@@ -43,6 +43,25 @@ export function buildCallUpMessage(cu: {
   return { title, body: parts.join(" · "), url: `/call-ups/${cu.id}` };
 }
 
+/** Un solo aviso cuando se crean varios entrenos de una vez. */
+export function buildBulkTrainingMessage(startsAt: string[]): PushBody {
+  const sorted = [...startsAt].sort();
+  const dia = (iso: string) =>
+    new Date(iso).toLocaleDateString("es-PA", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      timeZone: "America/Panama",
+    });
+  const n = sorted.length;
+  const body = n === 1 ? dia(sorted[0]) : `Del ${dia(sorted[0])} al ${dia(sorted[n - 1])}`;
+  return {
+    title: n === 1 ? "Nuevo entreno" : `Tu profe publicó ${n} entrenos`,
+    body: `${body} · Toca para verlos y confirmar`,
+    url: "/mis-convocatorias",
+  };
+}
+
 export async function sendToSubscriptions(
   subs: (WebPushSub & { id: string })[],
   message: PushBody,
