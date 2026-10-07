@@ -124,6 +124,18 @@ Reemplaza la Tarea 1.
   exponer datos del celular.
 - La guía para instalar en iPhone ya existía (`PushOptIn` en la pantalla de inicio de la jugadora).
 
+### Tarea 7 — Errores visibles (7-oct)
+- `src/lib/errors.ts`: `translateDbError` (antes vivía en roster.tsx) y `friendlyError`. Ningún
+  error crudo de la base ni en inglés en crear partido/entreno, plantel y equipo.
+- Botón "Voy / No puedo": si falla, la jugadora ve "Tu profe todavía no la ve" con botón
+  **Reintentar**; si sale bien, "¡Listo! Tu profe ya sabe que vas". Se revisa que de verdad se
+  haya guardado la fila. Igual para wellness y RPE.
+- Eliminar convocatoria, invitar jugadora, crear/borrar invitación y quitar cuerpo técnico:
+  mensaje claro si fallan.
+- Avisos: tabla nueva `push_log` (migración `20261007140000_push_log.sql`) con cada envío: tipo,
+  a cuántas les tocaba, cuántas tienen avisos, enviados, fallidos y códigos de falla. Solo la
+  dueña la lee. **Cómo verla:** Supabase → Table Editor → `push_log`.
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
@@ -171,7 +183,7 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
   se probará con la primera jugadora real que tenga Android (revisar en la base que tenga
   suscripción `fcm.googleapis.com` y que le lleguen).
-- Tareas 7 y 8 del plan (errores visibles, recordatorios).
+- Tarea 8 del plan (recordatorios automáticos).
 - Agregar Vitest para tener tests en el repo.
 - **Más adelante — límites por plan** (recordatorio de Bárbara, 6-oct): hay Plan Equipo (un solo
   equipo) y Plan Academia (varios equipos, precio por equipo). Hoy la app deja crear categorías sin

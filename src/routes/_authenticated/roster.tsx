@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { getMyActiveClub } from "@/lib/active-club";
 import { PhotoCropInput } from "@/components/roster/PhotoCropInput";
 import { StaffShell } from "@/components/staff/StaffShell";
+import { translateDbError, friendlyError } from "@/lib/errors";
+import { toast as notify } from "sonner";
 
 
 export const Route = createFileRoute("/_authenticated/roster")({
@@ -74,17 +76,6 @@ const POSITIONS: { value: PlayerPosition; label: string }[] = [
   { value: "delantera", label: "Delantera" },
 ];
 
-function translateDbError(raw: string): string {
-  const m = (raw || "").toLowerCase();
-  if (!raw) return "Algo salió mal. Vuelve a intentarlo.";
-  if (m.includes("row-level security") || m.includes("permission") || m.includes("403"))
-    return "No pudimos acceder a este club. Revisa que tu cuenta esté asociada como administradora.";
-  if (m.includes("duplicate") || m.includes("unique"))
-    return "Ya existe un registro con esos datos.";
-  if (m.includes("network") || m.includes("failed to fetch"))
-    return "Sin conexión. Revisa tu internet.";
-  return "No pudimos completar la acción. Vuelve a intentarlo.";
-}
 
 const inputCls =
   "w-full rounded-xl border-2 border-ink/20 focus:border-ink bg-paper px-4 py-3 text-base outline-none transition-colors placeholder:text-ink/40";
@@ -388,6 +379,7 @@ function RosterPage() {
       if (error) throw error;
       return { player: data as Player, token: token! };
     },
+    onError: (e) => notify.error(friendlyError(e, "No pudimos crear el link de invitación. Vuelve a intentarlo.")),
     onSuccess: ({ player, token }) => {
       const catKey = ["players", player.category_id] as const;
       qc.setQueryData<Player[]>(catKey, (current) =>

@@ -8,6 +8,7 @@ import { getMyActiveClub } from "@/lib/active-club";
 import { sendPush } from "@/lib/push.functions";
 import { CallUpFields } from "@/components/call-ups/CallUpFields";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 import { toMatchTimes } from "@/lib/call-ups";
 
 export const Route = createFileRoute("/_authenticated/call-ups/new")({
@@ -139,7 +140,7 @@ function NewCallUp() {
       return cu.id as string;
     },
     onSuccess: (id) => navigate({ to: "/call-ups/$id", params: { id } }),
-    onError: (e: any) => setError(e?.message || "No pudimos crear la convocatoria."),
+    onError: (e) => setError(friendlyError(e, "No pudimos crear la convocatoria. Vuelve a intentarlo.")),
   });
 
   return (

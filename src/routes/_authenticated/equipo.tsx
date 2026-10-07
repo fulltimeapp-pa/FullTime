@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, Pencil, Share2, Shield, Trash2, UserPlus, X } from "lucide-react";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyActiveClub, type ClubRole } from "@/lib/active-club";
 import { StaffShell } from "@/components/staff/StaffShell";
@@ -219,6 +220,7 @@ function EquipoPage() {
       if (error) throw error;
       return data as StaffInvite;
     },
+    onError: (e) => setInviteError(friendlyError(e, "No pudimos crear la invitación. Vuelve a intentarlo.")),
     onSuccess: (inv) => {
       setNewInvite(inv);
       setInviteEmail("");
@@ -243,6 +245,7 @@ function EquipoPage() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["staff-invites", clubId] }),
+    onError: (e) => toast.error(friendlyError(e, "No pudimos borrar la invitación. Vuelve a intentarlo.")),
   });
 
   const removeStaffMut = useMutation({
@@ -251,6 +254,7 @@ function EquipoPage() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["staff-members", clubId] }),
+    onError: (e) => toast.error(friendlyError(e, "No pudimos quitar a esa persona. Vuelve a intentarlo.")),
   });
 
   const cats = catsQ.data ?? [];

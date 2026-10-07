@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, BookOpen, Save, X } from "lucide-react";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 import { supabase } from "@/integrations/supabase/client";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { getMyActiveClub } from "@/lib/active-club";
@@ -208,7 +209,7 @@ function NewEntreno() {
       setActivities(acts);
       setShowLoad(false);
     },
-    onError: (e: any) => setError(e?.message || "No pudimos cargar la plantilla."),
+    onError: (e) => setError(friendlyError(e, "No pudimos cargar la plantilla.")),
   });
 
   const saveTemplateMut = useMutation({
@@ -238,7 +239,7 @@ function NewEntreno() {
       qc.invalidateQueries({ queryKey: ["session-templates", clubId] });
       setShowSave(false);
     },
-    onError: (e: any) => setError(e?.message || "No pudimos guardar la plantilla."),
+    onError: (e) => setError(friendlyError(e, "No pudimos guardar la plantilla.")),
   });
 
   const createMut = useMutation({
@@ -352,7 +353,7 @@ function NewEntreno() {
         navigate({ to: "/call-ups/$id", params: { id: r.id } });
       }
     },
-    onError: (e: any) => setError(e?.message || "No pudimos crear el entreno."),
+    onError: (e) => setError(friendlyError(e, "No pudimos crear el entreno. Vuelve a intentarlo.")),
   });
 
   return (

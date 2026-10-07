@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy, Pencil, Bell, BellOff, UserX } from "lucide-react";
 import { sendPush, getCallUpReach, type PlayerReach } from "@/lib/push.functions";
 import { siteUrl } from "@/lib/site";
+import { friendlyError } from "@/lib/errors";
 import { CallUpFields, type CallUpFieldsValue } from "@/components/call-ups/CallUpFields";
 import { supabase } from "@/integrations/supabase/client";
 import { formatWhen, kindLabel, toStartEnd, toMatchTimes, type CallUp, type CallUpPlayerRow, type ResponseStatus } from "@/lib/call-ups";
@@ -145,40 +146,66 @@ function CallUpDetail() {
 
   useEffect(() => {
     if (!myRow || myRow.read_at) return;
-    supabase.from("call_up_players").update({ read_at: new Date().toISOString() }).eq("id", myRow.id).then();
+    // Marca que la jugadora la abrió. Si falla no la molestamos; solo queda registrado.
+    supabase.from("call_up_players").update({ read_at: new Date().toISOString() }).eq("id", myRow.id)
+      .then(({ error }) => { if (error) console.error("No se pudo marcar como abierta", error); });
   }, [myRow]);
 
   const respondMut = useMutation({
     mutationFn: async ({ status, reason }: { status: ResponseStatus; reason?: string }) => {
       if (!myRow) throw new Error("No estás en esta convocatoria.");
-      const { error } = await supabase.from("call_up_players").update({
+      const { data, error } = await supabase.from("call_up_players").update({
         status, reason: reason?.trim() || null, responded_at: new Date().toISOString(),
-      }).eq("id", myRow.id);
+      }).eq("id", myRow.id).select("id");
       if (error) throw error;
+      // Si no se actualizó ninguna fila, no se guardó: mejor decirlo que fingir que sí.
+      if (!data || data.length === 0) throw new Error("No pudimos guardar tu respuesta.");
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["call-up-rows", id] }),
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ["call-up-rows", id] });
+      toast.success(vars.status === "going" ? "¡Listo! Tu profe ya sabe que vas." : "Listo. Tu profe ya sabe que no puedes.");
+    },
+    onError: (e, vars) => {
+      console.error("No se guardó la respuesta", e);
+      toast.error(`${friendlyError(e, "No pudimos guardar tu respuesta.")} Tu profe todavía no la ve.`, {
+        duration: 15000,
+        action: { label: "Reintentar", onClick: () => respondMut.mutate(vars) },
+      });
+    },
   });
 
   const wellnessMut = useMutation({
     mutationFn: async (v: Record<WellnessKey, number>) => {
       if (!myRow) throw new Error("No estás en esta convocatoria.");
-      const { error } = await supabase.from("call_up_players").update({
+      const { data, error } = await supabase.from("call_up_players").update({
         ...v, wellness_at: new Date().toISOString(),
-      }).eq("id", myRow.id);
+      }).eq("id", myRow.id).select("id");
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error("No pudimos guardar cómo llegas.");
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["call-up-rows", id] }),
+    onError: (e, vars) =>
+      toast.error(friendlyError(e, "No pudimos guardar cómo llegas."), {
+        duration: 15000,
+        action: { label: "Reintentar", onClick: () => wellnessMut.mutate(vars) },
+      }),
   });
 
   const rpeMut = useMutation({
     mutationFn: async (rpe: number) => {
       if (!myRow) throw new Error("No estás en esta convocatoria.");
-      const { error } = await supabase.from("call_up_players").update({
+      const { data, error } = await supabase.from("call_up_players").update({
         rpe, rpe_at: new Date().toISOString(),
-      }).eq("id", myRow.id);
+      }).eq("id", myRow.id).select("id");
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error("No pudimos guardar el esfuerzo del entreno.");
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["call-up-rows", id] }),
+    onError: (e, vars) =>
+      toast.error(friendlyError(e, "No pudimos guardar el esfuerzo del entreno."), {
+        duration: 15000,
+        action: { label: "Reintentar", onClick: () => rpeMut.mutate(vars) },
+      }),
   });
 
   const attendanceMut = useMutation({
@@ -419,6 +446,7 @@ function CallUpDetail() {
       const dest = cuQ.data?.kind === "entreno" ? "/entrenos" : "/call-ups";
       navigate({ to: dest });
     },
+    onError: (e) => toast.error(friendlyError(e, "No pudimos eliminarla. Vuelve a intentarlo.")),
   });
 
   if (cuQ.isLoading) {

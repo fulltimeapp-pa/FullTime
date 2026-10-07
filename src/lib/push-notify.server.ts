@@ -77,9 +77,10 @@ export async function sendToSubscriptions(
   subs: (WebPushSub & { id: string })[],
   message: PushBody,
   onGone: (ids: string[]) => Promise<void>,
-): Promise<{ sent: number; failed: number }> {
+): Promise<{ sent: number; failed: number; detail: string | null }> {
   const payload = JSON.stringify(message);
   const gone: string[] = [];
+  const fallas = new Map<string, number>();
   let sent = 0;
   let failed = 0;
 
@@ -89,15 +90,43 @@ export async function sendToSubscriptions(
       if (res.ok) sent++;
       else {
         failed++;
+        const k = res.gone ? `${res.status} (celular ya no existe)` : String(res.status);
+        fallas.set(k, (fallas.get(k) ?? 0) + 1);
         if (res.gone) gone.push(sub.id);
       }
     } catch (e) {
       failed++;
-      console.warn("push falló", (e as Error)?.message ?? String(e));
+      const k = `error: ${((e as Error)?.message ?? String(e)).slice(0, 80)}`;
+      fallas.set(k, (fallas.get(k) ?? 0) + 1);
+      console.error("[push] falló el envío", (e as Error)?.message ?? String(e));
     }
   }
 
   if (gone.length > 0) await onGone(gone);
-  return { sent, failed };
+  const detail = fallas.size ? Array.from(fallas, ([k, n]) => `${k} ×${n}`).join(", ") : null;
+  return { sent, failed, detail };
 }
 
+type PushLogRow = {
+  club_id: string | null;
+  call_up_id: string | null;
+  kind: string;
+  targeted?: number;
+  reachable?: number;
+  sent?: number;
+  failed?: number;
+  detail?: string | null;
+};
+
+/** Anota un envío en push_log. Nunca rompe el envío si el registro falla. */
+export async function logPush(
+  admin: { from: (t: string) => any },
+  row: PushLogRow,
+): Promise<void> {
+  try {
+    const { error } = await admin.from("push_log").insert(row);
+    if (error) console.error("[push] no se pudo registrar", error.message);
+  } catch (e) {
+    console.error("[push] no se pudo registrar", (e as Error)?.message ?? String(e));
+  }
+}

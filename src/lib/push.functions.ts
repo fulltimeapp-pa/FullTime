@@ -5,6 +5,7 @@ import {
   buildBulkTrainingMessage,
   buildCallUpMessage,
   sendToSubscriptions,
+  logPush,
   type CallUpMessageKind,
 } from "./push-notify.server";
 
@@ -33,6 +34,8 @@ export type SendPushResult = {
   /** Celulares a los que el aviso salió bien. */
   sent: number;
   failed: number;
+  /** Códigos de falla, si hubo (también queda en push_log). */
+  detail?: string | null;
 };
 
 export const sendPush = createServerFn({ method: "POST" })
@@ -81,7 +84,10 @@ export const sendPush = createServerFn({ method: "POST" })
       ),
     );
 
-    if (userIds.length === 0) return { ...empty, targeted: targets.length };
+    if (userIds.length === 0) {
+      await logPush(supabaseAdmin, { club_id: cu.club_id, call_up_id: cu.id, kind, targeted: targets.length });
+      return { ...empty, targeted: targets.length };
+    }
 
     const { data: subs, error: sErr } = await supabaseAdmin
       .from("push_subscriptions")
@@ -92,6 +98,10 @@ export const sendPush = createServerFn({ method: "POST" })
     const reachable = new Set((subs ?? []).map((s: any) => s.user_id as string)).size;
     const res = await sendToSubscriptions((subs ?? []) as any, message, async (ids) => {
       await supabaseAdmin.from("push_subscriptions").delete().in("id", ids);
+    });
+    await logPush(supabaseAdmin, {
+      club_id: cu.club_id, call_up_id: cu.id, kind,
+      targeted: targets.length, reachable, sent: res.sent, failed: res.failed, detail: res.detail,
     });
     return { targeted: targets.length, reachable, ...res };
   });
@@ -142,7 +152,10 @@ export const sendPushBulk = createServerFn({ method: "POST" })
           .filter((v: string | null): v is string => !!v && v !== context.userId),
       ),
     );
-    if (userIds.length === 0) return { ...empty, targeted };
+    if (userIds.length === 0) {
+      await logPush(supabaseAdmin, { club_id: cus[0].club_id, call_up_id: null, kind: "bulk", targeted });
+      return { ...empty, targeted };
+    }
 
     const { data: subs, error: sErr } = await supabaseAdmin
       .from("push_subscriptions")
@@ -153,6 +166,11 @@ export const sendPushBulk = createServerFn({ method: "POST" })
     const reachable = new Set((subs ?? []).map((s: any) => s.user_id as string)).size;
     const res = await sendToSubscriptions((subs ?? []) as any, message, async (ids) => {
       await supabaseAdmin.from("push_subscriptions").delete().in("id", ids);
+    });
+    await logPush(supabaseAdmin, {
+      club_id: cus[0].club_id, call_up_id: null, kind: "bulk",
+      targeted, reachable, sent: res.sent, failed: res.failed,
+      detail: [`${cus.length} entrenos`, res.detail].filter(Boolean).join(" · "),
     });
     return { targeted, reachable, ...res };
   });
