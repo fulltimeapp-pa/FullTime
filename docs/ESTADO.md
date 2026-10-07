@@ -179,6 +179,10 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 
 ## Pendiente
 
+- **Probar la Tarea 7 (Bárbara, al empezar la próxima sesión):** (A) en el iPhone como jugadora,
+  "Voy" muestra "¡Listo!"; en modo avión "No puedo" muestra error con "Reintentar" y luego se
+  guarda; (B) tocar "Recordar…" y revisar la fila nueva en Supabase → Table Editor → `push_log`.
+
 - Avisos push: **funcionan en iPhone** (probado el 29-sep con la app instalada en la pantalla de
   inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
   se probará con la primera jugadora real que tenga Android (revisar en la base que tenga
