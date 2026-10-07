@@ -44,9 +44,12 @@ function AuthenticatedLayout() {
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth", search: { mode: "login" } });
-    return { user: data.user };
+    // Sesión guardada en el celular: funciona sin internet (en la cancha con mala señal no
+    // queremos sacar a nadie). Los datos igual los protege la base en cada consulta.
+    const { data } = await supabase.auth.getSession();
+    const user = data.session?.user;
+    if (!user) throw redirect({ to: "/auth", search: { mode: "login" } });
+    return { user };
   },
   component: AuthenticatedLayout,
 });
