@@ -9,8 +9,10 @@ import { addMinutesToTime } from "@/lib/call-ups";
 export type CallUpFieldsValue = {
   date: string;
   time: string;
-  /** Hora de fin "HH:MM" (opcional, vacío = sin hora de fin). */
+  /** Hora de fin "HH:MM" (entrenos; opcional). */
   endTime: string;
+  /** Hora de convocatoria "HH:MM" (partidos; opcional, antes del juego). */
+  meetTime: string;
   place: string;
   note: string;
   objetivo: string;
@@ -21,11 +23,14 @@ export function CallUpFields({
   onChange,
   showObjetivo = false,
   disabled = false,
+  kind = "entreno",
 }: {
   value: CallUpFieldsValue;
   onChange: (patch: Partial<CallUpFieldsValue>) => void;
   showObjetivo?: boolean;
   disabled?: boolean;
+  /** Partido: convocatoria + hora del juego. Entreno: empieza + termina. */
+  kind?: "partido" | "entreno";
 }) {
   return (
     <>
@@ -37,6 +42,34 @@ export function CallUpFields({
           className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
         />
       </div>
+      {kind === "partido" ? (
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Convocatoria</label>
+          <input
+            type="time" disabled={disabled}
+            value={value.meetTime} onChange={(e) => onChange({ meetTime: e.target.value })}
+            className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+          />
+          <p className="mt-1 text-xs text-ink/50">A qué hora llegar.</p>
+        </div>
+        <div>
+          <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Empieza el partido</label>
+          <input
+            type="time" required disabled={disabled}
+            value={value.time}
+            onChange={(e) => {
+              const time = e.target.value;
+              // La convocatoria se sugiere 1 hora antes y acompaña al partido si no la tocaron.
+              const sugerida = addMinutesToTime(value.time, -60);
+              const meetTime = !value.meetTime || value.meetTime === sugerida ? addMinutesToTime(time, -60) : value.meetTime;
+              onChange({ time, meetTime });
+            }}
+            className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+          />
+        </div>
+      </div>
+      ) : (
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Empieza</label>
@@ -62,6 +95,7 @@ export function CallUpFields({
           />
         </div>
       </div>
+      )}
 
       <div>
         <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Lugar</label>

@@ -103,6 +103,13 @@ Reemplaza la Tarea 1.
   "Empieza / Termina". Termina se sugiere 1 h 30 después y se puede cambiar.
 - Se muestra "6:30 – 8:00 p. m." en detalle, listas, calendario, panel, inicio de la jugadora y en
   el aviso al celular. Funciones en `src/lib/call-ups.ts`, probadas con 9 casos.
+- Ajuste (pedido de Bárbara, 7-oct): los **partidos no llevan hora de fin**, sino **hora de
+  convocatoria** (a qué hora llegar) y **hora del partido**. Migración
+  `20261007130000_hora_convocatoria.sql`: columna opcional `meet_at` (antes o igual al inicio).
+  La convocatoria se sugiere 1 h antes. Se muestra "Convocatoria 2:00 p. m. · Partido 3:00 p. m."
+  y cambiarla avisa a las jugadoras. Entrenos siguen con inicio y fin.
+- `src/routeTree.gen.ts` vuelve a estar al día en el repo (le faltaba `/privacidad`). Regla: si se
+  agrega una pantalla, se sube este archivo regenerado.
 
 ## Decisiones tomadas
 

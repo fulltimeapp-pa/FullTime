@@ -59,7 +59,7 @@ function PlayerHome() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("call_up_players")
-        .select("id, status, call_ups(id, kind, starts_at, ends_at, place)")
+        .select("id, status, call_ups(id, kind, starts_at, ends_at, meet_at, place)")
         .eq("player_id", meQ.data!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -204,7 +204,7 @@ function PlayerHome() {
                       <div>
                         <span className="chip">{kindLabel(c.kind)}</span>
                         <p className="mt-2 font-display text-lg font-bold">
-                          {formatShort(c.starts_at, c.ends_at)}
+                          {formatShort(c.starts_at, c.ends_at, c.meet_at)}
                         </p>
                         {c.place && (
                           <p className="mt-1 text-sm text-ink/60 inline-flex items-center gap-1">

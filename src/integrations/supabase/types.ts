@@ -105,6 +105,7 @@ export type Database = {
           created_at: string
           created_by: string
           ends_at: string | null
+          meet_at: string | null
           id: string
           kind: Database["public"]["Enums"]["call_up_kind"]
           note: string | null
@@ -121,6 +122,7 @@ export type Database = {
           created_at?: string
           created_by: string
           ends_at?: string | null
+          meet_at?: string | null
           id?: string
           kind: Database["public"]["Enums"]["call_up_kind"]
           note?: string | null
@@ -137,6 +139,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           ends_at?: string | null
+          meet_at?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["call_up_kind"]
           note?: string | null

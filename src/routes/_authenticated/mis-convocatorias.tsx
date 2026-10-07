@@ -44,7 +44,7 @@ function MyCallUps() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("call_up_players")
-        .select("id, status, read_at, responded_at, attended, call_ups(id, kind, starts_at, ends_at, place, categories(name))")
+        .select("id, status, read_at, responded_at, attended, call_ups(id, kind, starts_at, ends_at, meet_at, place, categories(name))")
         .eq("player_id", myPlayerId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -127,7 +127,7 @@ function Section({ title, items, loading, empty, past }: { title: string; items:
                     <span className="text-xs font-mono uppercase tracking-wider text-ink/50">{c.category_name}</span>
                   </div>
                   <h3 className="mt-2 font-display text-xl font-bold flex items-center gap-2">
-                    <Calendar size={18} className="text-ink/50" /> {formatShort(c.starts_at, c.ends_at)}
+                    <Calendar size={18} className="text-ink/50" /> {formatShort(c.starts_at, c.ends_at, c.meet_at)}
                   </h3>
                   {c.place && (
                     <p className="mt-1 text-sm text-ink/60 flex items-center gap-1.5">

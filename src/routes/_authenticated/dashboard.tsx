@@ -116,7 +116,7 @@ function Dashboard() {
     queryFn: async () => {
       let q = supabase
         .from("call_ups")
-        .select("id, kind, starts_at, ends_at, place, categories(name)")
+        .select("id, kind, starts_at, ends_at, meet_at, place, categories(name)")
         .eq("club_id", clubId!)
         .eq("kind", "partido")
         .gte("starts_at", new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString())
@@ -164,7 +164,7 @@ function Dashboard() {
     queryFn: async () => {
       let q = supabase
         .from("call_ups")
-        .select("id, kind, starts_at, ends_at, place, objetivo, categories(name)")
+        .select("id, kind, starts_at, ends_at, meet_at, place, objetivo, categories(name)")
         .eq("club_id", clubId!)
         .eq("kind", "entreno")
         .gte("starts_at", new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString())
@@ -508,7 +508,7 @@ function Dashboard() {
                       </span>
                     </div>
                     <h3 className="mt-2 font-display text-xl font-bold flex items-center gap-2">
-                      <Calendar size={18} className="text-ink/50" /> {formatShort(c.starts_at, c.ends_at)}
+                      <Calendar size={18} className="text-ink/50" /> {formatShort(c.starts_at, c.ends_at, c.meet_at)}
                     </h3>
                     <p className="mt-1 text-sm text-ink/60 flex items-center gap-1.5">
                       <MapPin size={14} /> {c.place}
@@ -562,7 +562,7 @@ function Dashboard() {
                       </span>
                     </div>
                     <h3 className="mt-2 font-display text-xl font-bold flex items-center gap-2">
-                      <Calendar size={18} className="text-ink/50" /> {formatShort(c.starts_at, c.ends_at)}
+                      <Calendar size={18} className="text-ink/50" /> {formatShort(c.starts_at, c.ends_at, c.meet_at)}
                     </h3>
                     <p className="mt-1 text-sm text-ink/60 flex items-center gap-1.5">
                       <MapPin size={14} /> {c.place}

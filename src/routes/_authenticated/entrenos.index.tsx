@@ -46,7 +46,7 @@ function EntrenosPage() {
     queryFn: async (): Promise<WithCounts[]> => {
       const { data: cus, error } = await supabase
         .from("call_ups")
-        .select("id, club_id, category_id, kind, starts_at, ends_at, place, note, objetivo, created_by, created_at, categories(name)")
+        .select("id, club_id, category_id, kind, starts_at, ends_at, meet_at, place, note, objetivo, created_by, created_at, categories(name)")
         .eq("club_id", clubId!)
         .eq("kind", "entreno")
         .order("starts_at", { ascending: false });
@@ -72,6 +72,7 @@ function EntrenosPage() {
           kind: c.kind,
           starts_at: c.starts_at,
           ends_at: c.ends_at ?? null,
+          meet_at: c.meet_at ?? null,
           place: c.place,
           note: c.note,
           objetivo: c.objetivo,
@@ -174,7 +175,7 @@ function Section({ title, items, loading, empty }: { title: string; items: WithC
                     <span className="text-xs font-mono uppercase tracking-wider text-ink/50">{c.category_name}</span>
                   </div>
                   <h3 className="mt-2 font-display text-xl font-bold flex items-center gap-2">
-                    <Calendar size={18} className="text-ink/50" /> {formatShort(c.starts_at, c.ends_at)}
+                    <Calendar size={18} className="text-ink/50" /> {formatShort(c.starts_at, c.ends_at, c.meet_at)}
                   </h3>
                   <p className="mt-1 text-sm text-ink/60 flex items-center gap-1.5">
                     <MapPin size={14} /> {c.place}

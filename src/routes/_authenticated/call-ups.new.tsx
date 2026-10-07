@@ -7,7 +7,7 @@ import { StaffShell } from "@/components/staff/StaffShell";
 import { getMyActiveClub } from "@/lib/active-club";
 import { sendPush } from "@/lib/push.functions";
 import { CallUpFields } from "@/components/call-ups/CallUpFields";
-import { toStartEnd } from "@/lib/call-ups";
+import { toMatchTimes } from "@/lib/call-ups";
 
 export const Route = createFileRoute("/_authenticated/call-ups/new")({
   head: () => ({
@@ -62,7 +62,7 @@ function NewCallUp() {
 
   const [date, setDate] = useState(todayLocalDate());
   const [time, setTime] = useState("18:00");
-  const [endTime, setEndTime] = useState("19:30");
+  const [meetTime, setMeetTime] = useState("17:00");
   const [place, setPlace] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
@@ -101,13 +101,13 @@ function NewCallUp() {
       if (!categoryId) throw new Error("Elige un equipo.");
       if (!place.trim()) throw new Error("Indica el lugar.");
       if (selected.size === 0) throw new Error("Selecciona al menos una jugadora.");
-      const { starts_at: startsAt, ends_at: endsAt } = toStartEnd(date, time, endTime);
+      const { starts_at: startsAt, meet_at: meetAt } = toMatchTimes(date, meetTime, time);
 
       const { data: cu, error: cErr } = await supabase
         .from("call_ups")
         .insert({
           club_id: clubId, category_id: categoryId,
-          kind: "partido", starts_at: startsAt, ends_at: endsAt, place: place.trim(),
+          kind: "partido", starts_at: startsAt, meet_at: meetAt, place: place.trim(),
           note: note.trim() || null, created_by: user.id,
         })
         .select("id").single();
@@ -162,11 +162,12 @@ function NewCallUp() {
 
 
           <CallUpFields
-            value={{ date, time, endTime, place, note, objetivo: "" }}
+            kind="partido"
+            value={{ date, time, endTime: "", meetTime, place, note, objetivo: "" }}
             onChange={(p) => {
               if (p.date !== undefined) setDate(p.date);
               if (p.time !== undefined) setTime(p.time);
-              if (p.endTime !== undefined) setEndTime(p.endTime);
+              if (p.meetTime !== undefined) setMeetTime(p.meetTime);
               if (p.place !== undefined) setPlace(p.place);
               if (p.note !== undefined) setNote(p.note);
             }}

@@ -9,36 +9,41 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as UnirseTokenRouteImport } from './routes/unirse.$token'
-import { Route as UnirseEquipoTokenRouteImport } from './routes/unirse-equipo.$token'
-import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
-import { Route as AuthenticatedRosterRouteImport } from './routes/_authenticated/roster'
-import { Route as AuthenticatedPerfilEntrenadorRouteImport } from './routes/_authenticated/perfil-entrenador'
-import { Route as AuthenticatedPanelFulltimeRouteImport } from './routes/_authenticated/panel-fulltime'
-import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
-import { Route as AuthenticatedMisConvocatoriasRouteImport } from './routes/_authenticated/mis-convocatorias'
-import { Route as AuthenticatedMiPerfilRouteImport } from './routes/_authenticated/mi-perfil'
-import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
-import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated/equipo'
-import { Route as AuthenticatedEntrenosRouteImport } from './routes/_authenticated/entrenos'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedCallUpsRouteImport } from './routes/_authenticated/call-ups'
-import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as PrivacidadRouteImport } from './routes/privacidad'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAsistenciaRouteImport } from './routes/_authenticated/asistencia'
-import { Route as AuthenticatedEntrenosIndexRouteImport } from './routes/_authenticated/entrenos.index'
+import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
+import { Route as AuthenticatedCallUpsRouteImport } from './routes/_authenticated/call-ups'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedEntrenosRouteImport } from './routes/_authenticated/entrenos'
+import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated/equipo'
+import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
+import { Route as AuthenticatedMiPerfilRouteImport } from './routes/_authenticated/mi-perfil'
+import { Route as AuthenticatedMisConvocatoriasRouteImport } from './routes/_authenticated/mis-convocatorias'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedPanelFulltimeRouteImport } from './routes/_authenticated/panel-fulltime'
+import { Route as AuthenticatedPerfilEntrenadorRouteImport } from './routes/_authenticated/perfil-entrenador'
+import { Route as AuthenticatedRosterRouteImport } from './routes/_authenticated/roster'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as UnirseEquipoTokenRouteImport } from './routes/unirse-equipo.$token'
+import { Route as UnirseTokenRouteImport } from './routes/unirse.$token'
 import { Route as AuthenticatedCallUpsIndexRouteImport } from './routes/_authenticated/call-ups.index'
-import { Route as AuthenticatedEntrenosNewRouteImport } from './routes/_authenticated/entrenos.new'
-import { Route as AuthenticatedCallUpsNewRouteImport } from './routes/_authenticated/call-ups.new'
 import { Route as AuthenticatedCallUpsIdRouteImport } from './routes/_authenticated/call-ups.$id'
+import { Route as AuthenticatedCallUpsNewRouteImport } from './routes/_authenticated/call-ups.new'
+import { Route as AuthenticatedEntrenosIndexRouteImport } from './routes/_authenticated/entrenos.index'
+import { Route as AuthenticatedEntrenosNewRouteImport } from './routes/_authenticated/entrenos.new'
 import { Route as ApiPublicCronRemindersRouteImport } from './routes/api/public/cron/reminders'
 
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -46,50 +51,54 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const PrivacidadRoute = PrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UnirseTokenRoute = UnirseTokenRouteImport.update({
-  id: '/unirse/$token',
-  path: '/unirse/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UnirseEquipoTokenRoute = UnirseEquipoTokenRouteImport.update({
-  id: '/unirse-equipo/$token',
-  path: '/unirse-equipo/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/callback',
-  path: '/callback',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthenticatedRosterRoute = AuthenticatedRosterRouteImport.update({
-  id: '/roster',
-  path: '/roster',
+const AuthenticatedAsistenciaRoute = AuthenticatedAsistenciaRouteImport.update({
+  id: '/asistencia',
+  path: '/asistencia',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedPerfilEntrenadorRoute =
-  AuthenticatedPerfilEntrenadorRouteImport.update({
-    id: '/perfil-entrenador',
-    path: '/perfil-entrenador',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPanelFulltimeRoute =
-  AuthenticatedPanelFulltimeRouteImport.update({
-    id: '/panel-fulltime',
-    path: '/panel-fulltime',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
+const AuthenticatedCalendarioRoute = AuthenticatedCalendarioRouteImport.update({
+  id: '/calendario',
+  path: '/calendario',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCallUpsRoute = AuthenticatedCallUpsRouteImport.update({
+  id: '/call-ups',
+  path: '/call-ups',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEntrenosRoute = AuthenticatedEntrenosRouteImport.update({
+  id: '/entrenos',
+  path: '/entrenos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEquipoRoute = AuthenticatedEquipoRouteImport.update({
+  id: '/equipo',
+  path: '/equipo',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMiPerfilRoute = AuthenticatedMiPerfilRouteImport.update({
+  id: '/mi-perfil',
+  path: '/mi-perfil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMisConvocatoriasRoute =
@@ -98,45 +107,58 @@ const AuthenticatedMisConvocatoriasRoute =
     path: '/mis-convocatorias',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedMiPerfilRoute = AuthenticatedMiPerfilRouteImport.update({
-  id: '/mi-perfil',
-  path: '/mi-perfil',
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
-  id: '/inicio',
-  path: '/inicio',
+const AuthenticatedPanelFulltimeRoute =
+  AuthenticatedPanelFulltimeRouteImport.update({
+    id: '/panel-fulltime',
+    path: '/panel-fulltime',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPerfilEntrenadorRoute =
+  AuthenticatedPerfilEntrenadorRouteImport.update({
+    id: '/perfil-entrenador',
+    path: '/perfil-entrenador',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedRosterRoute = AuthenticatedRosterRouteImport.update({
+  id: '/roster',
+  path: '/roster',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedEquipoRoute = AuthenticatedEquipoRouteImport.update({
-  id: '/equipo',
-  path: '/equipo',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
 } as any)
-const AuthenticatedEntrenosRoute = AuthenticatedEntrenosRouteImport.update({
-  id: '/entrenos',
-  path: '/entrenos',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const UnirseEquipoTokenRoute = UnirseEquipoTokenRouteImport.update({
+  id: '/unirse-equipo/$token',
+  path: '/unirse-equipo/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const UnirseTokenRoute = UnirseTokenRouteImport.update({
+  id: '/unirse/$token',
+  path: '/unirse/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedCallUpsRoute = AuthenticatedCallUpsRouteImport.update({
-  id: '/call-ups',
-  path: '/call-ups',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const AuthenticatedCallUpsIndexRoute =
+  AuthenticatedCallUpsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCallUpsRoute,
+  } as any)
+const AuthenticatedCallUpsIdRoute = AuthenticatedCallUpsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedCallUpsRoute,
 } as any)
-const AuthenticatedCalendarioRoute = AuthenticatedCalendarioRouteImport.update({
-  id: '/calendario',
-  path: '/calendario',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAsistenciaRoute = AuthenticatedAsistenciaRouteImport.update({
-  id: '/asistencia',
-  path: '/asistencia',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const AuthenticatedCallUpsNewRoute = AuthenticatedCallUpsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthenticatedCallUpsRoute,
 } as any)
 const AuthenticatedEntrenosIndexRoute =
   AuthenticatedEntrenosIndexRouteImport.update({
@@ -144,28 +166,12 @@ const AuthenticatedEntrenosIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedEntrenosRoute,
   } as any)
-const AuthenticatedCallUpsIndexRoute =
-  AuthenticatedCallUpsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedCallUpsRoute,
-  } as any)
 const AuthenticatedEntrenosNewRoute =
   AuthenticatedEntrenosNewRouteImport.update({
     id: '/new',
     path: '/new',
     getParentRoute: () => AuthenticatedEntrenosRoute,
   } as any)
-const AuthenticatedCallUpsNewRoute = AuthenticatedCallUpsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AuthenticatedCallUpsRoute,
-} as any)
-const AuthenticatedCallUpsIdRoute = AuthenticatedCallUpsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AuthenticatedCallUpsRoute,
-} as any)
 const ApiPublicCronRemindersRoute = ApiPublicCronRemindersRouteImport.update({
   id: '/api/public/cron/reminders',
   path: '/api/public/cron/reminders',
@@ -175,6 +181,7 @@ const ApiPublicCronRemindersRoute = ApiPublicCronRemindersRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/privacidad': typeof PrivacidadRoute
   '/reset-password': typeof ResetPasswordRoute
   '/asistencia': typeof AuthenticatedAsistenciaRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/privacidad': typeof PrivacidadRoute
   '/reset-password': typeof ResetPasswordRoute
   '/asistencia': typeof AuthenticatedAsistenciaRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/privacidad': typeof PrivacidadRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/asistencia': typeof AuthenticatedAsistenciaRoute
   '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/privacidad'
     | '/reset-password'
     | '/asistencia'
     | '/calendario'
@@ -285,6 +295,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/privacidad'
     | '/reset-password'
     | '/asistencia'
     | '/calendario'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/privacidad'
     | '/reset-password'
     | '/_authenticated/asistencia'
     | '/_authenticated/calendario'
@@ -340,6 +352,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  PrivacidadRoute: typeof PrivacidadRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   UnirseEquipoTokenRoute: typeof UnirseEquipoTokenRoute
   UnirseTokenRoute: typeof UnirseTokenRoute
@@ -348,18 +361,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -369,109 +375,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/unirse/$token': {
-      id: '/unirse/$token'
-      path: '/unirse/$token'
-      fullPath: '/unirse/$token'
-      preLoaderRoute: typeof UnirseTokenRouteImport
+    '/privacidad': {
+      id: '/privacidad'
+      path: '/privacidad'
+      fullPath: '/privacidad'
+      preLoaderRoute: typeof PrivacidadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/unirse-equipo/$token': {
-      id: '/unirse-equipo/$token'
-      path: '/unirse-equipo/$token'
-      fullPath: '/unirse-equipo/$token'
-      preLoaderRoute: typeof UnirseEquipoTokenRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_authenticated/roster': {
-      id: '/_authenticated/roster'
-      path: '/roster'
-      fullPath: '/roster'
-      preLoaderRoute: typeof AuthenticatedRosterRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/perfil-entrenador': {
-      id: '/_authenticated/perfil-entrenador'
-      path: '/perfil-entrenador'
-      fullPath: '/perfil-entrenador'
-      preLoaderRoute: typeof AuthenticatedPerfilEntrenadorRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/panel-fulltime': {
-      id: '/_authenticated/panel-fulltime'
-      path: '/panel-fulltime'
-      fullPath: '/panel-fulltime'
-      preLoaderRoute: typeof AuthenticatedPanelFulltimeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/onboarding': {
-      id: '/_authenticated/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/mis-convocatorias': {
-      id: '/_authenticated/mis-convocatorias'
-      path: '/mis-convocatorias'
-      fullPath: '/mis-convocatorias'
-      preLoaderRoute: typeof AuthenticatedMisConvocatoriasRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/mi-perfil': {
-      id: '/_authenticated/mi-perfil'
-      path: '/mi-perfil'
-      fullPath: '/mi-perfil'
-      preLoaderRoute: typeof AuthenticatedMiPerfilRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/inicio': {
-      id: '/_authenticated/inicio'
-      path: '/inicio'
-      fullPath: '/inicio'
-      preLoaderRoute: typeof AuthenticatedInicioRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/equipo': {
-      id: '/_authenticated/equipo'
-      path: '/equipo'
-      fullPath: '/equipo'
-      preLoaderRoute: typeof AuthenticatedEquipoRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/entrenos': {
-      id: '/_authenticated/entrenos'
-      path: '/entrenos'
-      fullPath: '/entrenos'
-      preLoaderRoute: typeof AuthenticatedEntrenosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/call-ups': {
-      id: '/_authenticated/call-ups'
-      path: '/call-ups'
-      fullPath: '/call-ups'
-      preLoaderRoute: typeof AuthenticatedCallUpsRouteImport
+    '/_authenticated/asistencia': {
+      id: '/_authenticated/asistencia'
+      path: '/asistencia'
+      fullPath: '/asistencia'
+      preLoaderRoute: typeof AuthenticatedAsistenciaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/calendario': {
@@ -481,19 +410,103 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCalendarioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/asistencia': {
-      id: '/_authenticated/asistencia'
-      path: '/asistencia'
-      fullPath: '/asistencia'
-      preLoaderRoute: typeof AuthenticatedAsistenciaRouteImport
+    '/_authenticated/call-ups': {
+      id: '/_authenticated/call-ups'
+      path: '/call-ups'
+      fullPath: '/call-ups'
+      preLoaderRoute: typeof AuthenticatedCallUpsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/entrenos/': {
-      id: '/_authenticated/entrenos/'
-      path: '/'
-      fullPath: '/entrenos/'
-      preLoaderRoute: typeof AuthenticatedEntrenosIndexRouteImport
-      parentRoute: typeof AuthenticatedEntrenosRoute
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/entrenos': {
+      id: '/_authenticated/entrenos'
+      path: '/entrenos'
+      fullPath: '/entrenos'
+      preLoaderRoute: typeof AuthenticatedEntrenosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/equipo': {
+      id: '/_authenticated/equipo'
+      path: '/equipo'
+      fullPath: '/equipo'
+      preLoaderRoute: typeof AuthenticatedEquipoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/inicio': {
+      id: '/_authenticated/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof AuthenticatedInicioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mi-perfil': {
+      id: '/_authenticated/mi-perfil'
+      path: '/mi-perfil'
+      fullPath: '/mi-perfil'
+      preLoaderRoute: typeof AuthenticatedMiPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mis-convocatorias': {
+      id: '/_authenticated/mis-convocatorias'
+      path: '/mis-convocatorias'
+      fullPath: '/mis-convocatorias'
+      preLoaderRoute: typeof AuthenticatedMisConvocatoriasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/panel-fulltime': {
+      id: '/_authenticated/panel-fulltime'
+      path: '/panel-fulltime'
+      fullPath: '/panel-fulltime'
+      preLoaderRoute: typeof AuthenticatedPanelFulltimeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/perfil-entrenador': {
+      id: '/_authenticated/perfil-entrenador'
+      path: '/perfil-entrenador'
+      fullPath: '/perfil-entrenador'
+      preLoaderRoute: typeof AuthenticatedPerfilEntrenadorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/roster': {
+      id: '/_authenticated/roster'
+      path: '/roster'
+      fullPath: '/roster'
+      preLoaderRoute: typeof AuthenticatedRosterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/unirse-equipo/$token': {
+      id: '/unirse-equipo/$token'
+      path: '/unirse-equipo/$token'
+      fullPath: '/unirse-equipo/$token'
+      preLoaderRoute: typeof UnirseEquipoTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unirse/$token': {
+      id: '/unirse/$token'
+      path: '/unirse/$token'
+      fullPath: '/unirse/$token'
+      preLoaderRoute: typeof UnirseTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/call-ups/': {
       id: '/_authenticated/call-ups/'
@@ -502,12 +515,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCallUpsIndexRouteImport
       parentRoute: typeof AuthenticatedCallUpsRoute
     }
-    '/_authenticated/entrenos/new': {
-      id: '/_authenticated/entrenos/new'
-      path: '/new'
-      fullPath: '/entrenos/new'
-      preLoaderRoute: typeof AuthenticatedEntrenosNewRouteImport
-      parentRoute: typeof AuthenticatedEntrenosRoute
+    '/_authenticated/call-ups/$id': {
+      id: '/_authenticated/call-ups/$id'
+      path: '/$id'
+      fullPath: '/call-ups/$id'
+      preLoaderRoute: typeof AuthenticatedCallUpsIdRouteImport
+      parentRoute: typeof AuthenticatedCallUpsRoute
     }
     '/_authenticated/call-ups/new': {
       id: '/_authenticated/call-ups/new'
@@ -516,12 +529,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCallUpsNewRouteImport
       parentRoute: typeof AuthenticatedCallUpsRoute
     }
-    '/_authenticated/call-ups/$id': {
-      id: '/_authenticated/call-ups/$id'
-      path: '/$id'
-      fullPath: '/call-ups/$id'
-      preLoaderRoute: typeof AuthenticatedCallUpsIdRouteImport
-      parentRoute: typeof AuthenticatedCallUpsRoute
+    '/_authenticated/entrenos/': {
+      id: '/_authenticated/entrenos/'
+      path: '/'
+      fullPath: '/entrenos/'
+      preLoaderRoute: typeof AuthenticatedEntrenosIndexRouteImport
+      parentRoute: typeof AuthenticatedEntrenosRoute
+    }
+    '/_authenticated/entrenos/new': {
+      id: '/_authenticated/entrenos/new'
+      path: '/new'
+      fullPath: '/entrenos/new'
+      preLoaderRoute: typeof AuthenticatedEntrenosNewRouteImport
+      parentRoute: typeof AuthenticatedEntrenosRoute
     }
     '/api/public/cron/reminders': {
       id: '/api/public/cron/reminders'
@@ -612,6 +632,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  PrivacidadRoute: PrivacidadRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   UnirseEquipoTokenRoute: UnirseEquipoTokenRoute,
   UnirseTokenRoute: UnirseTokenRoute,
