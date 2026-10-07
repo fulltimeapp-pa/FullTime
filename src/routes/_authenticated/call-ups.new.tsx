@@ -7,6 +7,7 @@ import { StaffShell } from "@/components/staff/StaffShell";
 import { getMyActiveClub } from "@/lib/active-club";
 import { sendPush } from "@/lib/push.functions";
 import { CallUpFields } from "@/components/call-ups/CallUpFields";
+import { toast } from "sonner";
 import { toMatchTimes } from "@/lib/call-ups";
 
 export const Route = createFileRoute("/_authenticated/call-ups/new")({
@@ -28,6 +29,15 @@ export const Route = createFileRoute("/_authenticated/call-ups/new")({
 });
 
 type Cat = { id: string; name: string };
+
+/** Mensaje tras convocar: a cuántas les llegó el aviso. */
+function avisoToast(r: { targeted: number; reachable: number }) {
+  if (r.targeted === 0) return;
+  const faltan = r.targeted - r.reachable;
+  if (faltan === 0) toast.success(`Avisamos a las ${r.targeted}.`);
+  else toast.warning(`Avisamos a ${r.reachable} de ${r.targeted}. A ${faltan} les faltan las notificaciones: mándales el mensaje desde la convocatoria.`, { duration: 8000 });
+}
+
 type PL = { id: string; full_name: string; jersey_number: number | null };
 
 function todayLocalDate() {
@@ -120,9 +130,12 @@ function NewCallUp() {
       if (pErr) throw pErr;
 
       // Aviso push: complementario, nunca bloquea la creación.
-      void sendPush({ data: { call_up_id: cu.id as string } }).catch((e) =>
-        console.warn("No se pudo enviar el push", e),
-      );
+      try {
+        avisoToast(await sendPush({ data: { call_up_id: cu.id as string } }));
+      } catch (e) {
+        console.warn("No se pudo enviar el push", e);
+        toast.error("Creamos la convocatoria, pero no pudimos avisar. Usa \"Copiar mensaje para WhatsApp\".");
+      }
       return cu.id as string;
     },
     onSuccess: (id) => navigate({ to: "/call-ups/$id", params: { id } }),
@@ -224,7 +237,7 @@ function NewCallUp() {
 
           <div className="flex items-center gap-3 pt-2">
             <button type="submit" disabled={createMut.isPending} className="btn-primary">
-              {createMut.isPending ? "Creando..." : "Crear convocatoria"}
+              {createMut.isPending ? "Convocando..." : "Convocar y avisar al equipo"}
             </button>
             <Link to="/call-ups" className="btn-ghost">Cancelar</Link>
           </div>

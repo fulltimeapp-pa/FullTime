@@ -2,8 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy, Pencil, Bell } from "lucide-react";
-import { sendPush } from "@/lib/push.functions";
+import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy, Pencil, Bell, BellOff, UserX } from "lucide-react";
+import { sendPush, getCallUpReach, type PlayerReach } from "@/lib/push.functions";
+import { siteUrl } from "@/lib/site";
 import { CallUpFields, type CallUpFieldsValue } from "@/components/call-ups/CallUpFields";
 import { supabase } from "@/integrations/supabase/client";
 import { formatWhen, kindLabel, toStartEnd, toMatchTimes, type CallUp, type CallUpPlayerRow, type ResponseStatus } from "@/lib/call-ups";
@@ -90,6 +91,17 @@ function CallUpDetail() {
 
     },
   });
+  // Quién recibe los avisos (solo cuerpo técnico).
+  const reachQ = useQuery({
+    queryKey: ["call-up-reach", id],
+    enabled: !!isStaffQ.data && !!cuQ.data,
+    queryFn: () => getCallUpReach({ data: { call_up_id: id } }),
+  });
+  const reach = useMemo(
+    () => new Map((reachQ.data ?? []).map((r: PlayerReach) => [r.player_id, r])),
+    [reachQ.data],
+  );
+
   const planQ = useQuery({
     queryKey: ["training-activities", id],
     enabled: !!cuQ.data && cuQ.data.kind === "entreno",
@@ -186,6 +198,20 @@ function CallUpDetail() {
       console.error(err);
     },
   });
+
+  function copyCallUpMessage() {
+    const c = cuQ.data;
+    if (!c) return;
+    const texto = [
+      `${kindLabel(c.kind)} · ${formatWhen(c.starts_at, c.ends_at, c.meet_at)}`,
+      c.place ? `📍 ${c.place}` : "",
+      `Confirma aquí si vas: ${siteUrl(`/call-ups/${id}`)}`,
+    ].filter(Boolean).join("\n");
+    navigator.clipboard.writeText(texto).then(
+      () => toast.success("Mensaje copiado. Pégalo en WhatsApp."),
+      () => toast.error("No pudimos copiar. Intenta de nuevo."),
+    );
+  }
 
   function copyAttendanceList() {
     const rows = rowsQ.data ?? [];
@@ -589,6 +615,8 @@ function CallUpDetail() {
             copying={attendanceMut.isPending}
             onRemind={() => remindMut.mutate()}
             reminding={remindMut.isPending}
+            reach={reachQ.data ? reach : null}
+            onCopyMessage={copyCallUpMessage}
             notCalled={(catPlayersQ.data ?? []).filter(
               (p) => !(rowsQ.data ?? []).some((r) => r.player_id === p.id),
             )}
@@ -680,7 +708,7 @@ function PlayerResponse({ row, started, onGoing, onDecline, pending }: {
   );
 }
 
-function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendance, copying, onRemind, reminding, notCalled }: {
+function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendance, copying, onRemind, reminding, notCalled, reach, onCopyMessage }: {
   rows: Row[];
   loading: boolean;
   started: boolean;
@@ -690,6 +718,8 @@ function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendanc
   onRemind: () => void;
   reminding: boolean;
   notCalled: { id: string; full_name: string; jersey_number: number | null }[];
+  reach: Map<string, PlayerReach> | null;
+  onCopyMessage: () => void;
 }) {
   const going = rows.filter((r) => r.status === "going");
   const declined = rows.filter((r) => r.status === "declined");
@@ -717,6 +747,10 @@ function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendanc
           </div>
         </div>
       </div>
+      {reach && rows.length > 0 && (
+        <AvisoResumen rows={rows} reach={reach} onCopyMessage={onCopyMessage} />
+      )}
+
       {!started && pending.length > 0 && (
         <button
           type="button"
@@ -739,9 +773,9 @@ function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendanc
 
       <div className="mt-6 space-y-6">
         <Group title="Confirmadas" count={going.length} color="lime" icon={<Check size={14}/>} rows={going} showAttendance started={started} onToggleAttendance={onToggleAttendance} />
-        <Group title="No puede" count={declined.length} color="red" icon={<X size={14}/>} rows={declined} showReason />
-        <Group title="Leída sin responder" count={read.length} color="blue" icon={<Eye size={14}/>} rows={read} />
-        <Group title="Sin responder" count={unread.length} color="gray" icon={<Clock size={14}/>} rows={unread} />
+        <Group title="No va" count={declined.length} color="red" icon={<X size={14}/>} rows={declined} showReason />
+        <Group title="La abrió, sin responder" count={read.length} color="blue" icon={<Eye size={14}/>} rows={read} reach={reach} />
+        <Group title="No la ha abierto" count={unread.length} color="gray" icon={<Clock size={14}/>} rows={unread} reach={reach} />
         {notCalled.length > 0 && (
           <div className="rounded-2xl border-2 border-dashed border-ink/30 bg-paper overflow-hidden">
             <div className="px-4 py-2.5 flex items-center gap-2 text-ink/60">
@@ -769,8 +803,9 @@ function CoachView({ rows, loading, started, onToggleAttendance, onCopyAttendanc
   );
 }
 
-function Group({ title, count, color, icon, rows, showReason, showAttendance, started, onToggleAttendance }: {
+function Group({ title, count, color, icon, rows, showReason, showAttendance, started, onToggleAttendance, reach }: {
   title: string; count: number;
+  reach?: Map<string, PlayerReach> | null;
   color: "lime" | "red" | "blue" | "gray";
   icon: React.ReactNode; rows: Row[]; showReason?: boolean;
   showAttendance?: boolean;
@@ -802,6 +837,16 @@ function Group({ title, count, color, icon, rows, showReason, showAttendance, st
               </span>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold truncate">{r.player.full_name}</p>
+                {reach?.get(r.player_id) && !reach.get(r.player_id)!.linked && (
+                  <p className="text-xs font-semibold text-pa-red inline-flex items-center gap-1">
+                    <UserX size={12} /> Todavía no entra a la app
+                  </p>
+                )}
+                {reach?.get(r.player_id)?.linked && !reach.get(r.player_id)!.has_push && (
+                  <p className="text-xs font-semibold text-ink/60 inline-flex items-center gap-1">
+                    <BellOff size={12} /> No recibe avisos
+                  </p>
+                )}
                 {showReason && r.reason && (
                   <p className="text-xs text-ink/60 truncate">{r.reason}</p>
                 )}
@@ -834,6 +879,47 @@ function Group({ title, count, color, icon, rows, showReason, showAttendance, st
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function AvisoResumen({ rows, reach, onCopyMessage }: {
+  rows: Row[];
+  reach: Map<string, PlayerReach>;
+  onCopyMessage: () => void;
+}) {
+  const total = rows.length;
+  const conAviso = rows.filter((r) => reach.get(r.player_id)?.has_push).length;
+  const sinCuenta = rows.filter((r) => reach.get(r.player_id) && !reach.get(r.player_id)!.linked).length;
+  const sinAvisos = total - conAviso - sinCuenta;
+  const todas = conAviso === total;
+
+  return (
+    <div className={`mt-4 rounded-2xl border-2 border-ink p-4 ${todas ? "bg-lime/30" : "bg-paper"}`}>
+      <p className="font-display text-lg font-bold">
+        {todas ? `Las ${total} reciben los avisos ✓` : `${conAviso} de ${total} reciben los avisos`}
+      </p>
+      {!todas && (
+        <ul className="mt-1 space-y-0.5 text-sm text-ink/70">
+          {sinAvisos > 0 && (
+            <li>
+              A {sinAvisos} {sinAvisos === 1 ? "le faltan" : "les faltan"} las notificaciones: mándales el mensaje por WhatsApp.
+            </li>
+          )}
+          {sinCuenta > 0 && (
+            <li>
+              {sinCuenta} todavía no {sinCuenta === 1 ? "entra" : "entran"} a la app: mándales su invitación desde Plantel.
+            </li>
+          )}
+        </ul>
+      )}
+      <button
+        type="button"
+        onClick={onCopyMessage}
+        className="mt-3 w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border-2 border-ink bg-paper px-4 py-2.5 text-sm font-semibold hover:bg-lime/30"
+      >
+        <Copy size={14} /> Copiar mensaje para WhatsApp
+      </button>
     </div>
   );
 }

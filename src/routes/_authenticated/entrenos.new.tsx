@@ -35,6 +35,15 @@ export const Route = createFileRoute("/_authenticated/entrenos/new")({
 });
 
 type Cat = { id: string; name: string };
+
+/** Mensaje tras convocar: a cuántas les llegó el aviso. */
+function avisoToast(r: { targeted: number; reachable: number }) {
+  if (r.targeted === 0) return;
+  const faltan = r.targeted - r.reachable;
+  if (faltan === 0) toast.success(`Avisamos a las ${r.targeted}.`);
+  else toast.warning(`Avisamos a ${r.reachable} de ${r.targeted}. A ${faltan} les faltan las notificaciones: mándales el mensaje desde la convocatoria.`, { duration: 8000 });
+}
+
 type PL = { id: string; full_name: string; jersey_number: number | null };
 type Template = { id: string; name: string };
 
@@ -281,7 +290,7 @@ function NewEntreno() {
 
         // Un solo aviso de resumen para todas las jugadoras.
         try {
-          await sendPushBulk({ data: { call_up_ids: ids } });
+          avisoToast(await sendPushBulk({ data: { call_up_ids: ids } }));
         } catch (e) {
           console.warn("No se pudo enviar el aviso de resumen", e);
           toast.error("Creamos los entrenos, pero no pudimos avisar a las jugadoras.");
@@ -326,9 +335,12 @@ function NewEntreno() {
       }
 
       // Aviso push: complementario, nunca bloquea la creación.
-      void sendPush({ data: { call_up_id: cu.id as string } }).catch((e) =>
-        console.warn("No se pudo enviar el push", e),
-      );
+      try {
+        avisoToast(await sendPush({ data: { call_up_id: cu.id as string } }));
+      } catch (e) {
+        console.warn("No se pudo enviar el push", e);
+        toast.error("Creamos el entreno, pero no pudimos avisar. Usa \"Copiar mensaje para WhatsApp\".");
+      }
       return { id: cu.id as string };
     },
     onSuccess: (r) => {
@@ -649,8 +661,8 @@ function NewEntreno() {
               {createMut.isPending
                 ? "Creando..."
                 : mode === "varios"
-                  ? `Crear ${repeatDates.length} entrenos`
-                  : "Crear entreno"}
+                  ? `Crear ${repeatDates.length} entrenos y avisar`
+                  : "Crear entreno y avisar"}
             </button>
             <Link to="/entrenos" className="btn-ghost">Cancelar</Link>
           </div>

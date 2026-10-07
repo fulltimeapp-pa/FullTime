@@ -156,3 +156,53 @@ export const sendPushBulk = createServerFn({ method: "POST" })
     });
     return { targeted, reachable, ...res };
   });
+
+// Para el cuerpo técnico: de cada jugadora convocada, si ya entró a la app y si
+// tiene los avisos activados. No devuelve nada de los celulares, solo sí/no.
+export type PlayerReach = { player_id: string; linked: boolean; has_push: boolean };
+
+export const getCallUpReach = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ call_up_id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }): Promise<PlayerReach[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: cu, error } = await context.supabase
+      .from("call_ups")
+      .select("id, club_id")
+      .eq("id", data.call_up_id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!cu) return [];
+
+    const { data: isStaff, error: staffErr } = await context.supabase.rpc("is_club_staff", {
+      _user_id: context.userId,
+      _club_id: cu.club_id,
+    });
+    if (staffErr) throw staffErr;
+    if (!isStaff) throw new Error("Solo el cuerpo técnico puede ver esto.");
+
+    const { data: rows, error: rErr } = await supabaseAdmin
+      .from("call_up_players")
+      .select("player_id, players(user_id)")
+      .eq("call_up_id", data.call_up_id);
+    if (rErr) throw rErr;
+
+    const userIds = (rows ?? [])
+      .map((r: any) => r.players?.user_id as string | null)
+      .filter((v: string | null): v is string => !!v);
+    let withPush = new Set<string>();
+    if (userIds.length > 0) {
+      const { data: subs, error: sErr } = await supabaseAdmin
+        .from("push_subscriptions")
+        .select("user_id")
+        .in("user_id", userIds);
+      if (sErr) throw sErr;
+      withPush = new Set((subs ?? []).map((s: any) => s.user_id as string));
+    }
+
+    return (rows ?? []).map((r: any) => {
+      const uid = r.players?.user_id as string | null;
+      return { player_id: r.player_id as string, linked: !!uid, has_push: !!uid && withPush.has(uid) };
+    });
+  });

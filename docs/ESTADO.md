@@ -111,6 +111,19 @@ Reemplaza la Tarea 1.
 - `src/routeTree.gen.ts` vuelve a estar al día en el repo (le faltaba `/privacidad`). Regla: si se
   agrega una pantalla, se sube este archivo regenerado.
 
+### Tarea 6 — ¿Le llegó el aviso? (7-oct)
+- Botones: "Convocar y avisar al equipo", "Crear entreno y avisar", "Crear N entrenos y avisar".
+- Al crear: mensaje "Avisamos a X de Y. A Z les faltan las notificaciones…".
+- Detalle (cuerpo técnico): recuadro "X de Y reciben los avisos", con cuántas no tienen
+  notificaciones y cuántas no han entrado a la app, y botón "Copiar mensaje para WhatsApp" (fecha,
+  horas, lugar y link de la convocatoria).
+- Cada jugadora sin responder muestra "No recibe avisos" o "Todavía no entra a la app".
+- Grupos renombrados: Confirmadas · No va · La abrió, sin responder · No la ha abierto. Se mide
+  que la abrió en la app, no que leyó el push.
+- Servidor: `getCallUpReach` (solo cuerpo técnico) dice por jugadora si tiene cuenta y avisos, sin
+  exponer datos del celular.
+- La guía para instalar en iPhone ya existía (`PushOptIn` en la pantalla de inicio de la jugadora).
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
@@ -158,8 +171,7 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
   se probará con la primera jugadora real que tenga Android (revisar en la base que tenga
   suscripción `fcm.googleapis.com` y que le lleguen).
-- Tareas 6 a 8 del plan ( "¿llegó el aviso?", errores visibles,
-  recordatorios).
+- Tareas 7 y 8 del plan (errores visibles, recordatorios).
 - Agregar Vitest para tener tests en el repo.
 - **Más adelante — límites por plan** (recordatorio de Bárbara, 6-oct): hay Plan Equipo (un solo
   equipo) y Plan Academia (varios equipos, precio por equipo). Hoy la app deja crear categorías sin
