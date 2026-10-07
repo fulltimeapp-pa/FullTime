@@ -134,7 +134,12 @@ Reemplaza la Tarea 1.
   mensaje claro si fallan.
 - Avisos: tabla nueva `push_log` (migración `20261007140000_push_log.sql`) con cada envío: tipo,
   a cuántas les tocaba, cuántas tienen avisos, enviados, fallidos y códigos de falla. Solo la
-  dueña la lee. **Cómo verla:** Supabase → Table Editor → `push_log`.
+  dueña la lee. **Cómo verla:** Supabase → Table Editor → `push_log`. Verificado (7-oct): el
+  recordatorio de prueba quedó registrado.
+- Arreglos tras la prueba de Bárbara (7-oct): sin internet la app ya no saca de la sesión (usa la
+  sesión guardada en el celular en vez de preguntarle a Supabase), y guardar una respuesta sin
+  conexión ya no se queda colgado: falla al instante si no hay red o a los 10 segundos, con
+  "Reintentar".
 
 ## Decisiones tomadas
 
@@ -179,9 +184,8 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 
 ## Pendiente
 
-- **Probar la Tarea 7 (Bárbara, al empezar la próxima sesión):** (A) en el iPhone como jugadora,
-  "Voy" muestra "¡Listo!"; en modo avión "No puedo" muestra error con "Reintentar" y luego se
-  guarda; (B) tocar "Recordar…" y revisar la fila nueva en Supabase → Table Editor → `push_log`.
+- **Repetir la prueba A de la Tarea 7** (iPhone en modo avión con Wi-Fi apagado: "No puedo" debe
+  mostrar error con "Reintentar", sin cerrar sesión). La B ya pasó.
 
 - Avisos push: **funcionan en iPhone** (probado el 29-sep con la app instalada en la pantalla de
   inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,

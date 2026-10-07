@@ -6,6 +6,8 @@
 export function translateDbError(raw: string): string {
   const m = (raw || "").toLowerCase();
   if (!raw) return "Algo salió mal. Vuelve a intentarlo.";
+  if (m.includes("abort") || m.includes("timeout") || m.includes("timed out"))
+    return "La conexión está muy lenta y no pudimos guardar. Vuelve a intentarlo.";
   if (m.includes("failed to fetch") || m.includes("network") || m.includes("load failed"))
     return "Sin conexión. Revisa tu internet y vuelve a intentarlo.";
   if (m.includes("row-level security") || m.includes("permission") || m.includes("403"))
@@ -30,6 +32,23 @@ export function friendlyError(e: unknown, fallback = "No pudimos completar la ac
   const msg = typeof e === "object" && e && "message" in e ? String((e as { message: unknown }).message ?? "") : String(e);
   const fromDb = typeof e === "object" && e !== null && ("code" in e || "details" in e || "hint" in e);
   if (fromDb) return translateDbError(msg);
+  if (/abort|timed? ?out|timeout/i.test(msg))
+    return "La conexión está muy lenta y no pudimos guardar. Vuelve a intentarlo.";
   if (/failed to fetch|network|load failed|jwt/i.test(msg)) return translateDbError(msg);
   return msg || fallback;
+}
+
+/** Si el celular sabe que no hay internet, falla al instante en vez de quedarse esperando. */
+export function assertOnline(): void {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    throw new Error("Sin conexión. Revisa tu internet y vuelve a intentarlo.");
+  }
+}
+
+/** Señal que corta la espera a los `ms` milisegundos (iPhone puede esperar para siempre sin red). */
+export function timeoutSignal(ms = 10_000): AbortSignal {
+  if (typeof AbortSignal !== "undefined" && "timeout" in AbortSignal) return AbortSignal.timeout(ms);
+  const c = new AbortController();
+  setTimeout(() => c.abort(), ms);
+  return c.signal;
 }

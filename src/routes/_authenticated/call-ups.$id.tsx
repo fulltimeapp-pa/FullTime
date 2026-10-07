@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy, Pencil, Bell, BellOff, UserX } from "lucide-react";
 import { sendPush, getCallUpReach, type PlayerReach } from "@/lib/push.functions";
 import { siteUrl } from "@/lib/site";
-import { friendlyError } from "@/lib/errors";
+import { friendlyError, assertOnline, timeoutSignal } from "@/lib/errors";
 import { CallUpFields, type CallUpFieldsValue } from "@/components/call-ups/CallUpFields";
 import { supabase } from "@/integrations/supabase/client";
 import { formatWhen, kindLabel, toStartEnd, toMatchTimes, type CallUp, type CallUpPlayerRow, type ResponseStatus } from "@/lib/call-ups";
@@ -154,9 +154,10 @@ function CallUpDetail() {
   const respondMut = useMutation({
     mutationFn: async ({ status, reason }: { status: ResponseStatus; reason?: string }) => {
       if (!myRow) throw new Error("No estás en esta convocatoria.");
+      assertOnline();
       const { data, error } = await supabase.from("call_up_players").update({
         status, reason: reason?.trim() || null, responded_at: new Date().toISOString(),
-      }).eq("id", myRow.id).select("id");
+      }).eq("id", myRow.id).select("id").abortSignal(timeoutSignal());
       if (error) throw error;
       // Si no se actualizó ninguna fila, no se guardó: mejor decirlo que fingir que sí.
       if (!data || data.length === 0) throw new Error("No pudimos guardar tu respuesta.");
@@ -177,9 +178,10 @@ function CallUpDetail() {
   const wellnessMut = useMutation({
     mutationFn: async (v: Record<WellnessKey, number>) => {
       if (!myRow) throw new Error("No estás en esta convocatoria.");
+      assertOnline();
       const { data, error } = await supabase.from("call_up_players").update({
         ...v, wellness_at: new Date().toISOString(),
-      }).eq("id", myRow.id).select("id");
+      }).eq("id", myRow.id).select("id").abortSignal(timeoutSignal());
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("No pudimos guardar cómo llegas.");
     },
@@ -194,9 +196,10 @@ function CallUpDetail() {
   const rpeMut = useMutation({
     mutationFn: async (rpe: number) => {
       if (!myRow) throw new Error("No estás en esta convocatoria.");
+      assertOnline();
       const { data, error } = await supabase.from("call_up_players").update({
         rpe, rpe_at: new Date().toISOString(),
-      }).eq("id", myRow.id).select("id");
+      }).eq("id", myRow.id).select("id").abortSignal(timeoutSignal());
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("No pudimos guardar el esfuerzo del entreno.");
     },
