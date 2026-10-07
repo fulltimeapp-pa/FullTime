@@ -140,6 +140,8 @@ Reemplaza la Tarea 1.
   sesión guardada en el celular en vez de preguntarle a Supabase), y guardar una respuesta sin
   conexión ya no se queda colgado: falla al instante si no hay red o a los 10 segundos, con
   "Reintentar".
+- Pantallas de error y de "página no encontrada" en español (`__root.tsx` y `error-page.ts`); si
+  el error es por falta de internet dice "Sin conexión". `<html lang="es">`.
 
 ## Decisiones tomadas
 

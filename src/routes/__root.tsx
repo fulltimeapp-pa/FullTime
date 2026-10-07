@@ -20,16 +20,13 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">No encontramos esta página</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          Puede que el enlace esté mal copiado o que la página ya no exista.
         </p>
         <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
+          <Link to="/" className="btn-primary">
+            Ir al inicio
           </Link>
         </div>
       </div>
@@ -44,14 +41,23 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
+  // Sin internet el celular no puede descargar la pantalla: lo decimos claro.
+  const sinRed =
+    (typeof navigator !== "undefined" && navigator.onLine === false) ||
+    /failed to fetch|load failed|dynamically imported module|importing a module script|network/i.test(
+      String((error as { message?: unknown })?.message ?? error),
+    );
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
+          {sinRed ? "Sin conexión" : "No pudimos cargar esta página"}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+        <p className="mt-2 text-base text-muted-foreground">
+          {sinRed
+            ? "Revisa tu internet y vuelve a intentarlo."
+            : "Algo salió mal de nuestro lado. Vuelve a intentarlo o ve al inicio."}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -59,15 +65,12 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="btn-primary"
           >
-            Try again
+            Volver a intentar
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
+          <a href="/" className="btn-ghost">
+            Ir al inicio
           </a>
         </div>
       </div>
@@ -121,7 +124,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <HeadContent />
       </head>
