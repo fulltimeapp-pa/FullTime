@@ -186,8 +186,10 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 
 ## Pendiente
 
-- **Repetir la prueba A de la Tarea 7** (iPhone en modo avión con Wi-Fi apagado: "No puedo" debe
-  mostrar error con "Reintentar", sin cerrar sesión). La B ya pasó.
+- **Prueba A de la Tarea 7 (baja prioridad, cuando Bárbara quiera):** en el iPhone abrir la
+  convocatoria con internet, apagar la red y tocar "No puedo": a los 10 s máximo debe salir error con
+  "Reintentar". El 7-oct seguía congelándose; se agregó un límite de 10 s a todo el guardado
+  (incluida la renovación de sesión, commit 758ec8e). Falta confirmar en el celular.
 
 - Avisos push: **funcionan en iPhone** (probado el 29-sep con la app instalada en la pantalla de
   inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
