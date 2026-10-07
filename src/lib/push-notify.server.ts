@@ -33,11 +33,15 @@ export function buildCallUpMessage(cu: {
   id: string;
   kind: string;
   starts_at: string;
+  ends_at?: string | null;
   place: string | null;
   objetivo: string | null;
 }, kind: CallUpMessageKind = "new"): PushBody {
   const title = TITLES[kind][cu.kind === "entreno" ? "entreno" : "partido"];
-  const parts = [formatWhenShort(cu.starts_at)];
+  const fin = cu.ends_at
+    ? new Date(cu.ends_at).toLocaleTimeString("es-PA", { hour: "numeric", minute: "2-digit", timeZone: "America/Panama" })
+    : "";
+  const parts = [fin ? `${formatWhenShort(cu.starts_at)} – ${fin}` : formatWhenShort(cu.starts_at)];
   if (cu.place?.trim()) parts.push(cu.place.trim());
   if (cu.kind === "entreno" && cu.objetivo?.trim()) parts.push(cu.objetivo.trim().slice(0, 60));
   return { title, body: parts.join(" · "), url: `/call-ups/${cu.id}` };

@@ -9,6 +9,7 @@ import { getMyActiveClub } from "@/lib/active-club";
 import { PlanEditor } from "@/components/training/PlanEditor";
 import { newLocalId, type PlanActivity, type PlanPart, type Intensity } from "@/lib/training-plan";
 import { sendPush, sendPushBulk } from "@/lib/push.functions";
+import { addMinutesToTime, toStartEnd } from "@/lib/call-ups";
 import { WEEKDAYS, buildRepeatDates, endOfMonth, shortDayLabel, MAX_REPEAT, type Weekday } from "@/lib/repetir";
 
 export const Route = createFileRoute("/_authenticated/entrenos/new")({
@@ -94,9 +95,10 @@ function NewEntreno() {
   const { repetir } = Route.useSearch();
   const [date, setDate] = useState(todayLocalDate());
   const [time, setTime] = useState("18:00");
+  const [endTime, setEndTime] = useState("19:30");
   // Varios días: cada día de la semana elegido con su hora.
   const [mode, setMode] = useState<"uno" | "varios">(repetir ? "varios" : "uno");
-  const [repeatDays, setRepeatDays] = useState<Map<Weekday, string>>(new Map());
+  const [repeatDays, setRepeatDays] = useState<Map<Weekday, { start: string; end: string }>>(new Map());
   const [until, setUntil] = useState(endOfMonth(todayLocalDate()));
   const [skipped, setSkipped] = useState<Set<string>>(new Set());
 
@@ -105,7 +107,7 @@ function NewEntreno() {
       buildRepeatDates(
         date,
         until,
-        Array.from(repeatDays, ([weekday, t]) => ({ weekday, time: t })),
+        Array.from(repeatDays, ([weekday, t]) => ({ weekday, time: t.start })),
       ),
     [date, until, repeatDays],
   );
@@ -114,7 +116,7 @@ function NewEntreno() {
   function toggleWeekday(wd: Weekday) {
     setRepeatDays((prev) => {
       const n = new Map(prev);
-      if (n.has(wd)) n.delete(wd); else n.set(wd, time);
+      if (n.has(wd)) n.delete(wd); else n.set(wd, { start: time, end: endTime });
       return n;
     });
   }
@@ -252,7 +254,10 @@ function NewEntreno() {
         };
         const { data: cus, error: mErr } = await supabase
           .from("call_ups")
-          .insert(repeatDates.map((d) => ({ ...base, starts_at: new Date(`${d.date}T${d.time}:00`).toISOString() })))
+          .insert(repeatDates.map((d) => ({
+            ...base,
+            ...toStartEnd(d.date, d.time, repeatDays.get(d.weekday)?.end ?? ""),
+          })))
           .select("id");
         if (mErr) throw mErr;
         const ids = (cus ?? []).map((c) => c.id as string);
@@ -284,13 +289,13 @@ function NewEntreno() {
         return { many: ids.length };
       }
 
-      const startsAt = new Date(`${date}T${time}:00`).toISOString();
+      const { starts_at: startsAt, ends_at: endsAt } = toStartEnd(date, time, endTime);
 
       const { data: cu, error: cErr } = await supabase
         .from("call_ups")
         .insert({
           club_id: clubId, category_id: categoryId,
-          kind: "entreno", starts_at: startsAt, place: place.trim(),
+          kind: "entreno", starts_at: startsAt, ends_at: endsAt, place: place.trim(),
           objetivo: objetivo.trim() || null,
           wellness_enabled: wellnessEnabled,
           rpe_enabled: rpeEnabled,
@@ -385,7 +390,7 @@ function NewEntreno() {
           </div>
 
           {mode === "uno" ? (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
                 <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Fecha</label>
                 <input
@@ -393,12 +398,26 @@ function NewEntreno() {
                   className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
                 />
               </div>
-              <div>
-                <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Hora</label>
-                <input
-                  type="time" required value={time} onChange={(e) => setTime(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Empieza</label>
+                  <input
+                    type="time" required value={time}
+                    onChange={(e) => {
+                      const t = e.target.value;
+                      if (!endTime || endTime === addMinutesToTime(time, 90)) setEndTime(addMinutesToTime(t, 90));
+                      setTime(t);
+                    }}
+                    className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Termina</label>
+                  <input
+                    type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)}
+                    className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+                  />
+                </div>
               </div>
             </div>
           ) : (
@@ -424,16 +443,36 @@ function NewEntreno() {
               {repeatDays.size > 0 && (
                 <div className="space-y-2">
                   {WEEKDAYS.filter((w) => repeatDays.has(w.value)).map((w) => (
-                    <div key={w.value} className="flex items-center justify-between gap-3">
-                      <span className="font-semibold">{w.long}</span>
-                      <input
-                        type="time" required value={repeatDays.get(w.value) ?? ""}
-                        aria-label={`Hora del ${w.long}`}
-                        onChange={(e) =>
-                          setRepeatDays((prev) => new Map(prev).set(w.value, e.target.value))
-                        }
-                        className="w-36 rounded-xl border-2 border-ink bg-paper px-3 py-2.5 font-semibold"
-                      />
+                    <div key={w.value} className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-semibold w-24">{w.long}</span>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="time" required value={repeatDays.get(w.value)?.start ?? ""}
+                          aria-label={`Empieza el ${w.long}`}
+                          onChange={(e) => {
+                            const start = e.target.value;
+                            setRepeatDays((prev) => {
+                              const cur = prev.get(w.value) ?? { start: "", end: "" };
+                              const end = !cur.end || cur.end === addMinutesToTime(cur.start, 90)
+                                ? addMinutesToTime(start, 90) : cur.end;
+                              return new Map(prev).set(w.value, { start, end });
+                            });
+                          }}
+                          className="w-32 rounded-xl border-2 border-ink bg-paper px-3 py-2.5 font-semibold"
+                        />
+                        <span className="text-ink/50">a</span>
+                        <input
+                          type="time" value={repeatDays.get(w.value)?.end ?? ""}
+                          aria-label={`Termina el ${w.long}`}
+                          onChange={(e) =>
+                            setRepeatDays((prev) => {
+                              const cur = prev.get(w.value) ?? { start: time, end: "" };
+                              return new Map(prev).set(w.value, { ...cur, end: e.target.value });
+                            })
+                          }
+                          className="w-32 rounded-xl border-2 border-ink bg-paper px-3 py-2.5 font-semibold"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -472,7 +511,7 @@ function NewEntreno() {
                           aria-pressed={!off}
                           className={`rounded-full border-2 px-3 py-1.5 text-xs font-semibold ${off ? "border-ink/20 text-ink/40 line-through bg-paper" : "border-ink bg-lime/30"}`}
                         >
-                          {shortDayLabel(d.date)} · {d.time}
+                          {shortDayLabel(d.date)} · {d.time}{repeatDays.get(d.weekday)?.end ? `–${repeatDays.get(d.weekday)!.end}` : ""}
                         </button>
                       );
                     })}

@@ -94,7 +94,15 @@ Reemplaza la Tarea 1.
   vie 30 oct". Solo cuerpo técnico.
 - Panel: recuadro "Todavía no cargas los entrenos de {mes}" si no hay entrenos en el mes (desde el
   día 25 mira el mes siguiente), con botón que abre "Varios días".
-- La app guarda solo la hora de inicio, no la de fin (pregunta abierta para Bárbara).
+- Probado en la web real (7-oct): "Varios días" creó los entrenos y llegó un solo aviso al iPhone.
+
+### Hora de fin (7-oct)
+- Migración `20261007120000_hora_fin.sql`: columna opcional `call_ups.ends_at` (debe ser después
+  del inicio). Lo creado antes sigue sin hora de fin.
+- Crear partido, crear entreno (un día y varios días, cada día con inicio y fin) y editar tienen
+  "Empieza / Termina". Termina se sugiere 1 h 30 después y se puede cambiar.
+- Se muestra "6:30 – 8:00 p. m." en detalle, listas, calendario, panel, inicio de la jugadora y en
+  el aviso al celular. Funciones en `src/lib/call-ups.ts`, probadas con 9 casos.
 
 ## Decisiones tomadas
 

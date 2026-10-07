@@ -6,7 +6,7 @@ import { ArrowLeft, Calendar, MapPin, Trash2, Check, X, Eye, Clock, Copy, Pencil
 import { sendPush } from "@/lib/push.functions";
 import { CallUpFields, type CallUpFieldsValue } from "@/components/call-ups/CallUpFields";
 import { supabase } from "@/integrations/supabase/client";
-import { formatWhen, kindLabel, type CallUp, type CallUpPlayerRow, type ResponseStatus } from "@/lib/call-ups";
+import { formatWhen, kindLabel, toStartEnd, type CallUp, type CallUpPlayerRow, type ResponseStatus } from "@/lib/call-ups";
 import { PlanView } from "@/components/training/PlanView";
 import { StaffShell } from "@/components/staff/StaffShell";
 
@@ -50,7 +50,7 @@ function CallUpDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("call_ups")
-        .select("id, club_id, category_id, kind, starts_at, place, note, objetivo, wellness_enabled, rpe_enabled, created_by, created_at, categories(name)")
+        .select("id, club_id, category_id, kind, starts_at, ends_at, place, note, objetivo, wellness_enabled, rpe_enabled, created_by, created_at, categories(name)")
         .eq("id", id).maybeSingle();
       if (error) throw error;
       if (!data) throw new Error("No encontramos la convocatoria.");
@@ -192,7 +192,7 @@ function CallUpDetail() {
     const going = rows.filter((r) => r.status === "going");
     const attended = going.filter((r) => r.attended);
     const lines = [
-      `${kindLabel(cuQ.data!.kind)} · ${formatWhen(cuQ.data!.starts_at)}`,
+      `${kindLabel(cuQ.data!.kind)} · ${formatWhen(cuQ.data!.starts_at, cuQ.data!.ends_at)}`,
       `Confirmaron: ${going.length} · Asistieron: ${attended.length}`,
       "",
       "ASISTIERON:",
@@ -211,7 +211,7 @@ function CallUpDetail() {
   const [editing, setEditing] = useState(false);
   const [editError, setEditError] = useState("");
   const [form, setForm] = useState<CallUpFieldsValue>({
-    date: "", time: "", place: "", note: "", objetivo: "",
+    date: "", time: "", endTime: "", place: "", note: "", objetivo: "",
   });
   // Jugadoras convocadas mientras se edita (ids de players).
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -257,6 +257,9 @@ function CallUpDetail() {
     setForm({
       date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
       time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      endTime: c.ends_at
+        ? `${pad(new Date(c.ends_at).getHours())}:${pad(new Date(c.ends_at).getMinutes())}`
+        : "",
       place: c.place ?? "",
       note: c.note ?? "",
       objetivo: c.objetivo ?? "",
@@ -284,9 +287,7 @@ function CallUpDetail() {
     mutationFn: async () => {
       const c = cuQ.data!;
       if (!form.place.trim()) throw new Error("Indica el lugar.");
-      const dt = new Date(`${form.date}T${form.time}:00`);
-      if (Number.isNaN(dt.getTime())) throw new Error("Revisa la fecha y la hora.");
-      const startsAt = dt.toISOString();
+      const { starts_at: startsAt, ends_at: endsAt } = toStartEnd(form.date, form.time, form.endTime);
       const horaCambio = startsAt !== new Date(c.starts_at).toISOString();
       const lugarCambio = form.place.trim() !== (c.place ?? "");
       if (selectedIds.size === 0) throw new Error("Deja al menos una jugadora convocada.");
@@ -300,6 +301,7 @@ function CallUpDetail() {
         .from("call_ups")
         .update({
           starts_at: startsAt,
+          ends_at: endsAt,
           place: form.place.trim(),
           note: form.note.trim() || null,
           ...(c.kind === "entreno" ? { objetivo: form.objetivo.trim() || null } : {}),
@@ -449,7 +451,7 @@ function CallUpDetail() {
           <span className="text-xs font-mono uppercase tracking-wider text-ink/50">{cu.categories?.name}</span>
         </div>
         <h1 className="mt-3 text-display text-3xl md:text-4xl font-bold leading-tight">
-          {formatWhen(cu.starts_at)}
+          {formatWhen(cu.starts_at, cu.ends_at)}
         </h1>
 
         {isStaff && editing ? (

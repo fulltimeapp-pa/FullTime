@@ -45,7 +45,7 @@ export const sendPush = createServerFn({ method: "POST" })
     // RLS del usuario: sólo puede disparar avisos de convocatorias que puede ver.
     const { data: cu, error } = await context.supabase
       .from("call_ups")
-      .select("id, club_id, kind, starts_at, place, objetivo")
+      .select("id, club_id, kind, starts_at, ends_at, place, objetivo")
       .eq("id", data.call_up_id)
       .maybeSingle();
     if (error) throw error;

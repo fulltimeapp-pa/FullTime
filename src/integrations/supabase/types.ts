@@ -104,6 +104,7 @@ export type Database = {
           club_id: string
           created_at: string
           created_by: string
+          ends_at: string | null
           id: string
           kind: Database["public"]["Enums"]["call_up_kind"]
           note: string | null
@@ -119,6 +120,7 @@ export type Database = {
           club_id: string
           created_at?: string
           created_by: string
+          ends_at?: string | null
           id?: string
           kind: Database["public"]["Enums"]["call_up_kind"]
           note?: string | null
@@ -134,6 +136,7 @@ export type Database = {
           club_id?: string
           created_at?: string
           created_by?: string
+          ends_at?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["call_up_kind"]
           note?: string | null

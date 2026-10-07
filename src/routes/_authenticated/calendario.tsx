@@ -39,6 +39,7 @@ type EventRow = {
   id: string;
   kind: CallUpKind;
   starts_at: string;
+  ends_at: string | null;
   place: string;
   objetivo: string | null;
   categories: { name: string } | null;
@@ -72,7 +73,7 @@ function Calendario() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("call_ups")
-        .select("id, kind, starts_at, place, objetivo, categories(name)")
+        .select("id, kind, starts_at, ends_at, place, objetivo, categories(name)")
         .eq("club_id", clubId!)
         .gte("starts_at", gridStart.toISOString())
         .lte("starts_at", gridEnd.toISOString())
@@ -259,7 +260,7 @@ function Calendario() {
                       {e.categories?.name}
                     </span>
                   </div>
-                  <h3 className="mt-1.5 font-display text-lg font-bold">{formatShort(e.starts_at)}</h3>
+                  <h3 className="mt-1.5 font-display text-lg font-bold">{formatShort(e.starts_at, e.ends_at)}</h3>
                   <p className="mt-0.5 text-sm text-ink/60 flex items-center gap-1.5">
                     <MapPin size={14} /> {e.place}
                   </p>
