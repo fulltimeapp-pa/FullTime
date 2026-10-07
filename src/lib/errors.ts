@@ -52,3 +52,20 @@ export function timeoutSignal(ms = 10_000): AbortSignal {
   setTimeout(() => c.abort(), ms);
   return c.signal;
 }
+
+/**
+ * Corta cualquier operación a los `ms` milisegundos. Sin red, el iPhone puede quedarse
+ * esperando para siempre (incluida la renovación de la sesión antes de guardar).
+ */
+export function withTimeout<T>(p: Promise<T>, ms = 10_000): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(
+      () => reject(new Error("La conexión está muy lenta y no pudimos guardar. Vuelve a intentarlo.")),
+      ms,
+    );
+    p.then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (e) => { clearTimeout(t); reject(e); },
+    );
+  });
+}
