@@ -254,6 +254,8 @@ fulltimeapp.pa@gmail.com): `docs/guias/`. Se editan en el HTML y se regeneran co
 
 **Idea para después — Ayuda dentro de la app (Bárbara, 8-oct):** una sección de "Ayuda" con
 tutoriales paso a paso (crear partido, cargar entrenos del mes, invitar jugadoras, activar avisos).
+Bárbara quiere convertir las guías de `docs/guias/` en **videos tutoriales** grabando su
+pantalla, paso a paso (8-oct). Los videos podrían vivir luego en esa sección de Ayuda.
 
 **Idea para después — "FullTime HQ" (Bárbara, 8-oct):** un centro de control del negocio que crece
 desde `/panel-fulltime` (ya tiene clubes, CRM básico, pagos y métricas). Secciones: Inicio (el día
