@@ -188,8 +188,8 @@ export function Pricing() {
 
         <p className="mt-10 text-center text-sm text-muted-foreground reveal">
           ¿Eres un club grande o una liga? Escríbeme a{" "}
-          <a href="mailto:barbarchan2415@gmail.com" className="font-semibold text-ink underline underline-offset-4 decoration-lime decoration-2 hover:decoration-ink">
-            barbarchan2415@gmail.com
+          <a href="mailto:fulltimeapp.pa@gmail.com" className="font-semibold text-ink underline underline-offset-4 decoration-lime decoration-2 hover:decoration-ink">
+            fulltimeapp.pa@gmail.com
           </a>{" "}
           o al WhatsApp{" "}
           <a href="https://wa.me/50769911552" target="_blank" rel="noopener noreferrer" className="font-semibold text-ink underline underline-offset-4 decoration-lime decoration-2 hover:decoration-ink">

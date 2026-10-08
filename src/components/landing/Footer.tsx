@@ -30,7 +30,7 @@ export function Footer() {
           <div className="md:col-span-3">
             <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-3">Contacto</div>
             <ul className="space-y-2 text-sm">
-              <li><a href="mailto:barbarchan2415@gmail.com" className="hover:underline underline-offset-4">barbarchan2415@gmail.com</a></li>
+              <li><a href="mailto:fulltimeapp.pa@gmail.com" className="hover:underline underline-offset-4">fulltimeapp.pa@gmail.com</a></li>
               <li><a href="https://wa.me/50769911552" target="_blank" rel="noopener noreferrer" className="hover:underline underline-offset-4">WhatsApp +507 6991-1552</a></li>
               <li><a href="https://instagram.com/fulltime.pa" target="_blank" rel="noopener noreferrer" className="hover:underline underline-offset-4">@fulltime.pa</a></li>
             </ul>

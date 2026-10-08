@@ -175,6 +175,11 @@ Reemplaza la Tarea 1.
 - `fulltimeapp.pa@gmail.com` agregada a `platform_admins` desde el SQL Editor. Bárbara ya entra a
   `/panel-fulltime` (botón "🛠 Panel de dueña" en su panel).
 
+### Contacto en la portada (8-oct)
+- Pie de página y sección de precios: el correo pasa de `barbarchan2415@gmail.com` (tenía un
+  error de escritura) a `fulltimeapp.pa@gmail.com`, igual que las guías y la política de
+  privacidad. El enlace de Calendly no se tocó.
+
 ### Historial ordenado (8-oct)
 - Partidos y Entrenos: "Próximos" arriba; "Historial (N)" cerrado por defecto, con lo más reciente
   primero y agrupado por mes ("Octubre de 2026"). No se borra nada (de ahí sale la asistencia).
