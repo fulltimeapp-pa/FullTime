@@ -153,6 +153,13 @@ Reemplaza la Tarea 1.
 - Mensajes con "Convocatoria 2:00 p. m. · Partido 3:00 p. m.". Se salta a las que dijeron que no
   van. Cada envío queda en `push_log` (`auto_soon` / `auto_night`).
 - Probado con 9 casos (ventana, Hoy/Mañana, convocatoria, zona horaria).
+- Activado el 8-oct desde el SQL Editor de Supabase (la herramienta de línea de comandos no
+  conectaba): clave en Vault y tarea `fulltime-recordatorios` (*/15). Verificado: corrió a las
+  8:45 y la app respondió 200. Ojo: esa migración no quedó marcada como aplicada en la
+  herramienta; el próximo `db push` la volverá a ofrecer y es seguro aceptarla (reemplaza la
+  tarea por la misma).
+- Para revisar: `select status_code, content, created from net._http_response order by created
+  desc limit 5;` en el SQL Editor.
 
 ## Decisiones tomadas
 
