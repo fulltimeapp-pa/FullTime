@@ -231,3 +231,12 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 - Agregar Vitest para guardar en el repo las pruebas que hoy corren aparte (necesita OK de
   Bárbara: es una librería nueva).
 - Revisión legal de `/privacidad` antes de tener muchos equipos.
+
+**Idea para después — "FullTime HQ" (Bárbara, 8-oct):** un centro de control del negocio que crece
+desde `/panel-fulltime` (ya tiene clubes, CRM básico, pagos y métricas). Secciones: Inicio (el día
+de un vistazo), Notificaciones (club dormido, prueba por vencer, avisos fallidos), Clientes/CRM por
+etapas (Contacto → Demo → Prueba → Pagando → Perdido), Ventas/Cotizaciones (con la calculadora de
+planes), Proyectos y tareas, Calendario y reuniones, Métricas (embudo + ingresos), Contenido
+(posible conexión con Metricool), Inbox (formulario web / WhatsApp / Instagram) y
+Automatizaciones. Fases sugeridas: 1) lo que vende (CRM, cotizaciones, métricas, alertas);
+2) lo que organiza (tareas, calendario); 3) inbox y contenido conectando herramientas existentes.
