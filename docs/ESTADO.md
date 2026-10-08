@@ -188,6 +188,8 @@ Reemplaza la Tarea 1.
   la ve (probado en PGlite).
 - **Clientes y Métricas** siguen en `/panel-fulltime` (enlazado desde HQ y con "Volver a FullTime
   HQ"). El botón del panel del club ahora dice "🛠 FullTime HQ".
+- Probado en la web real (8-oct): Bárbara agregó su primer prospecto (Carlos Rivera, Inter CF,
+  demo agendada) y aparece en "Para hoy" como "Mañana".
 - Siguientes fases: Tareas, Calendario y Reuniones → Cotizaciones → Contenido, Inbox, Jarvis.
 
 ### Detalles menores del prompt original (8-oct)
