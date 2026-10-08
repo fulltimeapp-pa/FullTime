@@ -1,10 +1,17 @@
 /**
  * Recordatorios automáticos por push (server-only).
  * Zona de referencia: America/Panama (UTC-5 fijo, sin horario de verano).
+ *
+ * - "Unas horas antes": cuando faltan 3 horas o menos para la hora de referencia, que es la
+ *   hora de convocatoria si el profe la puso (a qué hora llegar) o, si no, la de inicio.
+ * - "Noche anterior": entre 6 y 9 p. m. de Panamá, para lo de mañana.
+ * Cada jugadora recibe cada recordatorio una sola vez (columnas remind_*_at), y se salta a
+ * las que ya dijeron que no van.
  */
-import { sendToSubscriptions, type PushBody } from "./push-notify.server";
+import { logPush, sendToSubscriptions, type PushBody } from "./push-notify.server";
 
 const PA_OFFSET_MS = 5 * 60 * 60 * 1000;
+const SOON_WINDOW_MS = 3 * 60 * 60 * 1000;
 
 /** Hora en formato es-PA, ej "6:00 p. m." */
 export function horaPA(iso: string): string {
@@ -25,50 +32,60 @@ export function horaDelDiaPA(d: Date): number {
   return new Date(d.getTime() - PA_OFFSET_MS).getUTCHours();
 }
 
-type CallUp = {
+export type ReminderCallUp = {
   id: string;
+  club_id?: string;
   kind: string;
   starts_at: string;
+  meet_at?: string | null;
   place: string | null;
 };
 
-export function buildSoonMessage(cu: CallUp): PushBody {
-  const title = cu.kind === "entreno" ? "Hoy hay entreno" : "Hoy hay partido";
-  const parts = [horaPA(cu.starts_at)];
+/** Hora que importa para llegar: convocatoria si existe, si no el inicio. */
+export function horaReferencia(cu: ReminderCallUp): string {
+  return cu.meet_at ?? cu.starts_at;
+}
+
+/** "Convocatoria 2:00 p. m. · Partido 3:00 p. m." o solo "6:30 p. m.". */
+function horasTexto(cu: ReminderCallUp): string {
+  if (cu.meet_at) return `Convocatoria ${horaPA(cu.meet_at)} · Partido ${horaPA(cu.starts_at)}`;
+  return horaPA(cu.starts_at);
+}
+
+/** "Unas horas antes". Dice "Hoy" o "Mañana" según el día real en Panamá. */
+export function buildSoonMessage(cu: ReminderCallUp, now: Date = new Date()): PushBody {
+  const esHoy = fechaPA(new Date(horaReferencia(cu))) === fechaPA(now);
+  const cuando = esHoy ? "Hoy" : "Mañana";
+  const title = cu.kind === "entreno" ? `${cuando} hay entreno` : `${cuando} hay partido`;
+  const parts = [horasTexto(cu)];
   if (cu.place?.trim()) parts.push(cu.place.trim());
   return { title, body: parts.join(" · "), url: `/call-ups/${cu.id}` };
 }
 
-export function buildNightMessage(cu: CallUp): PushBody {
+export function buildNightMessage(cu: ReminderCallUp): PushBody {
   const title = cu.kind === "entreno" ? "Mañana hay entreno" : "Mañana hay partido";
-  const parts = [`Mañana ${horaPA(cu.starts_at)}`];
+  const parts = [`Mañana · ${horasTexto(cu)}`];
   if (cu.place?.trim()) parts.push(cu.place.trim());
   return { title, body: parts.join(" · "), url: `/call-ups/${cu.id}` };
+}
+
+/** Las que entran en la ventana de "unas horas antes" según su hora de referencia. */
+export function inSoonWindow(cu: ReminderCallUp, now: Date): boolean {
+  const ref = new Date(horaReferencia(cu)).getTime();
+  return ref >= now.getTime() && ref <= now.getTime() + SOON_WINDOW_MS;
 }
 
 type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
 
-async function pushToUsers(admin: Admin, userIds: string[], message: PushBody) {
-  if (userIds.length === 0) return { sent: 0, failed: 0 };
-  const { data: subs, error } = await admin
-    .from("push_subscriptions")
-    .select("id, endpoint, p256dh, auth")
-    .in("user_id", userIds);
-  if (error) throw error;
-  return await sendToSubscriptions((subs ?? []) as any, message, async (ids) => {
-    await admin.from("push_subscriptions").delete().in("id", ids);
-  });
-}
-
 /**
- * Procesa un lote de convocatorias: envía el push a las convocadas pendientes
- * y marca la columna correspondiente. Devuelve cuántos avisos se mandaron.
+ * Procesa un lote de convocatorias: envía el push a las convocadas que no dijeron que no
+ * y que todavía no recibieron este recordatorio, y marca la columna. Devuelve cuántos salieron.
  */
 async function processCallUps(
   admin: Admin,
-  callUps: CallUp[],
+  callUps: ReminderCallUp[],
   column: "remind_soon_at" | "remind_night_before_at",
-  build: (cu: CallUp) => PushBody,
+  build: (cu: ReminderCallUp) => PushBody,
 ): Promise<number> {
   let sent = 0;
   for (const cu of callUps) {
@@ -90,9 +107,33 @@ async function processCallUps(
       ),
     );
 
-    const res = await pushToUsers(admin, userIds, build(cu));
+    let res = { sent: 0, failed: 0, detail: null as string | null };
+    let reachable = 0;
+    if (userIds.length > 0) {
+      const { data: subs, error: sErr } = await admin
+        .from("push_subscriptions")
+        .select("id, user_id, endpoint, p256dh, auth")
+        .in("user_id", userIds);
+      if (sErr) throw sErr;
+      reachable = new Set((subs ?? []).map((s: any) => s.user_id as string)).size;
+      res = await sendToSubscriptions((subs ?? []) as any, build(cu), async (ids) => {
+        await admin.from("push_subscriptions").delete().in("id", ids);
+      });
+    }
     sent += res.sent;
 
+    await logPush(admin as any, {
+      club_id: cu.club_id ?? null,
+      call_up_id: cu.id,
+      kind: column === "remind_soon_at" ? "auto_soon" : "auto_night",
+      targeted: pending.length,
+      reachable,
+      sent: res.sent,
+      failed: res.failed,
+      detail: res.detail,
+    });
+
+    // Se marca aunque no tuviera avisos activados: así no se reintenta cada 15 minutos.
     await admin
       .from("call_up_players")
       .update({ [column]: new Date().toISOString() } as any)
@@ -104,29 +145,27 @@ async function processCallUps(
   return sent;
 }
 
-export async function runReminders(): Promise<{
+export async function runReminders(now: Date = new Date()): Promise<{
   soon_sent: number;
   night_sent: number;
 }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const admin = supabaseAdmin as Admin;
 
-  const now = new Date();
-  const in3h = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-
-  // (B) Unas horas antes: eventos futuros dentro de las próximas 3 horas.
+  // (B) Unas horas antes. La convocatoria es como mucho anterior al inicio, así que basta
+  // traer lo que empieza en las próximas 15 h y filtrar por la hora de referencia.
   const { data: soonRows, error: soonErr } = await admin
     .from("call_ups")
-    .select("id, kind, starts_at, place")
+    .select("id, club_id, kind, starts_at, meet_at, place")
     .gte("starts_at", now.toISOString())
-    .lte("starts_at", in3h.toISOString());
+    .lte("starts_at", new Date(now.getTime() + 15 * 60 * 60 * 1000).toISOString());
   if (soonErr) throw soonErr;
 
   const soon_sent = await processCallUps(
     admin,
-    (soonRows ?? []) as CallUp[],
+    ((soonRows ?? []) as ReminderCallUp[]).filter((cu) => inSoonWindow(cu, now)),
     "remind_soon_at",
-    buildSoonMessage,
+    (cu) => buildSoonMessage(cu, now),
   );
 
   // (A) Noche anterior: sólo entre las 18:00 y 21:00 hora de Panamá.
@@ -140,14 +179,14 @@ export async function runReminders(): Promise<{
 
     const { data: nightRows, error: nightErr } = await admin
       .from("call_ups")
-      .select("id, kind, starts_at, place")
+      .select("id, club_id, kind, starts_at, meet_at, place")
       .gte("starts_at", new Date(desde).toISOString())
       .lt("starts_at", new Date(hasta).toISOString());
     if (nightErr) throw nightErr;
 
     night_sent = await processCallUps(
       admin,
-      (nightRows ?? []) as CallUp[],
+      (nightRows ?? []) as ReminderCallUp[],
       "remind_night_before_at",
       buildNightMessage,
     );

@@ -143,6 +143,17 @@ Reemplaza la Tarea 1.
 - Pantallas de error y de "página no encontrada" en español (`__root.tsx` y `error-page.ts`); si
   el error es por falta de internet dice "Sin conexión". `<html lang="es">`.
 
+### Tarea 8 — Recordatorios automáticos (8-oct)
+- Supabase llama cada 15 minutos a `/api/public/cron/reminders` (pg_cron + pg_net, migración
+  `20261008120000_cron_recordatorios.sql`). La clave va en Supabase Vault como `cron_secret`
+  (misma que `CRON_SECRET` en Vercel), nunca en el repo.
+- "Unas horas antes": 3 h antes de la **hora de convocatoria** si el profe la puso, si no del
+  inicio. Dice "Hoy" o "Mañana" según el día real (antes decía "Hoy" siempre).
+- "Noche anterior": entre 6 y 9 p. m. de Panamá, para lo de mañana.
+- Mensajes con "Convocatoria 2:00 p. m. · Partido 3:00 p. m.". Se salta a las que dijeron que no
+  van. Cada envío queda en `push_log` (`auto_soon` / `auto_night`).
+- Probado con 9 casos (ventana, Hoy/Mañana, convocatoria, zona horaria).
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
@@ -195,7 +206,6 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
   se probará con la primera jugadora real que tenga Android (revisar en la base que tenga
   suscripción `fcm.googleapis.com` y que le lleguen).
-- Tarea 8 del plan (recordatorios automáticos).
 - Agregar Vitest para tener tests en el repo.
 - **Más adelante — límites por plan** (recordatorio de Bárbara, 6-oct): hay Plan Equipo (un solo
   equipo) y Plan Academia (varios equipos, precio por equipo). Hoy la app deja crear categorías sin
