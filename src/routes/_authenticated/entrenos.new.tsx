@@ -12,6 +12,7 @@ import { newLocalId, type PlanActivity, type PlanPart, type Intensity } from "@/
 import { sendPush, sendPushBulk } from "@/lib/push.functions";
 import { addMinutesToTime, toStartEnd } from "@/lib/call-ups";
 import { WEEKDAYS, buildRepeatDates, endOfMonth, shortDayLabel, MAX_REPEAT, type Weekday } from "@/lib/repetir";
+import { DateField } from "@/components/ui/date-field";
 
 export const Route = createFileRoute("/_authenticated/entrenos/new")({
   // ?repetir=1 abre directo en "Varios días" (desde el recordatorio del panel).
@@ -406,10 +407,7 @@ function NewEntreno() {
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Fecha</label>
-                <input
-                  type="date" required value={date} onChange={(e) => setDate(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
-                />
+                <DateField value={date} onChange={setDate} ariaLabel="Fecha" className="mt-1.5 rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -494,17 +492,16 @@ function NewEntreno() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Desde</label>
-                  <input
-                    type="date" required value={date}
-                    onChange={(e) => { setDate(e.target.value); setUntil(endOfMonth(e.target.value)); }}
-                    className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+                  <DateField
+                    value={date} onChange={(d) => { setDate(d); setUntil(endOfMonth(d)); }}
+                    ariaLabel="Desde" className="mt-1.5 rounded-xl border-2 border-ink bg-paper px-3 py-3 text-sm font-semibold"
                   />
                 </div>
                 <div>
                   <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Hasta</label>
-                  <input
-                    type="date" required value={until} min={date} onChange={(e) => setUntil(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+                  <DateField
+                    value={until} min={date} onChange={setUntil}
+                    ariaLabel="Hasta" className="mt-1.5 rounded-xl border-2 border-ink bg-paper px-3 py-3 text-sm font-semibold"
                   />
                 </div>
               </div>

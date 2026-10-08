@@ -8,6 +8,7 @@ import { PhotoCropInput } from "@/components/roster/PhotoCropInput";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { translateDbError, friendlyError } from "@/lib/errors";
 import { toast as notify } from "sonner";
+import { DateField } from "@/components/ui/date-field";
 
 
 export const Route = createFileRoute("/_authenticated/roster")({
@@ -1092,11 +1093,9 @@ function PlayerModal({
           </div>
           <div>
             <label className="block text-sm font-semibold mb-1.5">Fecha de nacimiento</label>
-            <input
-              type="date"
-              className={inputCls}
-              value={birth}
-              onChange={(e) => setBirth(e.target.value)}
+            <DateField
+              value={birth} onChange={setBirth} birthday
+              placeholder="Elegir fecha" ariaLabel="Fecha de nacimiento" className={inputCls}
             />
           </div>
         </div>

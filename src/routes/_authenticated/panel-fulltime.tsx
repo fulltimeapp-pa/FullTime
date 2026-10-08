@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { siteUrl } from "@/lib/site";
+import { DateField } from "@/components/ui/date-field";
 
 export const Route = createFileRoute("/_authenticated/panel-fulltime")({
   head: () => ({
@@ -723,11 +724,9 @@ function PaymentModal({ club, onClose }: { club: ClubRow; onClose: () => void })
 
         <label className="mt-3 block text-xs font-semibold uppercase tracking-wide text-ink/60">
           Fecha de pago
-          <input
-            type="date"
-            value={paidAt}
-            onChange={(e) => setPaidAt(e.target.value)}
-            className="mt-1 w-full rounded-xl border-2 border-ink bg-paper px-3 py-2 text-sm font-semibold text-ink"
+          <DateField
+            value={paidAt} onChange={setPaidAt} ariaLabel="Fecha de pago"
+            className="mt-1 rounded-xl border-2 border-ink bg-paper px-3 py-2 text-sm font-semibold text-ink normal-case tracking-normal"
           />
         </label>
 

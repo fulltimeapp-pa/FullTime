@@ -5,6 +5,7 @@
  */
 
 import { addMinutesToTime } from "@/lib/call-ups";
+import { DateField } from "@/components/ui/date-field";
 
 export type CallUpFieldsValue = {
   date: string;
@@ -36,10 +37,9 @@ export function CallUpFields({
     <>
       <div>
         <label className="text-xs font-mono uppercase tracking-wider text-ink/50">Fecha</label>
-        <input
-          type="date" required disabled={disabled}
-          value={value.date} onChange={(e) => onChange({ date: e.target.value })}
-          className="mt-1.5 w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
+        <DateField
+          value={value.date} onChange={(date) => onChange({ date })} disabled={disabled}
+          ariaLabel="Fecha" className="mt-1.5 rounded-xl border-2 border-ink bg-paper px-4 py-3 font-semibold"
         />
       </div>
       {kind === "partido" ? (

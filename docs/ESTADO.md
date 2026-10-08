@@ -163,6 +163,12 @@ Reemplaza la Tarea 1.
 - Para revisar: `select status_code, content, created from net._http_response order by created
   desc limit 5;` en el SQL Editor.
 
+### Fechas en español (8-oct, pedido de Bárbara)
+- El campo de fecha del navegador mostraba mes/día/año si el navegador está en inglés. Se cambió
+  por un campo propio (`src/components/ui/date-field.tsx`) que siempre muestra "jue 8 oct 2026" y
+  abre un calendario en español que empieza en lunes. Usado en crear/editar partido, entrenos (un
+  día, desde y hasta), fecha de nacimiento en el plantel (con selector de año) y pagos del panel.
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
