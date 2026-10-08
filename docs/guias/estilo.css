@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap');
+@page { size: Letter; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Inter, sans-serif; color: #0C1A14; background: #F4F1E8; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.hoja { width: 8.5in; height: 11in; padding: 0.55in 0.6in 0.5in; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.top { display: flex; align-items: center; justify-content: space-between; }
+.marca { display: flex; align-items: center; gap: 10px; font-family: 'Bricolage Grotesque'; font-weight: 800; font-size: 22px; }
+.marca img { width: 38px; height: 38px; }
+.marca .punto { color: #D21034; }
+.chip { border: 2px solid #0C1A14; border-radius: 999px; padding: 5px 12px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; background: #fff; }
+h1 { font-family: 'Bricolage Grotesque'; font-weight: 800; font-size: 42px; line-height: .98; margin-top: 26px; letter-spacing: -0.02em; }
+h1 mark { background: linear-gradient(transparent 55%, #D6F84C 55%); color: inherit; padding: 0 4px; }
+.sub { margin-top: 10px; font-size: 15px; color: #3a4a42; max-width: 6.2in; }
+.pasos { margin-top: 22px; display: flex; flex-direction: column; gap: 11px; flex: 1; }
+.paso { display: grid; grid-template-columns: 44px 1fr; gap: 14px; background: #fff; border: 2px solid #0C1A14; border-radius: 16px; padding: 13px 16px; box-shadow: 4px 4px 0 #0C1A14; }
+.n { width: 40px; height: 40px; border-radius: 50%; background: #D6F84C; border: 2px solid #0C1A14; display: grid; place-items: center; font-family: 'Bricolage Grotesque'; font-weight: 800; font-size: 19px; }
+.paso h2 { font-family: 'Bricolage Grotesque'; font-weight: 800; font-size: 18px; line-height: 1.15; }
+.paso p { font-size: 12.6px; line-height: 1.45; color: #2b3a33; margin-top: 3px; }
+.btn { display: inline-block; background: #0C1A14; color: #D6F84C; font-weight: 700; border-radius: 6px; padding: 0 6px; font-size: 11.5px; white-space: nowrap; }
+.tip { margin-top: 12px; border: 2px dashed #0C1A14; border-radius: 14px; padding: 10px 14px; font-size: 12.3px; background: rgba(214,248,76,.35); }
+.pie { margin-top: 14px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #0C1A14; padding-top: 12px; font-size: 12.5px; }
+.pie b { font-family: 'Bricolage Grotesque'; font-size: 15px; }
+.bandera { display: inline-block; width: 20px; height: 13px; border: 1px solid #0C1A14; background: linear-gradient(90deg,#fff 50%,#D21034 50%) top/100% 50% no-repeat, linear-gradient(90deg,#005293 50%,#fff 50%) bottom/100% 50% no-repeat; vertical-align: -2px; margin-right: 6px; }
+.url { font-weight: 700; }

@@ -249,6 +249,8 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 (Prueba FC · Sub-18 Femenino, 18 jugadoras, partido del sábado 10-oct, entrenos de octubre e
 historial de septiembre). Script: `supabase/demo/demo.sql` (no es migración; se corre a mano en
 el SQL Editor y se puede repetir). Guion de 10 minutos: `docs/DEMO.md`.
+Guías de 1 página en PDF (entrenador y jugadoras, con WhatsApp +507 6991-1552 y
+fulltimeapp.pa@gmail.com): `docs/guias/`. Se editan en el HTML y se regeneran con Chrome.
 
 **Idea para después — Ayuda dentro de la app (Bárbara, 8-oct):** una sección de "Ayuda" con
 tutoriales paso a paso (crear partido, cargar entrenos del mes, invitar jugadoras, activar avisos).
