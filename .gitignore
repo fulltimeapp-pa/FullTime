@@ -42,3 +42,6 @@ dist-ssr
 # Supabase CLI
 supabase/.temp
 !.env.production
+
+# Configuración local del navegador de Claude (ruta de Node de esta Mac)
+.claude/launch.json
