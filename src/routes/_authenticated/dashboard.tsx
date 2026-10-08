@@ -267,10 +267,10 @@ function Dashboard() {
             </span>
             {isOwner && (
               <Link
-                to="/panel-fulltime"
+                to="/hq"
                 className="rounded-full border-2 border-ink bg-lime px-3 py-1 text-xs font-bold text-ink hover:bg-ink hover:text-paper transition-colors"
               >
-                🛠 Panel de dueña
+                🛠 FullTime HQ
               </Link>
             )}
           </div>

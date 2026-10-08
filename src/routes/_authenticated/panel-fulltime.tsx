@@ -1206,10 +1206,10 @@ function PanelFullTime() {
     <main className="min-h-screen bg-paper px-4 py-8 md:px-8">
       <div className="mx-auto max-w-5xl">
         <a
-          href="/"
+          href="/hq"
           className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink/70 transition-colors hover:text-ink"
         >
-          <span aria-hidden="true">←</span> Volver
+          <span aria-hidden="true">←</span> Volver a FullTime HQ
         </a>
         <h1 className="font-display text-3xl font-bold text-ink md:text-4xl">
           Panel FullTime · Dueña

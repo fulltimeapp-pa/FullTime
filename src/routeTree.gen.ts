@@ -20,6 +20,7 @@ import { Route as AuthenticatedCallUpsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEntrenosRouteImport } from './routes/_authenticated/entrenos'
 import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated/equipo'
+import { Route as AuthenticatedHqRouteImport } from './routes/_authenticated/hq'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedMiPerfilRouteImport } from './routes/_authenticated/mi-perfil'
 import { Route as AuthenticatedMisConvocatoriasRouteImport } from './routes/_authenticated/mis-convocatorias'
@@ -35,6 +36,9 @@ import { Route as AuthenticatedCallUpsIdRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCallUpsNewRouteImport } from './routes/_authenticated/call-ups.new'
 import { Route as AuthenticatedEntrenosIndexRouteImport } from './routes/_authenticated/entrenos.index'
 import { Route as AuthenticatedEntrenosNewRouteImport } from './routes/_authenticated/entrenos.new'
+import { Route as AuthenticatedHqIndexRouteImport } from './routes/_authenticated/hq.index'
+import { Route as AuthenticatedHqSeccionRouteImport } from './routes/_authenticated/hq.$seccion'
+import { Route as AuthenticatedHqCrmRouteImport } from './routes/_authenticated/hq.crm'
 import { Route as ApiPublicCronRemindersRouteImport } from './routes/api/public/cron/reminders'
 
 const IndexRoute = IndexRouteImport.update({
@@ -89,6 +93,11 @@ const AuthenticatedEntrenosRoute = AuthenticatedEntrenosRouteImport.update({
 const AuthenticatedEquipoRoute = AuthenticatedEquipoRouteImport.update({
   id: '/equipo',
   path: '/equipo',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHqRoute = AuthenticatedHqRouteImport.update({
+  id: '/hq',
+  path: '/hq',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
@@ -172,6 +181,21 @@ const AuthenticatedEntrenosNewRoute =
     path: '/new',
     getParentRoute: () => AuthenticatedEntrenosRoute,
   } as any)
+const AuthenticatedHqIndexRoute = AuthenticatedHqIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedHqRoute,
+} as any)
+const AuthenticatedHqSeccionRoute = AuthenticatedHqSeccionRouteImport.update({
+  id: '/$seccion',
+  path: '/$seccion',
+  getParentRoute: () => AuthenticatedHqRoute,
+} as any)
+const AuthenticatedHqCrmRoute = AuthenticatedHqCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => AuthenticatedHqRoute,
+} as any)
 const ApiPublicCronRemindersRoute = ApiPublicCronRemindersRouteImport.update({
   id: '/api/public/cron/reminders',
   path: '/api/public/cron/reminders',
@@ -189,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/entrenos': typeof AuthenticatedEntrenosRouteWithChildren
   '/equipo': typeof AuthenticatedEquipoRoute
+  '/hq': typeof AuthenticatedHqRouteWithChildren
   '/inicio': typeof AuthenticatedInicioRoute
   '/mi-perfil': typeof AuthenticatedMiPerfilRoute
   '/mis-convocatorias': typeof AuthenticatedMisConvocatoriasRoute
@@ -202,8 +227,11 @@ export interface FileRoutesByFullPath {
   '/call-ups/$id': typeof AuthenticatedCallUpsIdRoute
   '/call-ups/new': typeof AuthenticatedCallUpsNewRoute
   '/entrenos/new': typeof AuthenticatedEntrenosNewRoute
+  '/hq/$seccion': typeof AuthenticatedHqSeccionRoute
+  '/hq/crm': typeof AuthenticatedHqCrmRoute
   '/call-ups/': typeof AuthenticatedCallUpsIndexRoute
   '/entrenos/': typeof AuthenticatedEntrenosIndexRoute
+  '/hq/': typeof AuthenticatedHqIndexRoute
   '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
 }
 export interface FileRoutesByTo {
@@ -228,8 +256,11 @@ export interface FileRoutesByTo {
   '/call-ups/$id': typeof AuthenticatedCallUpsIdRoute
   '/call-ups/new': typeof AuthenticatedCallUpsNewRoute
   '/entrenos/new': typeof AuthenticatedEntrenosNewRoute
+  '/hq/$seccion': typeof AuthenticatedHqSeccionRoute
+  '/hq/crm': typeof AuthenticatedHqCrmRoute
   '/call-ups': typeof AuthenticatedCallUpsIndexRoute
   '/entrenos': typeof AuthenticatedEntrenosIndexRoute
+  '/hq': typeof AuthenticatedHqIndexRoute
   '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
 }
 export interface FileRoutesById {
@@ -245,6 +276,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/entrenos': typeof AuthenticatedEntrenosRouteWithChildren
   '/_authenticated/equipo': typeof AuthenticatedEquipoRoute
+  '/_authenticated/hq': typeof AuthenticatedHqRouteWithChildren
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/mi-perfil': typeof AuthenticatedMiPerfilRoute
   '/_authenticated/mis-convocatorias': typeof AuthenticatedMisConvocatoriasRoute
@@ -258,8 +290,11 @@ export interface FileRoutesById {
   '/_authenticated/call-ups/$id': typeof AuthenticatedCallUpsIdRoute
   '/_authenticated/call-ups/new': typeof AuthenticatedCallUpsNewRoute
   '/_authenticated/entrenos/new': typeof AuthenticatedEntrenosNewRoute
+  '/_authenticated/hq/$seccion': typeof AuthenticatedHqSeccionRoute
+  '/_authenticated/hq/crm': typeof AuthenticatedHqCrmRoute
   '/_authenticated/call-ups/': typeof AuthenticatedCallUpsIndexRoute
   '/_authenticated/entrenos/': typeof AuthenticatedEntrenosIndexRoute
+  '/_authenticated/hq/': typeof AuthenticatedHqIndexRoute
   '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
 }
 export interface FileRouteTypes {
@@ -275,6 +310,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/entrenos'
     | '/equipo'
+    | '/hq'
     | '/inicio'
     | '/mi-perfil'
     | '/mis-convocatorias'
@@ -288,8 +324,11 @@ export interface FileRouteTypes {
     | '/call-ups/$id'
     | '/call-ups/new'
     | '/entrenos/new'
+    | '/hq/$seccion'
+    | '/hq/crm'
     | '/call-ups/'
     | '/entrenos/'
+    | '/hq/'
     | '/api/public/cron/reminders'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -314,8 +353,11 @@ export interface FileRouteTypes {
     | '/call-ups/$id'
     | '/call-ups/new'
     | '/entrenos/new'
+    | '/hq/$seccion'
+    | '/hq/crm'
     | '/call-ups'
     | '/entrenos'
+    | '/hq'
     | '/api/public/cron/reminders'
   id:
     | '__root__'
@@ -330,6 +372,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/entrenos'
     | '/_authenticated/equipo'
+    | '/_authenticated/hq'
     | '/_authenticated/inicio'
     | '/_authenticated/mi-perfil'
     | '/_authenticated/mis-convocatorias'
@@ -343,8 +386,11 @@ export interface FileRouteTypes {
     | '/_authenticated/call-ups/$id'
     | '/_authenticated/call-ups/new'
     | '/_authenticated/entrenos/new'
+    | '/_authenticated/hq/$seccion'
+    | '/_authenticated/hq/crm'
     | '/_authenticated/call-ups/'
     | '/_authenticated/entrenos/'
+    | '/_authenticated/hq/'
     | '/api/public/cron/reminders'
   fileRoutesById: FileRoutesById
 }
@@ -436,6 +482,13 @@ declare module '@tanstack/react-router' {
       path: '/equipo'
       fullPath: '/equipo'
       preLoaderRoute: typeof AuthenticatedEquipoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/hq': {
+      id: '/_authenticated/hq'
+      path: '/hq'
+      fullPath: '/hq'
+      preLoaderRoute: typeof AuthenticatedHqRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/inicio': {
@@ -543,6 +596,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEntrenosNewRouteImport
       parentRoute: typeof AuthenticatedEntrenosRoute
     }
+    '/_authenticated/hq/': {
+      id: '/_authenticated/hq/'
+      path: '/'
+      fullPath: '/hq/'
+      preLoaderRoute: typeof AuthenticatedHqIndexRouteImport
+      parentRoute: typeof AuthenticatedHqRoute
+    }
+    '/_authenticated/hq/$seccion': {
+      id: '/_authenticated/hq/$seccion'
+      path: '/$seccion'
+      fullPath: '/hq/$seccion'
+      preLoaderRoute: typeof AuthenticatedHqSeccionRouteImport
+      parentRoute: typeof AuthenticatedHqRoute
+    }
+    '/_authenticated/hq/crm': {
+      id: '/_authenticated/hq/crm'
+      path: '/crm'
+      fullPath: '/hq/crm'
+      preLoaderRoute: typeof AuthenticatedHqCrmRouteImport
+      parentRoute: typeof AuthenticatedHqRoute
+    }
     '/api/public/cron/reminders': {
       id: '/api/public/cron/reminders'
       path: '/api/public/cron/reminders'
@@ -583,6 +657,22 @@ const AuthenticatedEntrenosRouteWithChildren =
     AuthenticatedEntrenosRouteChildren,
   )
 
+interface AuthenticatedHqRouteChildren {
+  AuthenticatedHqSeccionRoute: typeof AuthenticatedHqSeccionRoute
+  AuthenticatedHqCrmRoute: typeof AuthenticatedHqCrmRoute
+  AuthenticatedHqIndexRoute: typeof AuthenticatedHqIndexRoute
+}
+
+const AuthenticatedHqRouteChildren: AuthenticatedHqRouteChildren = {
+  AuthenticatedHqSeccionRoute: AuthenticatedHqSeccionRoute,
+  AuthenticatedHqCrmRoute: AuthenticatedHqCrmRoute,
+  AuthenticatedHqIndexRoute: AuthenticatedHqIndexRoute,
+}
+
+const AuthenticatedHqRouteWithChildren = AuthenticatedHqRoute._addFileChildren(
+  AuthenticatedHqRouteChildren,
+)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAsistenciaRoute: typeof AuthenticatedAsistenciaRoute
   AuthenticatedCalendarioRoute: typeof AuthenticatedCalendarioRoute
@@ -590,6 +680,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEntrenosRoute: typeof AuthenticatedEntrenosRouteWithChildren
   AuthenticatedEquipoRoute: typeof AuthenticatedEquipoRoute
+  AuthenticatedHqRoute: typeof AuthenticatedHqRouteWithChildren
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedMiPerfilRoute: typeof AuthenticatedMiPerfilRoute
   AuthenticatedMisConvocatoriasRoute: typeof AuthenticatedMisConvocatoriasRoute
@@ -606,6 +697,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEntrenosRoute: AuthenticatedEntrenosRouteWithChildren,
   AuthenticatedEquipoRoute: AuthenticatedEquipoRoute,
+  AuthenticatedHqRoute: AuthenticatedHqRouteWithChildren,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedMiPerfilRoute: AuthenticatedMiPerfilRoute,
   AuthenticatedMisConvocatoriasRoute: AuthenticatedMisConvocatoriasRoute,

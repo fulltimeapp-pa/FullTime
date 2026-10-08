@@ -175,6 +175,21 @@ Reemplaza la Tarea 1.
 - `fulltimeapp.pa@gmail.com` agregada a `platform_admins` desde el SQL Editor. Bárbara ya entra a
   `/panel-fulltime` (botón "🛠 Panel de dueña" en su panel).
 
+### FullTime HQ, fase 1 (8-oct)
+- Zona `/hq`, solo para la dueña de la plataforma, con el menú que diseñó Bárbara: General
+  (Inicio, Notificaciones, Proyectos, Clientes, Jarvis), Productividad (Tareas, Calendario,
+  Reuniones, Métricas), Redes sociales (Contenido, Inbox, Automatizaciones) y Ventas (CRM,
+  Cotizaciones). Lo que no está listo dice "Próximamente".
+- **Inicio:** números clave, "Para hoy" (próximos pasos de hoy, de mañana o atrasados, con botón de
+  WhatsApp), pruebas que vencen en 3 días o menos y clubes dormidos.
+- **CRM:** columnas Contacto → Demo agendada → Demo hecha → En prueba → Pagando · Perdido. Cada
+  prospecto: contacto, equipo, WhatsApp, correo, próximo paso con fecha, notas y su club cuando se
+  registra. Tabla nueva `prospects` (migración `20261008150000_hq_prospectos.sql`), solo la dueña
+  la ve (probado en PGlite).
+- **Clientes y Métricas** siguen en `/panel-fulltime` (enlazado desde HQ y con "Volver a FullTime
+  HQ"). El botón del panel del club ahora dice "🛠 FullTime HQ".
+- Siguientes fases: Tareas, Calendario y Reuniones → Cotizaciones → Contenido, Inbox, Jarvis.
+
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes
   "owner"/"admin"). Los nombres viven en `ROLE_LABEL` de `src/lib/active-club.ts`.
