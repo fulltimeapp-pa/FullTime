@@ -1,6 +1,8 @@
 # Estado de FullTime
 
-Última actualización: 29 de septiembre de 2026.
+Última actualización: 8 de octubre de 2026.
+
+**Resumen:** las 8 tareas del plan están hechas y publicadas en https://fulltimeapp.vercel.app.
 
 ## Dónde vive cada cosa
 
@@ -204,18 +206,23 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 
 ## Pendiente
 
-- **Prueba A de la Tarea 7 (baja prioridad, cuando Bárbara quiera):** en el iPhone abrir la
-  convocatoria con internet, apagar la red y tocar "No puedo": a los 10 s máximo debe salir error con
-  "Reintentar". El 7-oct seguía congelándose; se agregó un límite de 10 s a todo el guardado
-  (incluida la renovación de sesión, commit 758ec8e). Falta confirmar en el celular.
+**Pruebas con el celular (Bárbara):**
+- Ver un recordatorio automático real: crear un partido para dentro de 2–3 horas, con
+  convocatoria, y convocar a la jugadora de prueba. Debe llegar "Hoy hay partido · Convocatoria …"
+  y quedar en `push_log` como `auto_soon`.
+- "No puedo" sin internet (baja prioridad): abrir la convocatoria con internet, apagar la red y
+  tocar "No puedo". A los 10 s máximo debe salir error con "Reintentar" (arreglo 758ec8e, falta
+  confirmar en el celular).
+- Avisos en Android: funcionan en iPhone; falta probar con la primera jugadora real que tenga
+  Android (revisar en la base que tenga suscripción `fcm.googleapis.com`).
 
-- Avisos push: **funcionan en iPhone** (probado el 29-sep con la app instalada en la pantalla de
-  inicio; llegó "Nueva convocatoria"). Falta probar el servicio de Google: sin Android a mano,
-  se probará con la primera jugadora real que tenga Android (revisar en la base que tenga
-  suscripción `fcm.googleapis.com` y que le lleguen).
-- Agregar Vitest para tener tests en el repo.
-- **Más adelante — límites por plan** (recordatorio de Bárbara, 6-oct): hay Plan Equipo (un solo
-  equipo) y Plan Academia (varios equipos, precio por equipo). Hoy la app deja crear categorías sin
-  límite. Hay que limitar según el plan, idealmente controlado desde el panel de la dueña
-  (`/panel-fulltime`). Ojo: en la base nueva `platform_admins` está vacía, así que hoy nadie entra
-  a ese panel; hay que agregar a Bárbara.
+**Siguientes mejoras (fuera del plan original):**
+- Ordenar el historial: lo pasado en una sección "Historial" aparte (decidido: no se borra).
+- Agregar a Bárbara como dueña en la base nueva (`platform_admins` está vacía) para entrar a
+  `/panel-fulltime`.
+- Límites por plan (recordatorio de Bárbara, 6-oct): Plan Equipo (un equipo) y Plan Academia
+  (varios equipos, precio por equipo). Hoy la app deja crear categorías sin límite; controlarlo
+  desde el panel de la dueña.
+- Agregar Vitest para guardar en el repo las pruebas que hoy corren aparte (necesita OK de
+  Bárbara: es una librería nueva).
+- Revisión legal de `/privacidad` antes de tener muchos equipos.
