@@ -155,6 +155,8 @@ Reemplaza la Tarea 1.
 - Mensajes con "Convocatoria 2:00 p. m. · Partido 3:00 p. m.". Se salta a las que dijeron que no
   van. Cada envío queda en `push_log` (`auto_soon` / `auto_night`).
 - Probado con 9 casos (ventana, Hoy/Mañana, convocatoria, zona horaria).
+- **Probado en la vida real (8-oct):** partido con convocatoria a 2 h → llegó "Nueva convocatoria" y,
+  en la siguiente vuelta, "Hoy hay partido · Convocatoria …" al iPhone.
 - Activado el 8-oct desde el SQL Editor de Supabase (la herramienta de línea de comandos no
   conectaba): clave en Vault y tarea `fulltime-recordatorios` (*/15). Verificado: corrió a las
   8:45 y la app respondió 200. Ojo: esa migración no quedó marcada como aplicada en la
@@ -213,9 +215,6 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 ## Pendiente
 
 **Pruebas con el celular (Bárbara):**
-- Ver un recordatorio automático real: crear un partido para dentro de 2–3 horas, con
-  convocatoria, y convocar a la jugadora de prueba. Debe llegar "Hoy hay partido · Convocatoria …"
-  y quedar en `push_log` como `auto_soon`.
 - "No puedo" sin internet (baja prioridad): abrir la convocatoria con internet, apagar la red y
   tocar "No puedo". A los 10 s máximo debe salir error con "Reintentar" (arreglo 758ec8e, falta
   confirmar en el celular).
