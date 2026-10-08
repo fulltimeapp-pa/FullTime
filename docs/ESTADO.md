@@ -237,6 +237,14 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   Bárbara: es una librería nueva).
 - Revisión legal de `/privacidad` antes de tener muchos equipos.
 
+**Dominio propio (revisado el 8-oct en nic.pa, ambos libres):**
+- **fulltime.pa** — recomendado (corto, combina con @fulltime.pa). Registro: $200 por 2 años
+  ($300 / 3, $400 / 4, $500 / 5).
+- **fulltime.com.pa** — opción económica. Registro: $50 por 2 años ($75 / 3, $100 / 4, $110 / 5).
+- Se compra en nic.pa (cuenta + pago, lo hace Bárbara). Confirmar el precio de renovación al
+  comprar. Al tenerlo: conectarlo a Vercel, actualizar `VITE_SITE_URL`, las URL de Supabase Auth y
+  de Google, y se podrá mandar correo desde el dominio (volver a activar la confirmación de correo).
+
 **Idea para después — "FullTime HQ" (Bárbara, 8-oct):** un centro de control del negocio que crece
 desde `/panel-fulltime` (ya tiene clubes, CRM básico, pagos y métricas). Secciones: Inicio (el día
 de un vistazo), Notificaciones (club dormido, prueba por vencer, avisos fallidos), Clientes/CRM por
