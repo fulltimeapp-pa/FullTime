@@ -97,3 +97,20 @@ export function toStartEnd(date: string, start: string, end: string): { starts_a
   if (Number.isNaN(e.getTime()) || e <= s) throw new Error("La hora de fin tiene que ser después de la de inicio.");
   return { starts_at: s.toISOString(), ends_at: e.toISOString() };
 }
+
+/** Agrupa por mes ("septiembre 2026"), en el orden en que vienen los elementos. */
+export function groupByMonth<T extends { starts_at: string }>(items: T[]): { key: string; label: string; items: T[] }[] {
+  const groups: { key: string; label: string; items: T[] }[] = [];
+  for (const it of items) {
+    const d = new Date(it.starts_at);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    let g = groups[groups.length - 1];
+    if (!g || g.key !== key) {
+      const label = d.toLocaleDateString("es-PA", { month: "long", year: "numeric" });
+      g = { key, label: label.charAt(0).toUpperCase() + label.slice(1), items: [] };
+      groups.push(g);
+    }
+    g.items.push(it);
+  }
+  return groups;
+}

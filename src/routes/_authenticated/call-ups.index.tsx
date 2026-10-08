@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Calendar, MapPin } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, MapPin, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { getMyActiveClub } from "@/lib/active-club";
-import { formatShort, type CallUp } from "@/lib/call-ups";
+import { formatShort, groupByMonth, type CallUp } from "@/lib/call-ups";
 
 export const Route = createFileRoute("/_authenticated/call-ups/")({
   head: () => ({
@@ -103,6 +103,7 @@ function CallUpsPage() {
   }, [clubId, qc]);
 
   const items = listQ.data ?? [];
+  const [showPast, setShowPast] = useState(false);
   const now = Date.now();
   const { upcoming, past } = useMemo(() => {
     const up: WithCounts[] = [];
@@ -112,6 +113,7 @@ function CallUpsPage() {
       else pa.push(it);
     }
     up.sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
+    pa.sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime());
     return { upcoming: up, past: pa };
   }, [items, now]);
 
@@ -141,16 +143,33 @@ function CallUpsPage() {
         </p>
 
         <Section title="Próximos" items={upcoming} loading={listQ.isLoading} empty="No tienes partidos próximos. Crea uno para empezar." />
-        <Section title="Historial" items={past} loading={listQ.isLoading} empty="Todavía no hay partidos pasados." />
+        {!listQ.isLoading && past.length > 0 && (
+          <section className="mt-10">
+            <button
+              type="button"
+              onClick={() => setShowPast((v) => !v)}
+              aria-expanded={showPast}
+              className="w-full flex items-center justify-between rounded-2xl border-2 border-ink bg-paper px-5 py-4 font-display text-xl font-bold hover:bg-cream"
+            >
+              <span>Historial <span className="text-ink/40 text-base font-semibold">({past.length})</span></span>
+              <ChevronDown size={20} className={`transition-transform ${showPast ? "rotate-180" : ""}`} />
+            </button>
+            {showPast && groupByMonth(past).map((g) => (
+              <Section key={g.key} title={g.label} items={g.items} loading={false} empty="" small />
+            ))}
+          </section>
+        )}
       </main>
     </div>
   );
 }
 
-function Section({ title, items, loading, empty }: { title: string; items: WithCounts[]; loading: boolean; empty: string }) {
+function Section({ title, items, loading, empty, small = false }: { title: string; items: WithCounts[]; loading: boolean; empty: string; small?: boolean }) {
   return (
-    <section className="mt-10">
-      <h2 className="font-display text-2xl font-bold">{title}</h2>
+    <section className={small ? "mt-6" : "mt-10"}>
+      {small
+        ? <h3 className="font-mono text-xs uppercase tracking-wider text-ink/50">{title}</h3>
+        : <h2 className="font-display text-2xl font-bold">{title}</h2>}
       <div className="mt-4 space-y-3">
         {loading ? (
           <p className="text-sm text-ink/50">Cargando...</p>

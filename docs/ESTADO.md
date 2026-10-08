@@ -175,6 +175,10 @@ Reemplaza la Tarea 1.
 - `fulltimeapp.pa@gmail.com` agregada a `platform_admins` desde el SQL Editor. Bárbara ya entra a
   `/panel-fulltime` (botón "🛠 Panel de dueña" en su panel).
 
+### Historial ordenado (8-oct)
+- Partidos y Entrenos: "Próximos" arriba; "Historial (N)" cerrado por defecto, con lo más reciente
+  primero y agrupado por mes ("Octubre de 2026"). No se borra nada (de ahí sale la asistencia).
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
@@ -226,7 +230,6 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   Android (revisar en la base que tenga suscripción `fcm.googleapis.com`).
 
 **Siguientes mejoras (fuera del plan original):**
-- Ordenar el historial: lo pasado en una sección "Historial" aparte (decidido: no se borra).
 - Límites por plan (recordatorio de Bárbara, 6-oct): Plan Equipo (un equipo) y Plan Academia
   (varios equipos, precio por equipo). Hoy la app deja crear categorías sin límite; controlarlo
   desde el panel de la dueña.
