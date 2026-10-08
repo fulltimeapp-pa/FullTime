@@ -171,6 +171,10 @@ Reemplaza la Tarea 1.
   abre un calendario en español que empieza en lunes. Usado en crear/editar partido, entrenos (un
   día, desde y hasta), fecha de nacimiento en el plantel (con selector de año) y pagos del panel.
 
+### Panel de dueña (8-oct)
+- `fulltimeapp.pa@gmail.com` agregada a `platform_admins` desde el SQL Editor. Bárbara ya entra a
+  `/panel-fulltime` (botón "🛠 Panel de dueña" en su panel).
+
 ## Decisiones tomadas
 
 - **Hosting:** GitHub + Vercel + Supabase propio, sin Lovable (decidido por Bárbara el 28-sep).
@@ -223,8 +227,6 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 
 **Siguientes mejoras (fuera del plan original):**
 - Ordenar el historial: lo pasado en una sección "Historial" aparte (decidido: no se borra).
-- Agregar a Bárbara como dueña en la base nueva (`platform_admins` está vacía) para entrar a
-  `/panel-fulltime`.
 - Límites por plan (recordatorio de Bárbara, 6-oct): Plan Equipo (un equipo) y Plan Academia
   (varios equipos, precio por equipo). Hoy la app deja crear categorías sin límite; controlarlo
   desde el panel de la dueña.
