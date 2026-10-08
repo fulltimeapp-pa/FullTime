@@ -14,6 +14,14 @@ export type ActiveClub = {
 } | null;
 
 
+/** Cómo se muestra cada rol en pantalla. */
+export const ROLE_LABEL: Record<ClubRole, string> = {
+  owner: "Dueño/a del club",
+  admin: "Admin",
+  coach: "Cuerpo técnico",
+  jugadora: "Jugadora",
+};
+
 export function isStaffRole(role: ClubRole | null | undefined): boolean {
   return role === "owner" || role === "admin" || role === "coach";
 }

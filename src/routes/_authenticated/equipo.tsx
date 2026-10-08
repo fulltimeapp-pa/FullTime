@@ -5,7 +5,7 @@ import { Copy, Pencil, Share2, Shield, Trash2, UserPlus, X } from "lucide-react"
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
 import { supabase } from "@/integrations/supabase/client";
-import { getMyActiveClub, type ClubRole } from "@/lib/active-club";
+import { getMyActiveClub, type ClubRole, ROLE_LABEL } from "@/lib/active-club";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { PhotoCropInput } from "@/components/roster/PhotoCropInput";
 import { CLUB_LOGOS_BUCKET, signClubLogo } from "@/components/brand/ClubCrest";
@@ -48,12 +48,6 @@ type StaffInvite = {
   expires_at: string | null;
 };
 
-const ROLE_LABEL: Record<ClubRole, string> = {
-  owner: "Dueño/a",
-  admin: "Admin",
-  coach: "Cuerpo técnico",
-  jugadora: "Jugadora",
-};
 
 function generateToken(): string {
   const bytes = new Uint8Array(24);

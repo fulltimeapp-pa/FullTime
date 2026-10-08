@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { getMyActiveClub } from "@/lib/active-club";
+import { getMyActiveClub, ROLE_LABEL, type ClubRole } from "@/lib/active-club";
 import { StaffShell } from "@/components/staff/StaffShell";
 
 export const Route = createFileRoute("/_authenticated/perfil-entrenador")({
@@ -57,7 +57,7 @@ function Perfil() {
       <div className="mt-8 rounded-2xl border-2 border-ink bg-card p-6 space-y-4">
         <Field label="Correo" value={user.email ?? "—"} />
         <Field label="Club" value={clubName || "—"} />
-        <Field label="Rol" value={role || "—"} />
+        <Field label="Rol" value={role ? ROLE_LABEL[role as ClubRole] ?? role : "—"} />
       </div>
 
       <div className="mt-8">

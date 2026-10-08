@@ -258,20 +258,22 @@ function CallUpDetail() {
   function copyAttendanceList() {
     const rows = rowsQ.data ?? [];
     const going = rows.filter((r) => r.status === "going");
-    const attended = going.filter((r) => r.attended);
+    const nombre = (r: Row) => `${r.player.full_name}${r.player.jersey_number ? ` (#${r.player.jersey_number})` : ""}`;
+    const grupos: [string, Row[]][] = [
+      ["ASISTIERON", going.filter((r) => r.attended === true)],
+      ["NO ASISTIERON", going.filter((r) => r.attended === false)],
+      ["SIN MARCAR", going.filter((r) => r.attended == null)],
+    ];
     const lines = [
       `${kindLabel(cuQ.data!.kind)} · ${formatWhen(cuQ.data!.starts_at, cuQ.data!.ends_at, cuQ.data!.meet_at)}`,
-      `Confirmaron: ${going.length} · Asistieron: ${attended.length}`,
-      "",
-      "ASISTIERON:",
-      ...attended.map((r) => `${r.player.full_name}${r.player.jersey_number ? ` (#${r.player.jersey_number})` : ""}`),
-      "",
-      "NO ASISTIERON / PENDIENTES:",
-      ...going.filter((r) => !r.attended).map((r) => `${r.player.full_name}${r.player.jersey_number ? ` (#${r.player.jersey_number})` : ""}`),
+      `Confirmaron: ${going.length} · Asistieron: ${grupos[0][1].length}`,
+      // Solo los grupos que tienen a alguien.
+      ...grupos.filter(([, g]) => g.length > 0).flatMap(([titulo, g]) => ["", `${titulo} (${g.length}):`, ...g.map(nombre)]),
     ];
-    navigator.clipboard.writeText(lines.join("\n")).then(() => {
-      toast.success("Lista copiada");
-    });
+    navigator.clipboard.writeText(lines.join("\n")).then(
+      () => toast.success("Lista copiada. Pégala en WhatsApp."),
+      () => toast.error("No pudimos copiar la lista. Intenta de nuevo."),
+    );
   }
 
 

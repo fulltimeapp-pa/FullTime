@@ -175,6 +175,12 @@ Reemplaza la Tarea 1.
 - `fulltimeapp.pa@gmail.com` agregada a `platform_admins` desde el SQL Editor. Bárbara ya entra a
   `/panel-fulltime` (botón "🛠 Panel de dueña" en su panel).
 
+### Detalles menores del prompt original (8-oct)
+- Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes
+  "owner"/"admin"). Los nombres viven en `ROLE_LABEL` de `src/lib/active-club.ts`.
+- "Copiar lista" del partido: separa Asistieron / No asistieron / Sin marcar (antes mezclaba las
+  dos últimas) y avisa si no se pudo copiar.
+
 ### Contacto en la portada (8-oct)
 - Pie de página y sección de precios: el correo pasa de `barbarchan2415@gmail.com` (tenía un
   error de escritura) a `fulltimeapp.pa@gmail.com`, igual que las guías y la política de
