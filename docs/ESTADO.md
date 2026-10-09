@@ -243,7 +243,8 @@ Reemplaza la Tarea 1.
   asistencia, cuerpo técnico, confirmar, avisos en iPhone y Android, contraseña, quién ve mis datos)
   y botón de WhatsApp +507 6991-1552. Los textos usan los nombres reales de los botones.
 - Acceso: "Ayuda" en el menú del entrenador y enlace "¿No te llegan los avisos…? Ver ayuda" en el
-  inicio de la jugadora. Probada en tamaño celular (sin scroll de lado).
+  inicio de la jugadora. Probada en tamaño celular (sin scroll de lado) y en la web real por
+  Bárbara (9-oct): funciona.
 
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes
