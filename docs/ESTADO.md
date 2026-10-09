@@ -250,7 +250,7 @@ Reemplaza la Tarea 1.
   pendientes; al tocar una tarea se edita ahí mismo (nombre, fecha, urgente) o se borra. Dentro del
   proyecto manda tu orden; en Tareas, Inicio y Calendario sigue el orden por fecha. Columna
   `position` en `hq_tasks` (migración `20261009200000_hq_tareas_orden.sql`, arranca con el orden por
-  fecha). Falta: aplicar la migración y probarlo en la web real.
+  fecha). Migración aplicada y probado en la web real por Bárbara (9-oct): funciona.
 
 ### Sección de Ayuda (9-oct)
 - `/ayuda` (pública, no hace falta entrar): preguntas frecuentes con pestañas "Soy entrenador" y
