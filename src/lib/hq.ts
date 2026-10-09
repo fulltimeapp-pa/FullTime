@@ -281,7 +281,7 @@ export const HQ_MENU: { group: string; items: HqItem[] }[] = [
     group: "General",
     items: [
       { title: "Inicio", to: "/hq", icon: Home, ready: true },
-      { title: "Notificaciones", to: "/hq/notificaciones", icon: Bell, ready: false },
+      { title: "Notificaciones", to: "/hq/notificaciones", icon: Bell, ready: true },
       { title: "Proyectos", to: "/hq/proyectos", icon: FolderKanban, ready: false },
       { title: "Clientes", to: "/panel-fulltime", icon: Building2, ready: true },
       { title: "Jarvis", to: "/hq/jarvis", icon: Bot, ready: false },

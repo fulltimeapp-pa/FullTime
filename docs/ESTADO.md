@@ -190,7 +190,7 @@ Reemplaza la Tarea 1.
   HQ"). El botón del panel del club ahora dice "🛠 FullTime HQ".
 - Probado en la web real (8-oct): Bárbara agregó su primer prospecto (Carlos Rivera, Inter CF,
   demo agendada) y aparece en "Para hoy" como "Mañana".
-- Siguientes fases: Contenido, Inbox, Notificaciones, Proyectos, Automatizaciones, Jarvis.
+- Siguientes fases: Contenido, Inbox, Proyectos, Automatizaciones, Jarvis.
 
 ### FullTime HQ: Reuniones (9-oct)
 - `/hq/reuniones`: anotar cada reunión con título, fecha, con quién, prospecto del CRM, qué pasó,
@@ -227,6 +227,15 @@ Reemplaza la Tarea 1.
   cotizar. Solo la dueña la ve (probado en PGlite). Cálculos probados (12 meses Plan Equipo =
   $99.90; Academia 3 equipos × 12 meses = $259.70). Migración aplicada; probado en la web real por
   Bárbara (9-oct), con PDF: funciona.
+
+### FullTime HQ: Notificaciones (9-oct)
+- `/hq/notificaciones`: avisos armados con lo que ya hay (sin tabla nueva): club nuevo (últimos 30
+  días), prueba que vence en 3 días o menos o ya vencida, pago que vence en 5 días o ya vencido,
+  club dormido, tareas atrasadas y prospectos con el próximo paso vencido. Lo urgente primero.
+- Contador rojo en el menú con los avisos nuevos. "Visto" se recuerda en ese navegador (al salir de
+  la pantalla o con "Marcar todo como visto"); en otro aparato vuelven a salir como nuevos.
+- Lógica en `src/lib/hq-avisos.ts` (`buildAvisos`), probada con datos de ejemplo (12 casos).
+  Falta: que Bárbara lo pruebe en la web real.
 
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes

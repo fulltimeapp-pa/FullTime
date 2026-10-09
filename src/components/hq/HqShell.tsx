@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/brand/Logo";
 import { HQ_MENU, type HqItem } from "@/lib/hq";
+import { useHqAvisos } from "@/lib/hq-avisos";
 
 /** Marco de FullTime HQ: menú lateral y acceso solo para la dueña de la plataforma. */
 export function HqShell({ children }: { children: ReactNode }) {
@@ -58,6 +59,7 @@ export function HqShell({ children }: { children: ReactNode }) {
                     >
                       <it.icon size={18} className={isActive(it) ? "text-lime" : ""} />
                       <span className="flex-1">{it.title}</span>
+                      {it.to === AVISOS_TO && <AvisosBadge />}
                       {!it.ready && <span className="text-[10px] font-mono text-paper/35">pronto</span>}
                     </Link>
                   </li>
@@ -85,6 +87,7 @@ export function HqShell({ children }: { children: ReactNode }) {
               className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${isActive(it) ? "bg-lime text-ink" : "bg-paper/10 text-paper"}`}
             >
               {it.title}
+              {it.to === AVISOS_TO && <AvisosBadge />}
             </Link>
           ))}
         </nav>
@@ -92,6 +95,19 @@ export function HqShell({ children }: { children: ReactNode }) {
 
       <main className="flex-1 min-w-0">{children}</main>
     </div>
+  );
+}
+
+const AVISOS_TO = "/hq/notificaciones";
+
+/** Cuántos avisos nuevos hay (solo se monta cuando ya se comprobó que eres la dueña). */
+function AvisosBadge() {
+  const { unseen } = useHqAvisos();
+  if (unseen === 0) return null;
+  return (
+    <span className="ml-1 inline-grid min-w-5 h-5 place-items-center rounded-full bg-pa-red px-1.5 text-[11px] font-bold text-paper">
+      {unseen > 9 ? "9+" : unseen}
+    </span>
   );
 }
 
