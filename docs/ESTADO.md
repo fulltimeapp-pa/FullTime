@@ -356,6 +356,15 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 
 ## Pendiente
 
+**Para empezar la próxima sesión (pedido de Bárbara, 9-oct):**
+- Probar Automatizaciones en la web real: entrar a HQ → Automatizaciones y tocar "Revisar ahora"
+  (debe decir "Todo al día"). Luego en el Inbox poner la conversación de Carlos en "Le toca a la
+  otra persona" con último contacto de hace 4 días y volver a "Revisar ahora": debe crear la tarea
+  "Mandar seguimiento a Carlos Rivera".
+- Preguntar cómo le fue en la demo con Carlos (videollamada del 9-oct, 5 pm, Meet
+  meet.google.com/qci-acma-ccq) y anotarla en HQ → Reuniones.
+- Los videos tutoriales quedaron para la semana del 12-oct.
+
 **Pruebas con el celular (Bárbara):**
 - "No puedo" sin internet (baja prioridad): abrir la convocatoria con internet, apagar la red y
   tocar "No puedo". A los 10 s máximo debe salir error con "Reintentar" (arreglo 758ec8e, falta
