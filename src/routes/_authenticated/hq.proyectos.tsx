@@ -2,12 +2,13 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, Plus, Target, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Flame, Plus, Target, Trash2, X } from "lucide-react";
 import { HqHeader } from "@/components/hq/HqShell";
 import { DateField, formatDayEs } from "@/components/ui/date-field";
 import { friendlyError } from "@/lib/errors";
 import {
-  PROJECT_STATUS, daysFromToday, deleteProject, listProjects, listTasks, saveProject, saveTask, setTaskDone,
+  PROJECT_STATUS, daysFromToday, deleteProject, deleteTask, listProjects, listTasks, reorderTasks, saveProject, saveTask,
+  setTaskDone, sortByPosition,
   type HqProject, type HqProjectInput, type HqTask, type ProjectStatus,
 } from "@/lib/hq";
 
@@ -43,7 +44,7 @@ function HqProyectos() {
   const card = (p: HqProject) => {
     const ts = tareasDe(p.id);
     const a = avance(ts);
-    const proximas = ts.filter((t) => !t.done_at).sort((x, y) => (x.due_date ?? "9999") < (y.due_date ?? "9999") ? -1 : 1).slice(0, 3);
+    const proximas = sortByPosition(ts.filter((t) => !t.done_at)).slice(0, 3);
     const late = p.due_date && p.status !== "terminado" && daysFromToday(p.due_date) < 0;
     return (
       <button
@@ -162,7 +163,11 @@ function ProjectModal({ id, initial, tasks, onClose, onChanged }: {
     onError: (e) => setError(friendlyError(e, "No pudimos borrarlo. Vuelve a intentarlo.")),
   });
   const addMut = useMutation({
-    mutationFn: () => saveTask({ title: nueva, due_date: nuevaFecha || null, urgent: false, prospect_id: null, project_id: id! }),
+    // Las nuevas quedan al final de tu orden.
+    mutationFn: () => saveTask({
+      title: nueva, due_date: nuevaFecha || null, urgent: false, prospect_id: null, project_id: id!,
+      position: tasks.reduce((m, t) => Math.max(m, (t.position ?? -1) + 1), tasks.length),
+    }),
     onSuccess: () => { setNueva(""); setNuevaFecha(""); onChanged(); },
     onError: (e) => setError(friendlyError(e, "No pudimos agregar la tarea. Vuelve a intentarlo.")),
   });
@@ -172,8 +177,22 @@ function ProjectModal({ id, initial, tasks, onClose, onChanged }: {
     onError: (e) => setError(friendlyError(e, "No pudimos marcarla. Vuelve a intentarlo.")),
   });
 
-  const pendientes = tasks.filter((t) => !t.done_at);
-  const hechas = tasks.filter((t) => t.done_at);
+  const moveMut = useMutation({
+    mutationFn: (ordered: HqTask[]) => reorderTasks(ordered),
+    onSuccess: onChanged,
+    onError: (e) => { setError(friendlyError(e, "No pudimos cambiar el orden. Vuelve a intentarlo.")); onChanged(); },
+  });
+  const [editando, setEditando] = useState<string | null>(null);
+
+  const pendientes = sortByPosition(tasks.filter((t) => !t.done_at));
+  const hechas = sortByPosition(tasks.filter((t) => t.done_at));
+  const mover = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= pendientes.length) return;
+    const ordered = [...pendientes];
+    [ordered[i], ordered[j]] = [ordered[j], ordered[i]];
+    moveMut.mutate([...ordered, ...hechas]);
+  };
   const a = avance(tasks);
 
   return (
@@ -244,33 +263,108 @@ function ProjectModal({ id, initial, tasks, onClose, onChanged }: {
               <p className="mt-3 text-sm text-ink/50">Todavía no tiene tareas.</p>
             ) : (
               <ul className="mt-3 space-y-2">
-                {[...pendientes, ...hechas].map((t) => {
+                {[...pendientes, ...hechas].map((t, i) => {
                   const done = !!t.done_at;
+                  if (editando === t.id) {
+                    return <TaskEditor key={t.id} task={t} onClose={() => setEditando(null)} onChanged={onChanged} onError={setError} />;
+                  }
                   return (
-                    <li key={t.id} className="flex items-center gap-3 rounded-xl border-2 border-ink/15 bg-card px-3 py-2">
+                    <li key={t.id} className="flex items-center gap-2 rounded-xl border-2 border-ink/15 bg-card px-2 py-2">
                       <button
                         type="button"
                         onClick={() => doneMut.mutate({ tid: t.id, done: !done })}
                         aria-label={done ? "Marcar como pendiente" : "Marcar como hecha"}
-                        className={`grid h-6 w-6 shrink-0 place-items-center rounded-md border-2 border-ink ${done ? "bg-lime" : "bg-paper hover:bg-lime/40"}`}
+                        className={`grid h-7 w-7 shrink-0 place-items-center rounded-md border-2 border-ink ${done ? "bg-lime" : "bg-paper hover:bg-lime/40"}`}
                       >
                         {done && <Check size={14} strokeWidth={3} />}
                       </button>
-                      <span className={`min-w-0 flex-1 text-sm font-semibold ${done ? "line-through text-ink/45" : ""}`}>{t.title}</span>
-                      {t.due_date && <span className="text-xs text-ink/50">{formatDayEs(t.due_date)}</span>}
+                      <button type="button" onClick={() => setEditando(t.id)} className="min-w-0 flex-1 text-left" aria-label={`Editar ${t.title}`}>
+                        <span className={`block text-sm font-semibold ${done ? "line-through text-ink/45" : ""}`}>
+                          {t.urgent && !done && <Flame size={13} className="inline -mt-0.5 mr-1 text-pa-red" />}
+                          {t.title}
+                        </span>
+                        {t.due_date && <span className="block text-xs text-ink/50">{formatDayEs(t.due_date)}</span>}
+                      </button>
+                      {!done && (
+                        <span className="flex shrink-0 gap-1">
+                          <button
+                            type="button" onClick={() => mover(i, -1)} disabled={i === 0 || moveMut.isPending}
+                            aria-label="Subir" className="grid h-8 w-8 place-items-center rounded-lg border-2 border-ink/20 hover:border-ink disabled:opacity-25"
+                          >
+                            <ArrowUp size={15} />
+                          </button>
+                          <button
+                            type="button" onClick={() => mover(i, 1)} disabled={i === pendientes.length - 1 || moveMut.isPending}
+                            aria-label="Bajar" className="grid h-8 w-8 place-items-center rounded-lg border-2 border-ink/20 hover:border-ink disabled:opacity-25"
+                          >
+                            <ArrowDown size={15} />
+                          </button>
+                        </span>
+                      )}
                     </li>
                   );
                 })}
               </ul>
             )}
-            <p className="mt-3 text-xs text-ink/50">
-              Para cambiar fecha, urgencia o prospecto de una tarea, ábrela en <Link to="/hq/tareas" className="underline">Tareas</Link>.
-            </p>
+            <p className="mt-3 text-xs text-ink/50">Toca una tarea para cambiarle el nombre, la fecha o borrarla. Las flechas cambian el orden.</p>
           </section>
         )}
 
         {error && <p className="mt-3 rounded-lg border-2 border-pa-red bg-pa-red/10 px-3 py-2 text-sm font-medium text-pa-red">{error}</p>}
       </div>
     </div>
+  );
+}
+
+/** Edición rápida de una tarea dentro del proyecto. */
+function TaskEditor({ task, onClose, onChanged, onError }: {
+  task: HqTask; onClose: () => void; onChanged: () => void; onError: (msg: string) => void;
+}) {
+  const [title, setTitle] = useState(task.title);
+  const [due, setDue] = useState(task.due_date ?? "");
+  const [urgent, setUrgent] = useState(task.urgent);
+
+  const saveMut = useMutation({
+    mutationFn: () => saveTask({ title, due_date: due || null, urgent, prospect_id: task.prospect_id }, task.id),
+    onSuccess: () => { onChanged(); onClose(); },
+    onError: (e) => onError(friendlyError(e, "No pudimos guardar la tarea. Vuelve a intentarlo.")),
+  });
+  const delMut = useMutation({
+    mutationFn: () => deleteTask(task.id),
+    onSuccess: () => { toast.success("Tarea borrada"); onChanged(); onClose(); },
+    onError: (e) => onError(friendlyError(e, "No pudimos borrarla. Vuelve a intentarlo.")),
+  });
+
+  return (
+    <li className="rounded-xl border-2 border-ink bg-lime/15 p-3">
+      <form onSubmit={(e) => { e.preventDefault(); onError(""); saveMut.mutate(); }} className="space-y-2">
+        <input
+          value={title} onChange={(e) => setTitle(e.target.value)} autoFocus aria-label="Nombre de la tarea"
+          className="w-full rounded-lg border-2 border-ink/20 focus:border-ink bg-paper px-3 py-2 text-sm font-semibold outline-none"
+        />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-40">
+            <DateField value={due} onChange={setDue} ariaLabel="Para cuándo" className="w-full rounded-lg border-2 border-ink/20 bg-paper px-3 py-2 text-sm" />
+          </div>
+          {due && <button type="button" onClick={() => setDue("")} className="text-xs font-semibold underline text-ink/60">Quitar fecha</button>}
+          <label className="flex items-center gap-1.5 text-sm font-semibold">
+            <input type="checkbox" checked={urgent} onChange={(e) => setUrgent(e.target.checked)} className="h-4 w-4" /> Urgente 🔥
+          </label>
+        </div>
+        <div className="flex items-center gap-2 pt-1">
+          <button type="submit" disabled={saveMut.isPending} className="btn-primary !py-1.5 !px-3 !text-sm">
+            {saveMut.isPending ? "Guardando…" : "Guardar"}
+          </button>
+          <button type="button" onClick={onClose} className="btn-ghost !py-1.5 !px-3 !text-sm">Cancelar</button>
+          <button
+            type="button" disabled={delMut.isPending}
+            onClick={() => { if (confirm(`¿Borrar "${task.title}"?`)) delMut.mutate(); }}
+            className="ml-auto inline-flex items-center gap-1 text-sm font-semibold text-pa-red"
+          >
+            <Trash2 size={14} /> Borrar
+          </button>
+        </div>
+      </form>
+    </li>
   );
 }

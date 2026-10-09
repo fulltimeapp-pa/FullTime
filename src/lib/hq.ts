@@ -151,11 +151,15 @@ export type HqTask = {
   urgent: boolean;
   prospect_id: string | null;
   project_id: string | null;
+  position: number | null; // orden manual dentro del proyecto
   done_at: string | null;
 };
 
-/** project_id es opcional: si no viene, al editar no se toca el proyecto de la tarea. */
-export type HqTaskInput = Pick<HqTask, "title" | "due_date" | "urgent" | "prospect_id"> & { project_id?: string | null };
+/** project_id y position son opcionales: si no vienen, al editar no se tocan. */
+export type HqTaskInput = Pick<HqTask, "title" | "due_date" | "urgent" | "prospect_id"> & {
+  project_id?: string | null;
+  position?: number | null;
+};
 
 const tasks = () => supabase.from("hq_tasks" as never) as any;
 
@@ -180,6 +184,24 @@ export async function setTaskDone(id: string, done: boolean): Promise<void> {
 export async function deleteTask(id: string): Promise<void> {
   const { error } = await tasks().delete().eq("id", id);
   if (error) throw error;
+}
+
+/** Tareas de un proyecto en tu orden (las sin orden van al final, por fecha). */
+export function sortByPosition(list: HqTask[]): HqTask[] {
+  return [...list].sort(
+    (a, b) =>
+      (a.position ?? Number.MAX_SAFE_INTEGER) - (b.position ?? Number.MAX_SAFE_INTEGER) ||
+      (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999") ||
+      a.created_at.localeCompare(b.created_at),
+  );
+}
+
+/** Guarda el orden: cada tarea queda en la posición de la lista. Solo actualiza las que cambian. */
+export async function reorderTasks(ordered: HqTask[]): Promise<void> {
+  const changes = ordered.map((t, i) => ({ t, i })).filter(({ t, i }) => t.position !== i);
+  const results = await Promise.all(changes.map(({ t, i }) => tasks().update({ position: i }).eq("id", t.id)));
+  const failed = results.find((r: { error: unknown }) => r.error);
+  if (failed) throw failed.error;
 }
 
 export type ProjectStatus = "activo" | "pausa" | "terminado";

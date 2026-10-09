@@ -244,7 +244,13 @@ Reemplaza la Tarea 1.
 - En Tareas, cada tarea puede elegir su proyecto y muestra "📁 nombre del proyecto".
 - Tabla nueva `hq_projects` y columna `project_id` en `hq_tasks` (migración
   `20261009190000_hq_proyectos.sql`). Si se borra un proyecto, sus tareas quedan sueltas. Solo la
-  dueña lo ve (probado en PGlite). Falta: aplicar la migración y probarlo en la web real.
+  dueña lo ve (probado en PGlite). Migración aplicada y probado en la web real por Bárbara (9-oct).
+- Bárbara cargó 10 tareas en "Primeros 5 clubes" con un SQL suelto (no es migración).
+- Orden manual y edición dentro del proyecto (pedido de Bárbara, 9-oct): flechas ↑ ↓ en las
+  pendientes; al tocar una tarea se edita ahí mismo (nombre, fecha, urgente) o se borra. Dentro del
+  proyecto manda tu orden; en Tareas, Inicio y Calendario sigue el orden por fecha. Columna
+  `position` en `hq_tasks` (migración `20261009200000_hq_tareas_orden.sql`, arranca con el orden por
+  fecha). Falta: aplicar la migración y probarlo en la web real.
 
 ### Sección de Ayuda (9-oct)
 - `/ayuda` (pública, no hace falta entrar): preguntas frecuentes con pestañas "Soy entrenador" y
