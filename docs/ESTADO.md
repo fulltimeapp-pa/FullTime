@@ -259,7 +259,11 @@ Reemplaza la Tarea 1.
   Flechas en cada tarjeta para pasarla al estado siguiente o anterior.
 - En el Calendario de HQ salen las publicaciones con fecha ("Contenido"); las publicadas, tachadas.
 - Tabla nueva `hq_posts` (migración `20261009210000_hq_contenido.sql`), solo la dueña la ve
-  (probado en PGlite). Falta: aplicar la migración y probarlo en la web real.
+  (probado en PGlite). Migración aplicada y probado en la web real por Bárbara (9-oct): funciona.
+- Se pasó el artefacto "Calendario FullTime Octubre" (claude.ai) a HQ con un SQL suelto: 4 posts
+  con su texto y hashtags + 4 rutinas de stories (Programada) y 4 tareas. No quedan sincronizados:
+  desde ahora octubre se maneja en HQ. El Post 11 no salió el 6 (cumpleaños de su mamá) y se
+  reprogramó al domingo 11 en la noche; "Contestar comentarios" pasó al lunes 12.
 
 ### Sección de Ayuda (9-oct)
 - `/ayuda` (pública, no hace falta entrar): preguntas frecuentes con pestañas "Soy entrenador" y
