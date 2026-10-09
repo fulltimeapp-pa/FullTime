@@ -182,6 +182,12 @@ function PlayerHome() {
           </Link>
         </section>
 
+        <p className="mt-4 text-sm">
+          <Link to="/ayuda" search={{ para: "jugadora" }} className="font-semibold text-ink/60 underline hover:text-ink">
+            ¿No te llegan los avisos o tienes dudas? Ver ayuda
+          </Link>
+        </p>
+
         <section className="mt-10">
           <h2 className="font-display text-2xl md:text-3xl font-bold">
             Próximas <span className="marker-underline">convocatorias</span>

@@ -237,6 +237,14 @@ Reemplaza la Tarea 1.
 - Lógica en `src/lib/hq-avisos.ts` (`buildAvisos`), probada con datos de ejemplo (12 casos).
   Probado en la web real por Bárbara (9-oct): funciona.
 
+### Sección de Ayuda (9-oct)
+- `/ayuda` (pública, no hace falta entrar): preguntas frecuentes con pestañas "Soy entrenador" y
+  "Soy jugadora" (invitar, convocar, entrenos del mes, quién vio el aviso, recordatorios, cambios,
+  asistencia, cuerpo técnico, confirmar, avisos en iPhone y Android, contraseña, quién ve mis datos)
+  y botón de WhatsApp +507 6991-1552. Los textos usan los nombres reales de los botones.
+- Acceso: "Ayuda" en el menú del entrenador y enlace "¿No te llegan los avisos…? Ver ayuda" en el
+  inicio de la jugadora. Probada en tamaño celular (sin scroll de lado).
+
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes
   "owner"/"admin"). Los nombres viven en `ROLE_LABEL` de `src/lib/active-club.ts`.

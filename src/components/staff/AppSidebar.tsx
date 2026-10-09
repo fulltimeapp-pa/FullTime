@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Users, Trophy, Dumbbell, Calendar, User, LogOut, Shield, BarChart3 } from "lucide-react";
+import { Home, Users, Trophy, Dumbbell, Calendar, User, LogOut, Shield, BarChart3, LifeBuoy } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -30,6 +30,7 @@ const items = [
   { title: "Asistencia", url: "/asistencia", icon: BarChart3 },
 
   { title: "Perfil", url: "/perfil-entrenador", icon: User },
+  { title: "Ayuda", url: "/ayuda", icon: LifeBuoy },
 ] as const;
 
 export function AppSidebar() {
