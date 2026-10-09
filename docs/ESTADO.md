@@ -274,8 +274,8 @@ Reemplaza la Tarea 1.
 - Pestaña **Plantillas**: mensajes listos con botón Copiar. Arranca con 5 (responder comentario,
   contacto referido, invitar a demo, seguimiento, mandar la guía), editables.
 - Tablas nuevas `hq_templates` y `hq_conversations` (migración `20261009220000_hq_inbox.sql`, trae
-  las 5 plantillas). Solo la dueña las ve (probado en PGlite). Falta: aplicar la migración y
-  probarlo en la web real.
+  las 5 plantillas). Solo la dueña las ve (probado en PGlite). Migración aplicada y probado en la
+  web real por Bárbara (9-oct): funciona.
 
 ### Sección de Ayuda (9-oct)
 - `/ayuda` (pública, no hace falta entrar): preguntas frecuentes con pestañas "Soy entrenador" y
