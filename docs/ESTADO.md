@@ -190,7 +190,7 @@ Reemplaza la Tarea 1.
   HQ"). El botón del panel del club ahora dice "🛠 FullTime HQ".
 - Probado en la web real (8-oct): Bárbara agregó su primer prospecto (Carlos Rivera, Inter CF,
   demo agendada) y aparece en "Para hoy" como "Mañana".
-- Siguientes fases: Contenido, Inbox, Proyectos, Automatizaciones, Jarvis.
+- Siguientes fases: Contenido, Inbox, Automatizaciones, Jarvis.
 
 ### FullTime HQ: Reuniones (9-oct)
 - `/hq/reuniones`: anotar cada reunión con título, fecha, con quién, prospecto del CRM, qué pasó,
@@ -236,6 +236,15 @@ Reemplaza la Tarea 1.
   la pantalla o con "Marcar todo como visto"); en otro aparato vuelven a salir como nuevos.
 - Lógica en `src/lib/hq-avisos.ts` (`buildAvisos`), probada con datos de ejemplo (12 casos).
   Probado en la web real por Bárbara (9-oct): funciona.
+
+### FullTime HQ: Proyectos (9-oct)
+- `/hq/proyectos`: tarjetas con nombre, meta, fecha límite, estado (activo, en pausa, terminado),
+  barra de avance ("3 de 8 tareas hechas") y próximas tareas. Al abrir uno: editarlo, agregarle
+  tareas (con fecha opcional) y marcarlas como hechas. Los terminados se esconden en "Ver terminados".
+- En Tareas, cada tarea puede elegir su proyecto y muestra "📁 nombre del proyecto".
+- Tabla nueva `hq_projects` y columna `project_id` en `hq_tasks` (migración
+  `20261009190000_hq_proyectos.sql`). Si se borra un proyecto, sus tareas quedan sueltas. Solo la
+  dueña lo ve (probado en PGlite). Falta: aplicar la migración y probarlo en la web real.
 
 ### Sección de Ayuda (9-oct)
 - `/ayuda` (pública, no hace falta entrar): preguntas frecuentes con pestañas "Soy entrenador" y

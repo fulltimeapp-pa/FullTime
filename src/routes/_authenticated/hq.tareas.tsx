@@ -7,8 +7,8 @@ import { HqHeader } from "@/components/hq/HqShell";
 import { DateField, formatDayEs } from "@/components/ui/date-field";
 import { friendlyError } from "@/lib/errors";
 import {
-  daysFromToday, deleteTask, listProspects, listTasks, saveTask, setTaskDone, todayPA,
-  type HqTask, type HqTaskInput, type Prospect,
+  daysFromToday, deleteTask, listProjects, listProspects, listTasks, saveTask, setTaskDone, todayPA,
+  type HqProject, type HqTask, type HqTaskInput, type Prospect,
 } from "@/lib/hq";
 
 export const Route = createFileRoute("/_authenticated/hq/tareas")({
@@ -20,6 +20,8 @@ function HqTareas() {
   const tasksQ = useQuery({ queryKey: ["hq-tasks"], queryFn: listTasks });
   const prospectsQ = useQuery({ queryKey: ["hq-prospects"], queryFn: listProspects });
   const prospects = prospectsQ.data ?? [];
+  const projectsQ = useQuery({ queryKey: ["hq-projects"], queryFn: listProjects });
+  const projects = projectsQ.data ?? [];
   const [nueva, setNueva] = useState("");
   const [editing, setEditing] = useState<HqTask | null>(null);
   const [verHechas, setVerHechas] = useState(false);
@@ -47,6 +49,7 @@ function HqTareas() {
   ];
   const hechas = all.filter((t) => t.done_at).sort((a, b) => (b.done_at! > a.done_at! ? 1 : -1));
   const nombre = (id: string | null) => prospects.find((p) => p.id === id)?.name;
+  const proyecto = (id: string | null) => projects.find((p) => p.id === id)?.name;
 
   const row = (t: HqTask, late = false) => {
     const done = !!t.done_at;
@@ -67,6 +70,7 @@ function HqTareas() {
           <p className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-ink/60">
             {t.due_date && <span className={late ? "font-semibold text-pa-red" : ""}>{formatDayEs(t.due_date)}</span>}
             {nombre(t.prospect_id) && <span>· {nombre(t.prospect_id)}</span>}
+            {proyecto(t.project_id) && <span className="rounded-full bg-ink/10 px-1.5 font-semibold">📁 {proyecto(t.project_id)}</span>}
           </p>
         </button>
       </li>
@@ -127,6 +131,7 @@ function HqTareas() {
         <TaskModal
           task={editing}
           prospects={prospects}
+          projects={projects}
           onClose={() => setEditing(null)}
           onSaved={() => { setEditing(null); refresh(); }}
         />
@@ -137,11 +142,11 @@ function HqTareas() {
 
 const inputCls = "mt-1 w-full rounded-xl border-2 border-ink/20 focus:border-ink bg-paper px-3 py-2.5 outline-none font-normal";
 
-function TaskModal({ task, prospects, onClose, onSaved }: {
-  task: HqTask; prospects: Prospect[]; onClose: () => void; onSaved: () => void;
+function TaskModal({ task, prospects, projects, onClose, onSaved }: {
+  task: HqTask; prospects: Prospect[]; projects: HqProject[]; onClose: () => void; onSaved: () => void;
 }) {
   const [v, setV] = useState<HqTaskInput>({
-    title: task.title, due_date: task.due_date, urgent: task.urgent, prospect_id: task.prospect_id,
+    title: task.title, due_date: task.due_date, urgent: task.urgent, prospect_id: task.prospect_id, project_id: task.project_id,
   });
   const set = (patch: Partial<HqTaskInput>) => setV((prev) => ({ ...prev, ...patch }));
   const [error, setError] = useState("");
@@ -184,6 +189,14 @@ function TaskModal({ task, prospects, onClose, onSaved }: {
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={v.urgent} onChange={(e) => set({ urgent: e.target.checked })} className="h-4 w-4" />
             Urgente 🔥
+          </label>
+          <label className="block">Proyecto
+            <select className={inputCls} value={v.project_id ?? ""} onChange={(e) => set({ project_id: e.target.value || null })}>
+              <option value="">Ninguno</option>
+              {projects.filter((p) => p.status !== "terminado" || p.id === v.project_id).map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
           </label>
           <label className="block">Prospecto del CRM
             <select className={inputCls} value={v.prospect_id ?? ""} onChange={(e) => set({ prospect_id: e.target.value || null })}>

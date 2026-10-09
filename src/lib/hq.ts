@@ -150,10 +150,12 @@ export type HqTask = {
   due_date: string | null; // YYYY-MM-DD
   urgent: boolean;
   prospect_id: string | null;
+  project_id: string | null;
   done_at: string | null;
 };
 
-export type HqTaskInput = Pick<HqTask, "title" | "due_date" | "urgent" | "prospect_id">;
+/** project_id es opcional: si no viene, al editar no se toca el proyecto de la tarea. */
+export type HqTaskInput = Pick<HqTask, "title" | "due_date" | "urgent" | "prospect_id"> & { project_id?: string | null };
 
 const tasks = () => supabase.from("hq_tasks" as never) as any;
 
@@ -177,6 +179,45 @@ export async function setTaskDone(id: string, done: boolean): Promise<void> {
 
 export async function deleteTask(id: string): Promise<void> {
   const { error } = await tasks().delete().eq("id", id);
+  if (error) throw error;
+}
+
+export type ProjectStatus = "activo" | "pausa" | "terminado";
+
+export const PROJECT_STATUS: { value: ProjectStatus; label: string }[] = [
+  { value: "activo", label: "Activo" },
+  { value: "pausa", label: "En pausa" },
+  { value: "terminado", label: "Terminado" },
+];
+
+export type HqProject = {
+  id: string;
+  created_at: string;
+  name: string;
+  goal: string | null;
+  due_date: string | null; // YYYY-MM-DD
+  status: ProjectStatus;
+};
+
+export type HqProjectInput = Omit<HqProject, "id" | "created_at">;
+
+const projects = () => supabase.from("hq_projects" as never) as any;
+
+export async function listProjects(): Promise<HqProject[]> {
+  const { data, error } = await projects().select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as HqProject[];
+}
+
+export async function saveProject(input: HqProjectInput, id?: string): Promise<void> {
+  const clean = { ...input, name: input.name.trim(), goal: input.goal?.trim() || null, due_date: input.due_date || null };
+  if (!clean.name) throw new Error("Ponle un nombre al proyecto.");
+  const { error } = await (id ? projects().update(clean).eq("id", id) : projects().insert(clean));
+  if (error) throw error;
+}
+
+export async function deleteProject(id: string): Promise<void> {
+  const { error } = await projects().delete().eq("id", id);
   if (error) throw error;
 }
 
@@ -282,7 +323,7 @@ export const HQ_MENU: { group: string; items: HqItem[] }[] = [
     items: [
       { title: "Inicio", to: "/hq", icon: Home, ready: true },
       { title: "Notificaciones", to: "/hq/notificaciones", icon: Bell, ready: true },
-      { title: "Proyectos", to: "/hq/proyectos", icon: FolderKanban, ready: false },
+      { title: "Proyectos", to: "/hq/proyectos", icon: FolderKanban, ready: true },
       { title: "Clientes", to: "/panel-fulltime", icon: Building2, ready: true },
       { title: "Jarvis", to: "/hq/jarvis", icon: Bot, ready: false },
     ],

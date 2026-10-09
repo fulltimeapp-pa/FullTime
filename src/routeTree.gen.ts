@@ -44,6 +44,7 @@ import { Route as AuthenticatedHqCalendarioRouteImport } from './routes/_authent
 import { Route as AuthenticatedHqCotizacionesRouteImport } from './routes/_authenticated/hq.cotizaciones'
 import { Route as AuthenticatedHqCrmRouteImport } from './routes/_authenticated/hq.crm'
 import { Route as AuthenticatedHqNotificacionesRouteImport } from './routes/_authenticated/hq.notificaciones'
+import { Route as AuthenticatedHqProyectosRouteImport } from './routes/_authenticated/hq.proyectos'
 import { Route as AuthenticatedHqReunionesRouteImport } from './routes/_authenticated/hq.reuniones'
 import { Route as AuthenticatedHqTareasRouteImport } from './routes/_authenticated/hq.tareas'
 import { Route as ApiPublicCronRemindersRouteImport } from './routes/api/public/cron/reminders'
@@ -232,6 +233,12 @@ const AuthenticatedHqNotificacionesRoute =
     path: '/notificaciones',
     getParentRoute: () => AuthenticatedHqRoute,
   } as any)
+const AuthenticatedHqProyectosRoute =
+  AuthenticatedHqProyectosRouteImport.update({
+    id: '/proyectos',
+    path: '/proyectos',
+    getParentRoute: () => AuthenticatedHqRoute,
+  } as any)
 const AuthenticatedHqReunionesRoute =
   AuthenticatedHqReunionesRouteImport.update({
     id: '/reuniones',
@@ -281,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
   '/hq/crm': typeof AuthenticatedHqCrmRoute
   '/hq/notificaciones': typeof AuthenticatedHqNotificacionesRoute
+  '/hq/proyectos': typeof AuthenticatedHqProyectosRoute
   '/hq/reuniones': typeof AuthenticatedHqReunionesRoute
   '/hq/tareas': typeof AuthenticatedHqTareasRoute
   '/call-ups/': typeof AuthenticatedCallUpsIndexRoute
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
   '/hq/crm': typeof AuthenticatedHqCrmRoute
   '/hq/notificaciones': typeof AuthenticatedHqNotificacionesRoute
+  '/hq/proyectos': typeof AuthenticatedHqProyectosRoute
   '/hq/reuniones': typeof AuthenticatedHqReunionesRoute
   '/hq/tareas': typeof AuthenticatedHqTareasRoute
   '/call-ups': typeof AuthenticatedCallUpsIndexRoute
@@ -358,6 +367,7 @@ export interface FileRoutesById {
   '/_authenticated/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
   '/_authenticated/hq/crm': typeof AuthenticatedHqCrmRoute
   '/_authenticated/hq/notificaciones': typeof AuthenticatedHqNotificacionesRoute
+  '/_authenticated/hq/proyectos': typeof AuthenticatedHqProyectosRoute
   '/_authenticated/hq/reuniones': typeof AuthenticatedHqReunionesRoute
   '/_authenticated/hq/tareas': typeof AuthenticatedHqTareasRoute
   '/_authenticated/call-ups/': typeof AuthenticatedCallUpsIndexRoute
@@ -399,6 +409,7 @@ export interface FileRouteTypes {
     | '/hq/cotizaciones'
     | '/hq/crm'
     | '/hq/notificaciones'
+    | '/hq/proyectos'
     | '/hq/reuniones'
     | '/hq/tareas'
     | '/call-ups/'
@@ -435,6 +446,7 @@ export interface FileRouteTypes {
     | '/hq/cotizaciones'
     | '/hq/crm'
     | '/hq/notificaciones'
+    | '/hq/proyectos'
     | '/hq/reuniones'
     | '/hq/tareas'
     | '/call-ups'
@@ -475,6 +487,7 @@ export interface FileRouteTypes {
     | '/_authenticated/hq/cotizaciones'
     | '/_authenticated/hq/crm'
     | '/_authenticated/hq/notificaciones'
+    | '/_authenticated/hq/proyectos'
     | '/_authenticated/hq/reuniones'
     | '/_authenticated/hq/tareas'
     | '/_authenticated/call-ups/'
@@ -742,6 +755,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHqNotificacionesRouteImport
       parentRoute: typeof AuthenticatedHqRoute
     }
+    '/_authenticated/hq/proyectos': {
+      id: '/_authenticated/hq/proyectos'
+      path: '/proyectos'
+      fullPath: '/hq/proyectos'
+      preLoaderRoute: typeof AuthenticatedHqProyectosRouteImport
+      parentRoute: typeof AuthenticatedHqRoute
+    }
     '/_authenticated/hq/reuniones': {
       id: '/_authenticated/hq/reuniones'
       path: '/reuniones'
@@ -802,6 +822,7 @@ interface AuthenticatedHqRouteChildren {
   AuthenticatedHqCotizacionesRoute: typeof AuthenticatedHqCotizacionesRoute
   AuthenticatedHqCrmRoute: typeof AuthenticatedHqCrmRoute
   AuthenticatedHqNotificacionesRoute: typeof AuthenticatedHqNotificacionesRoute
+  AuthenticatedHqProyectosRoute: typeof AuthenticatedHqProyectosRoute
   AuthenticatedHqReunionesRoute: typeof AuthenticatedHqReunionesRoute
   AuthenticatedHqTareasRoute: typeof AuthenticatedHqTareasRoute
   AuthenticatedHqIndexRoute: typeof AuthenticatedHqIndexRoute
@@ -813,6 +834,7 @@ const AuthenticatedHqRouteChildren: AuthenticatedHqRouteChildren = {
   AuthenticatedHqCotizacionesRoute: AuthenticatedHqCotizacionesRoute,
   AuthenticatedHqCrmRoute: AuthenticatedHqCrmRoute,
   AuthenticatedHqNotificacionesRoute: AuthenticatedHqNotificacionesRoute,
+  AuthenticatedHqProyectosRoute: AuthenticatedHqProyectosRoute,
   AuthenticatedHqReunionesRoute: AuthenticatedHqReunionesRoute,
   AuthenticatedHqTareasRoute: AuthenticatedHqTareasRoute,
   AuthenticatedHqIndexRoute: AuthenticatedHqIndexRoute,
