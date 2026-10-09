@@ -391,8 +391,8 @@ Lo que pidió, en su orden de importancia:
 Para decidir con Bárbara antes de construir: (a) CLAUDE.md pone "ampliar wellness o RPE" fuera del
 alcance; (b) periodo menstrual y lesiones son datos de salud de menores: necesitan reglas claras
 de quién los ve y permiso; (c) apunta a un nivel más profesional que el usuario actual (CLAUDE.md:
-entrenador con poco tiempo que no quiere aprender software). Bárbara quiere abrir una cuenta de
-goTeam para ver ideas.
+entrenador con poco tiempo que no quiere aprender software). Revisión completa de goTeam (9-oct):
+`docs/GOTEAM.md`, con propuesta en orden (hoja de partido → estadísticas → estado/lesiones).
 
 - **Idea: chat dentro de la app (Bárbara, 9-oct). Solo anotada, NO decidida.** Chat del equipo
   completo, chat entre jugadoras de uno a uno (sin que ellas armen grupos) y chat del entrenador con
