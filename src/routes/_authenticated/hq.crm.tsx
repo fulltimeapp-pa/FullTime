@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Phone, Plus, Trash2, X } from "lucide-react";
@@ -7,7 +7,7 @@ import { HqHeader } from "@/components/hq/HqShell";
 import { DateField, formatDayEs } from "@/components/ui/date-field";
 import { friendlyError } from "@/lib/errors";
 import {
-  STAGES, daysFromToday, deleteProspect, listClubs, listProspects, saveProspect,
+  STAGES, daysFromToday, deleteProspect, listClubs, listMeetings, listProspects, saveProspect,
   type Prospect, type ProspectInput, type ProspectStage,
 } from "@/lib/hq";
 
@@ -124,6 +124,39 @@ function ProspectCard({ p, onOpen }: { p: Prospect; onOpen: () => void }) {
   );
 }
 
+/** Reuniones anotadas con este prospecto (las más recientes primero). */
+function ProspectMeetings({ prospectId }: { prospectId: string }) {
+  const q = useQuery({ queryKey: ["hq-meetings", prospectId], queryFn: () => listMeetings(prospectId) });
+  const items = q.data ?? [];
+  return (
+    <div className="mt-4 rounded-xl border-2 border-ink/15 p-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-bold">Reuniones</p>
+        <Link to="/hq/reuniones" search={{ prospecto: prospectId }} className="text-sm font-semibold underline">
+          + Anotar reunión
+        </Link>
+      </div>
+      {q.isLoading ? (
+        <p className="mt-2 text-sm text-ink/50">Cargando…</p>
+      ) : q.isError ? (
+        <p className="mt-2 text-sm text-pa-red">No pudimos cargar sus reuniones.</p>
+      ) : items.length === 0 ? (
+        <p className="mt-2 text-sm text-ink/50">Todavía no hay reuniones con esta persona.</p>
+      ) : (
+        <ul className="mt-2 space-y-2">
+          {items.map((m) => (
+            <li key={m.id} className="text-sm">
+              <span className="font-mono text-xs text-ink/50">{formatDayEs(m.meeting_date)}</span>{" "}
+              <span className="font-semibold">{m.title}</span>
+              {m.next_steps && <p className="text-ink/70">Sigue: {m.next_steps}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 const inputCls = "mt-1 w-full rounded-xl border-2 border-ink/20 focus:border-ink bg-paper px-3 py-2.5 outline-none";
 
 function ProspectModal({ initial, id, clubs, onClose, onSaved }: {
@@ -192,6 +225,8 @@ function ProspectModal({ initial, id, clubs, onClose, onSaved }: {
               placeholder="Qué le interesó, qué preguntó, cuántas jugadoras tiene…" />
           </label>
         </div>
+
+        {id && <ProspectMeetings prospectId={id} />}
 
         {error && <p className="mt-3 rounded-lg border-2 border-pa-red bg-pa-red/10 px-3 py-2 text-sm font-medium text-pa-red">{error}</p>}
 

@@ -1,6 +1,6 @@
 # Estado de FullTime
 
-Última actualización: 8 de octubre de 2026.
+Última actualización: 9 de octubre de 2026.
 
 **Resumen:** las 8 tareas del plan están hechas y publicadas en https://fulltimeapp.vercel.app.
 
@@ -190,7 +190,16 @@ Reemplaza la Tarea 1.
   HQ"). El botón del panel del club ahora dice "🛠 FullTime HQ".
 - Probado en la web real (8-oct): Bárbara agregó su primer prospecto (Carlos Rivera, Inter CF,
   demo agendada) y aparece en "Para hoy" como "Mañana".
-- Siguientes fases: Tareas, Calendario y Reuniones → Cotizaciones → Contenido, Inbox, Jarvis.
+- Siguientes fases: Tareas y Calendario → Cotizaciones → Contenido, Inbox, Jarvis.
+
+### FullTime HQ: Reuniones (9-oct)
+- `/hq/reuniones`: anotar cada reunión con título, fecha, con quién, prospecto del CRM, qué pasó,
+  qué le gustó, qué preguntó o le preocupó y próximos pasos.
+- Al guardar se puede actualizar al prospecto de una vez (etapa, próximo paso y fecha; por defecto
+  "Demo agendada" pasa a "Demo hecha").
+- En la ficha del prospecto del CRM sale su lista de reuniones y "+ Anotar reunión".
+- Tabla nueva `meetings` (migración `20261009120000_hq_reuniones.sql`), solo la dueña la ve
+  (probado en PGlite). Falta: aplicar la migración y probarlo en la web real.
 
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes

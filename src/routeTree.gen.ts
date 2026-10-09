@@ -39,6 +39,7 @@ import { Route as AuthenticatedEntrenosNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedHqIndexRouteImport } from './routes/_authenticated/hq.index'
 import { Route as AuthenticatedHqSeccionRouteImport } from './routes/_authenticated/hq.$seccion'
 import { Route as AuthenticatedHqCrmRouteImport } from './routes/_authenticated/hq.crm'
+import { Route as AuthenticatedHqReunionesRouteImport } from './routes/_authenticated/hq.reuniones'
 import { Route as ApiPublicCronRemindersRouteImport } from './routes/api/public/cron/reminders'
 
 const IndexRoute = IndexRouteImport.update({
@@ -196,6 +197,12 @@ const AuthenticatedHqCrmRoute = AuthenticatedHqCrmRouteImport.update({
   path: '/crm',
   getParentRoute: () => AuthenticatedHqRoute,
 } as any)
+const AuthenticatedHqReunionesRoute =
+  AuthenticatedHqReunionesRouteImport.update({
+    id: '/reuniones',
+    path: '/reuniones',
+    getParentRoute: () => AuthenticatedHqRoute,
+  } as any)
 const ApiPublicCronRemindersRoute = ApiPublicCronRemindersRouteImport.update({
   id: '/api/public/cron/reminders',
   path: '/api/public/cron/reminders',
@@ -229,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/entrenos/new': typeof AuthenticatedEntrenosNewRoute
   '/hq/$seccion': typeof AuthenticatedHqSeccionRoute
   '/hq/crm': typeof AuthenticatedHqCrmRoute
+  '/hq/reuniones': typeof AuthenticatedHqReunionesRoute
   '/call-ups/': typeof AuthenticatedCallUpsIndexRoute
   '/entrenos/': typeof AuthenticatedEntrenosIndexRoute
   '/hq/': typeof AuthenticatedHqIndexRoute
@@ -258,6 +266,7 @@ export interface FileRoutesByTo {
   '/entrenos/new': typeof AuthenticatedEntrenosNewRoute
   '/hq/$seccion': typeof AuthenticatedHqSeccionRoute
   '/hq/crm': typeof AuthenticatedHqCrmRoute
+  '/hq/reuniones': typeof AuthenticatedHqReunionesRoute
   '/call-ups': typeof AuthenticatedCallUpsIndexRoute
   '/entrenos': typeof AuthenticatedEntrenosIndexRoute
   '/hq': typeof AuthenticatedHqIndexRoute
@@ -292,6 +301,7 @@ export interface FileRoutesById {
   '/_authenticated/entrenos/new': typeof AuthenticatedEntrenosNewRoute
   '/_authenticated/hq/$seccion': typeof AuthenticatedHqSeccionRoute
   '/_authenticated/hq/crm': typeof AuthenticatedHqCrmRoute
+  '/_authenticated/hq/reuniones': typeof AuthenticatedHqReunionesRoute
   '/_authenticated/call-ups/': typeof AuthenticatedCallUpsIndexRoute
   '/_authenticated/entrenos/': typeof AuthenticatedEntrenosIndexRoute
   '/_authenticated/hq/': typeof AuthenticatedHqIndexRoute
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
     | '/entrenos/new'
     | '/hq/$seccion'
     | '/hq/crm'
+    | '/hq/reuniones'
     | '/call-ups/'
     | '/entrenos/'
     | '/hq/'
@@ -355,6 +366,7 @@ export interface FileRouteTypes {
     | '/entrenos/new'
     | '/hq/$seccion'
     | '/hq/crm'
+    | '/hq/reuniones'
     | '/call-ups'
     | '/entrenos'
     | '/hq'
@@ -388,6 +400,7 @@ export interface FileRouteTypes {
     | '/_authenticated/entrenos/new'
     | '/_authenticated/hq/$seccion'
     | '/_authenticated/hq/crm'
+    | '/_authenticated/hq/reuniones'
     | '/_authenticated/call-ups/'
     | '/_authenticated/entrenos/'
     | '/_authenticated/hq/'
@@ -617,6 +630,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHqCrmRouteImport
       parentRoute: typeof AuthenticatedHqRoute
     }
+    '/_authenticated/hq/reuniones': {
+      id: '/_authenticated/hq/reuniones'
+      path: '/reuniones'
+      fullPath: '/hq/reuniones'
+      preLoaderRoute: typeof AuthenticatedHqReunionesRouteImport
+      parentRoute: typeof AuthenticatedHqRoute
+    }
     '/api/public/cron/reminders': {
       id: '/api/public/cron/reminders'
       path: '/api/public/cron/reminders'
@@ -660,12 +680,14 @@ const AuthenticatedEntrenosRouteWithChildren =
 interface AuthenticatedHqRouteChildren {
   AuthenticatedHqSeccionRoute: typeof AuthenticatedHqSeccionRoute
   AuthenticatedHqCrmRoute: typeof AuthenticatedHqCrmRoute
+  AuthenticatedHqReunionesRoute: typeof AuthenticatedHqReunionesRoute
   AuthenticatedHqIndexRoute: typeof AuthenticatedHqIndexRoute
 }
 
 const AuthenticatedHqRouteChildren: AuthenticatedHqRouteChildren = {
   AuthenticatedHqSeccionRoute: AuthenticatedHqSeccionRoute,
   AuthenticatedHqCrmRoute: AuthenticatedHqCrmRoute,
+  AuthenticatedHqReunionesRoute: AuthenticatedHqReunionesRoute,
   AuthenticatedHqIndexRoute: AuthenticatedHqIndexRoute,
 }
 

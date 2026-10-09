@@ -87,6 +87,61 @@ export async function deleteProspect(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export type Meeting = {
+  id: string;
+  created_at: string;
+  title: string;
+  meeting_date: string; // YYYY-MM-DD
+  attendees: string | null;
+  prospect_id: string | null;
+  summary: string | null;
+  liked: string | null;
+  concerns: string | null;
+  next_steps: string | null;
+};
+
+export type MeetingInput = Omit<Meeting, "id" | "created_at">;
+
+const meetings = () => supabase.from("meetings" as never) as any;
+
+export async function listMeetings(prospectId?: string): Promise<Meeting[]> {
+  let q = meetings().select("*").order("meeting_date", { ascending: false }).order("created_at", { ascending: false });
+  if (prospectId) q = q.eq("prospect_id", prospectId);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as Meeting[];
+}
+
+export async function saveMeeting(input: MeetingInput, id?: string): Promise<void> {
+  const t = (x: string | null) => x?.trim() || null;
+  const clean = {
+    ...input,
+    title: input.title.trim(),
+    attendees: t(input.attendees), summary: t(input.summary), liked: t(input.liked),
+    concerns: t(input.concerns), next_steps: t(input.next_steps),
+  };
+  if (!clean.title) throw new Error("Ponle un título a la reunión.");
+  if (!clean.meeting_date) throw new Error("Elige la fecha de la reunión.");
+  const { error } = await (id ? meetings().update(clean).eq("id", id) : meetings().insert(clean));
+  if (error) throw error;
+}
+
+export async function deleteMeeting(id: string): Promise<void> {
+  const { error } = await meetings().delete().eq("id", id);
+  if (error) throw error;
+}
+
+/** Actualiza solo la etapa y el próximo paso de un prospecto (desde una reunión). */
+export async function updateProspectFollowUp(
+  id: string,
+  patch: { stage: ProspectStage; next_step: string | null; next_date: string | null },
+): Promise<void> {
+  const { error } = await prospects()
+    .update({ stage: patch.stage, next_step: patch.next_step?.trim() || null, next_date: patch.next_date || null })
+    .eq("id", id);
+  if (error) throw error;
+}
+
 export async function listClubs(): Promise<HqClub[]> {
   const { data, error } = await supabase.rpc("platform_overview");
   if (error) throw error;
@@ -123,7 +178,7 @@ export const HQ_MENU: { group: string; items: HqItem[] }[] = [
     items: [
       { title: "Tareas", to: "/hq/tareas", icon: CheckSquare, ready: false },
       { title: "Calendario", to: "/hq/calendario", icon: CalendarDays, ready: false },
-      { title: "Reuniones", to: "/hq/reuniones", icon: Mic, ready: false },
+      { title: "Reuniones", to: "/hq/reuniones", icon: Mic, ready: true },
       { title: "Métricas", to: "/panel-fulltime", icon: TrendingUp, ready: true },
     ],
   },
