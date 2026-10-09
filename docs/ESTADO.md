@@ -361,8 +361,7 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   (debe decir "Todo al día"). Luego en el Inbox poner la conversación de Carlos en "Le toca a la
   otra persona" con último contacto de hace 4 días y volver a "Revisar ahora": debe crear la tarea
   "Mandar seguimiento a Carlos Rivera".
-- Preguntar cómo le fue en la demo con Carlos (videollamada del 9-oct, 5 pm, Meet
-  meet.google.com/qci-acma-ccq) y anotarla en HQ → Reuniones.
+- Decidir con Bárbara qué hacer con el feedback de Carlos (ver abajo) y si Carlos prueba la app.
 - Los videos tutoriales quedaron para la semana del 12-oct.
 
 **Pruebas con el celular (Bárbara):**
@@ -372,7 +371,26 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 - Avisos en Android: funcionan en iPhone; falta probar con la primera jugadora real que tenga
   Android (revisar en la base que tenga suscripción `fcm.googleapis.com`).
 
-**Siguientes mejoras (fuera del plan original):**
+**Feedback de Carlos Rivera (demo por Meet, 9-oct, ~40 min). NADA decidido todavía.**
+Hoy usa goTeam (lo paga el club). Dice que esas plataformas son caras y poco amigables; valora lo
+simple. Le gustó el proyecto y **se ofreció a probarlo** con su equipo y decir dónde se queda corto.
+Lo que pidió, en su orden de importancia:
+1. Wellness y RPE "automatizados": recordatorio a la jugadora (RPE 20–30 min después del entreno),
+   formulario de wellness editable, historial por jugadora ("cómo estuvo este mes") e informes
+   (ej. RPE de toda la pretemporada). Mencionó registrar el periodo menstrual.
+2. Estadísticas de partido: goles (con opción **autogol** y gol en contra sin cargárselo a una
+   jugadora), tarjetas, cambios, lesión en el partido, **minutos jugados** por jugadora y por
+   temporada (la duración del partido cambia por categoría: 60, 70… min). Estadísticas de cargas.
+3. Historial de lesiones por jugadora (fecha, zona, tiempo fuera; ver patrones).
+4. En la convocatoria: titulares vs solo convocadas, alineación y plan de partido simples dentro
+   del mismo partido (en goTeam hay que crearlos aparte).
+5. Accesos por equipo: cada entrenador ve solo su equipo; lo asigna el administrador del club.
+Para decidir con Bárbara antes de construir: (a) CLAUDE.md pone "ampliar wellness o RPE" fuera del
+alcance; (b) periodo menstrual y lesiones son datos de salud de menores: necesitan reglas claras
+de quién los ve y permiso; (c) apunta a un nivel más profesional que el usuario actual (CLAUDE.md:
+entrenador con poco tiempo que no quiere aprender software). Bárbara quiere abrir una cuenta de
+goTeam para ver ideas.
+
 - **Idea: chat dentro de la app (Bárbara, 9-oct). Solo anotada, NO decidida.** Chat del equipo
   completo, chat entre jugadoras de uno a uno (sin que ellas armen grupos) y chat del entrenador con
   cada jugadora. Antes de construir hay que decidir: (1) choca con CLAUDE.md, que pone "chat o
