@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, CalendarClock, Flame, Moon, Phone } from "lucide-react";
+import { AlertTriangle, CalendarClock, Flame, MessageCircle, Moon, Phone } from "lucide-react";
 import { HqHeader } from "@/components/hq/HqShell";
 import { formatDayEs } from "@/components/ui/date-field";
 import { friendlyError } from "@/lib/errors";
-import { daysFromToday, listClubs, listProspects, listTasks, setTaskDone, stageLabel } from "@/lib/hq";
+import { CONV_CHANNELS, daysFromToday, listClubs, listConversations, listProspects, listTasks, setTaskDone, stageLabel } from "@/lib/hq";
 
 export const Route = createFileRoute("/_authenticated/hq/")({
   component: HqInicio,
@@ -23,6 +23,7 @@ function HqInicio() {
   const prospectsQ = useQuery({ queryKey: ["hq-prospects"], queryFn: listProspects });
   const clubsQ = useQuery({ queryKey: ["hq-clubs"], queryFn: listClubs });
   const tasksQ = useQuery({ queryKey: ["hq-tasks"], queryFn: listTasks });
+  const convQ = useQuery({ queryKey: ["hq-conversations"], queryFn: listConversations });
   const qc = useQueryClient();
   const doneMut = useMutation({
     mutationFn: (id: string) => setTaskDone(id, true),
@@ -35,6 +36,7 @@ function HqInicio() {
   const abiertos = prospects.filter((p) => p.stage !== "pagando" && p.stage !== "perdido");
   const paraHoy = abiertos.filter((p) => p.next_date && daysFromToday(p.next_date) <= 1);
   const tareasHoy = (tasksQ.data ?? []).filter((t) => !t.done_at && t.due_date && daysFromToday(t.due_date) <= 0);
+  const meToca = (convQ.data ?? []).filter((c) => c.status === "me_toca");
   const porVencer = clubs.filter((c) => !c.paid_until && c.trial_days_left > 0 && c.trial_days_left <= 3);
   const dormidos = clubs.filter((c) => c.estado === "dormido");
 
@@ -58,7 +60,7 @@ function HqInicio() {
         ))}
       </div>
 
-      {(prospectsQ.isError || clubsQ.isError || tasksQ.isError) && (
+      {(prospectsQ.isError || clubsQ.isError || tasksQ.isError || convQ.isError) && (
         <p className="mt-6 rounded-lg border-2 border-pa-red bg-pa-red/10 px-3 py-2 text-sm font-medium text-pa-red">
           No pudimos cargar todo. Recarga la página.
         </p>
@@ -88,7 +90,23 @@ function HqInicio() {
             })}
           </ul>
         )}
-        {paraHoy.length === 0 && tareasHoy.length === 0 ? (
+        {meToca.length > 0 && (
+          <ul className="mt-3 space-y-2">
+            {meToca.map((c) => (
+              <li key={c.id} className="rounded-2xl border-2 border-ink bg-card p-4 flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-1 rounded-full bg-lime px-2.5 py-0.5 text-xs font-bold text-ink">
+                  <MessageCircle size={12} /> Responder
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{c.person}</p>
+                  <p className="text-xs text-ink/60">{CONV_CHANNELS.find((x) => x.value === c.channel)?.label}{c.summary ? ` · ${c.summary}` : ""}</p>
+                </div>
+                <Link to="/hq/inbox" className="text-sm font-semibold underline">Ver en Inbox</Link>
+              </li>
+            ))}
+          </ul>
+        )}
+        {paraHoy.length === 0 && tareasHoy.length === 0 && meToca.length === 0 ? (
           <p className="mt-3 rounded-2xl border-2 border-dashed border-ink/20 bg-paper p-5 text-sm text-ink/60">
             Nada pendiente para hoy. Agrega <Link to="/hq/tareas" className="font-semibold underline">tareas</Link> o agenda el próximo paso de tus prospectos en el <Link to="/hq/crm" className="font-semibold underline">CRM</Link>.
           </p>

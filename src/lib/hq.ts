@@ -387,6 +387,84 @@ export async function deletePost(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export type HqTemplate = { id: string; created_at: string; name: string; body: string };
+export type HqTemplateInput = Pick<HqTemplate, "name" | "body">;
+
+const templates = () => supabase.from("hq_templates" as never) as any;
+
+export async function listTemplates(): Promise<HqTemplate[]> {
+  const { data, error } = await templates().select("*").order("created_at");
+  if (error) throw error;
+  return (data ?? []) as HqTemplate[];
+}
+
+export async function saveTemplate(input: HqTemplateInput, id?: string): Promise<void> {
+  const clean = { name: input.name.trim(), body: input.body.trim() };
+  if (!clean.name) throw new Error("Ponle un nombre a la plantilla.");
+  if (!clean.body) throw new Error("Escribe el mensaje de la plantilla.");
+  const { error } = await (id ? templates().update(clean).eq("id", id) : templates().insert(clean));
+  if (error) throw error;
+}
+
+export async function deleteTemplate(id: string): Promise<void> {
+  const { error } = await templates().delete().eq("id", id);
+  if (error) throw error;
+}
+
+export type ConvChannel = "instagram" | "whatsapp" | "comentario" | "correo";
+export type ConvStatus = "me_toca" | "esperando" | "cerrada";
+
+export const CONV_CHANNELS: { value: ConvChannel; label: string }[] = [
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "instagram", label: "Instagram (DM)" },
+  { value: "comentario", label: "Comentario" },
+  { value: "correo", label: "Correo" },
+];
+export const CONV_STATUS: { value: ConvStatus; label: string }[] = [
+  { value: "me_toca", label: "Me toca a mí" },
+  { value: "esperando", label: "Le toca a la otra persona" },
+  { value: "cerrada", label: "Cerrada" },
+];
+
+export type HqConversation = {
+  id: string;
+  created_at: string;
+  person: string;
+  channel: ConvChannel;
+  status: ConvStatus;
+  summary: string | null;
+  last_contact: string; // YYYY-MM-DD
+  prospect_id: string | null;
+};
+
+export type HqConversationInput = Omit<HqConversation, "id" | "created_at">;
+
+const conversations = () => supabase.from("hq_conversations" as never) as any;
+
+export async function listConversations(): Promise<HqConversation[]> {
+  const { data, error } = await conversations().select("*").order("last_contact", { ascending: false }).order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as HqConversation[];
+}
+
+export async function saveConversation(input: HqConversationInput, id?: string): Promise<void> {
+  const clean = { ...input, person: input.person.trim(), summary: input.summary?.trim() || null, last_contact: input.last_contact || todayPA() };
+  if (!clean.person) throw new Error("Escribe con quién es la conversación.");
+  const { error } = await (id ? conversations().update(clean).eq("id", id) : conversations().insert(clean));
+  if (error) throw error;
+}
+
+/** Cambia de quién es el turno; cuenta como contacto de hoy. */
+export async function setConversationStatus(id: string, status: ConvStatus): Promise<void> {
+  const { error } = await conversations().update({ status, last_contact: todayPA() }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteConversation(id: string): Promise<void> {
+  const { error } = await conversations().delete().eq("id", id);
+  if (error) throw error;
+}
+
 export async function listClubs(): Promise<HqClub[]> {
   const { data, error } = await supabase.rpc("platform_overview");
   if (error) throw error;
@@ -431,7 +509,7 @@ export const HQ_MENU: { group: string; items: HqItem[] }[] = [
     group: "Redes sociales",
     items: [
       { title: "Contenido", to: "/hq/contenido", icon: Clapperboard, ready: true },
-      { title: "Inbox", to: "/hq/inbox", icon: Inbox, ready: false },
+      { title: "Inbox", to: "/hq/inbox", icon: Inbox, ready: true },
       { title: "Automatizaciones", to: "/hq/automatizaciones", icon: Zap, ready: false },
     ],
   },

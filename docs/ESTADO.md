@@ -190,7 +190,7 @@ Reemplaza la Tarea 1.
   HQ"). El botón del panel del club ahora dice "🛠 FullTime HQ".
 - Probado en la web real (8-oct): Bárbara agregó su primer prospecto (Carlos Rivera, Inter CF,
   demo agendada) y aparece en "Para hoy" como "Mañana".
-- Siguientes fases: Inbox, Automatizaciones, Jarvis.
+- Siguientes fases: Automatizaciones, Jarvis.
 
 ### FullTime HQ: Reuniones (9-oct)
 - `/hq/reuniones`: anotar cada reunión con título, fecha, con quién, prospecto del CRM, qué pasó,
@@ -264,6 +264,18 @@ Reemplaza la Tarea 1.
   con su texto y hashtags + 4 rutinas de stories (Programada) y 4 tareas. No quedan sincronizados:
   desde ahora octubre se maneja en HQ. El Post 11 no salió el 6 (cumpleaños de su mamá) y se
   reprogramó al domingo 11 en la noche; "Contestar comentarios" pasó al lunes 12.
+
+### FullTime HQ: Inbox (9-oct)
+- `/hq/inbox`, pestaña **Conversaciones**: con quién, por dónde (WhatsApp, Instagram DM,
+  comentario, correo), qué pasó, prospecto del CRM y a quién le toca ("Me toca a mí", "Le toca a
+  la otra persona", "Cerrada"). Botones "Ya le respondí" / "Me respondió" / "Cerrar"; las que
+  esperan 3+ días salen en rojo con "mándale un seguimiento". Botón de WhatsApp si el prospecto
+  tiene teléfono. Las "Me toca a mí" salen en Inicio → Para hoy.
+- Pestaña **Plantillas**: mensajes listos con botón Copiar. Arranca con 5 (responder comentario,
+  contacto referido, invitar a demo, seguimiento, mandar la guía), editables.
+- Tablas nuevas `hq_templates` y `hq_conversations` (migración `20261009220000_hq_inbox.sql`, trae
+  las 5 plantillas). Solo la dueña las ve (probado en PGlite). Falta: aplicar la migración y
+  probarlo en la web real.
 
 ### Sección de Ayuda (9-oct)
 - `/ayuda` (pública, no hace falta entrar): preguntas frecuentes con pestañas "Soy entrenador" y

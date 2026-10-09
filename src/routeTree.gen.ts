@@ -44,6 +44,7 @@ import { Route as AuthenticatedHqCalendarioRouteImport } from './routes/_authent
 import { Route as AuthenticatedHqContenidoRouteImport } from './routes/_authenticated/hq.contenido'
 import { Route as AuthenticatedHqCotizacionesRouteImport } from './routes/_authenticated/hq.cotizaciones'
 import { Route as AuthenticatedHqCrmRouteImport } from './routes/_authenticated/hq.crm'
+import { Route as AuthenticatedHqInboxRouteImport } from './routes/_authenticated/hq.inbox'
 import { Route as AuthenticatedHqNotificacionesRouteImport } from './routes/_authenticated/hq.notificaciones'
 import { Route as AuthenticatedHqProyectosRouteImport } from './routes/_authenticated/hq.proyectos'
 import { Route as AuthenticatedHqReunionesRouteImport } from './routes/_authenticated/hq.reuniones'
@@ -234,6 +235,11 @@ const AuthenticatedHqCrmRoute = AuthenticatedHqCrmRouteImport.update({
   path: '/crm',
   getParentRoute: () => AuthenticatedHqRoute,
 } as any)
+const AuthenticatedHqInboxRoute = AuthenticatedHqInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => AuthenticatedHqRoute,
+} as any)
 const AuthenticatedHqNotificacionesRoute =
   AuthenticatedHqNotificacionesRouteImport.update({
     id: '/notificaciones',
@@ -295,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/hq/contenido': typeof AuthenticatedHqContenidoRoute
   '/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
   '/hq/crm': typeof AuthenticatedHqCrmRoute
+  '/hq/inbox': typeof AuthenticatedHqInboxRoute
   '/hq/notificaciones': typeof AuthenticatedHqNotificacionesRoute
   '/hq/proyectos': typeof AuthenticatedHqProyectosRoute
   '/hq/reuniones': typeof AuthenticatedHqReunionesRoute
@@ -333,6 +340,7 @@ export interface FileRoutesByTo {
   '/hq/contenido': typeof AuthenticatedHqContenidoRoute
   '/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
   '/hq/crm': typeof AuthenticatedHqCrmRoute
+  '/hq/inbox': typeof AuthenticatedHqInboxRoute
   '/hq/notificaciones': typeof AuthenticatedHqNotificacionesRoute
   '/hq/proyectos': typeof AuthenticatedHqProyectosRoute
   '/hq/reuniones': typeof AuthenticatedHqReunionesRoute
@@ -376,6 +384,7 @@ export interface FileRoutesById {
   '/_authenticated/hq/contenido': typeof AuthenticatedHqContenidoRoute
   '/_authenticated/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
   '/_authenticated/hq/crm': typeof AuthenticatedHqCrmRoute
+  '/_authenticated/hq/inbox': typeof AuthenticatedHqInboxRoute
   '/_authenticated/hq/notificaciones': typeof AuthenticatedHqNotificacionesRoute
   '/_authenticated/hq/proyectos': typeof AuthenticatedHqProyectosRoute
   '/_authenticated/hq/reuniones': typeof AuthenticatedHqReunionesRoute
@@ -419,6 +428,7 @@ export interface FileRouteTypes {
     | '/hq/contenido'
     | '/hq/cotizaciones'
     | '/hq/crm'
+    | '/hq/inbox'
     | '/hq/notificaciones'
     | '/hq/proyectos'
     | '/hq/reuniones'
@@ -457,6 +467,7 @@ export interface FileRouteTypes {
     | '/hq/contenido'
     | '/hq/cotizaciones'
     | '/hq/crm'
+    | '/hq/inbox'
     | '/hq/notificaciones'
     | '/hq/proyectos'
     | '/hq/reuniones'
@@ -499,6 +510,7 @@ export interface FileRouteTypes {
     | '/_authenticated/hq/contenido'
     | '/_authenticated/hq/cotizaciones'
     | '/_authenticated/hq/crm'
+    | '/_authenticated/hq/inbox'
     | '/_authenticated/hq/notificaciones'
     | '/_authenticated/hq/proyectos'
     | '/_authenticated/hq/reuniones'
@@ -768,6 +780,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHqCrmRouteImport
       parentRoute: typeof AuthenticatedHqRoute
     }
+    '/_authenticated/hq/inbox': {
+      id: '/_authenticated/hq/inbox'
+      path: '/inbox'
+      fullPath: '/hq/inbox'
+      preLoaderRoute: typeof AuthenticatedHqInboxRouteImport
+      parentRoute: typeof AuthenticatedHqRoute
+    }
     '/_authenticated/hq/notificaciones': {
       id: '/_authenticated/hq/notificaciones'
       path: '/notificaciones'
@@ -842,6 +861,7 @@ interface AuthenticatedHqRouteChildren {
   AuthenticatedHqContenidoRoute: typeof AuthenticatedHqContenidoRoute
   AuthenticatedHqCotizacionesRoute: typeof AuthenticatedHqCotizacionesRoute
   AuthenticatedHqCrmRoute: typeof AuthenticatedHqCrmRoute
+  AuthenticatedHqInboxRoute: typeof AuthenticatedHqInboxRoute
   AuthenticatedHqNotificacionesRoute: typeof AuthenticatedHqNotificacionesRoute
   AuthenticatedHqProyectosRoute: typeof AuthenticatedHqProyectosRoute
   AuthenticatedHqReunionesRoute: typeof AuthenticatedHqReunionesRoute
@@ -855,6 +875,7 @@ const AuthenticatedHqRouteChildren: AuthenticatedHqRouteChildren = {
   AuthenticatedHqContenidoRoute: AuthenticatedHqContenidoRoute,
   AuthenticatedHqCotizacionesRoute: AuthenticatedHqCotizacionesRoute,
   AuthenticatedHqCrmRoute: AuthenticatedHqCrmRoute,
+  AuthenticatedHqInboxRoute: AuthenticatedHqInboxRoute,
   AuthenticatedHqNotificacionesRoute: AuthenticatedHqNotificacionesRoute,
   AuthenticatedHqProyectosRoute: AuthenticatedHqProyectosRoute,
   AuthenticatedHqReunionesRoute: AuthenticatedHqReunionesRoute,
