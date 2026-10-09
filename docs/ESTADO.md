@@ -206,7 +206,7 @@ Reemplaza la Tarea 1.
   "Ver hechas". Cada tarea: fecha opcional, urgente 🔥 y prospecto del CRM ligado.
 - Las de hoy y las atrasadas salen en Inicio → "Para hoy" con botón "✅ Hecha".
 - Tabla nueva `hq_tasks` (migración `20261009150000_hq_tareas.sql`), solo la dueña la ve (probado
-  en PGlite). Falta: aplicar la migración y probarlo en la web real.
+  en PGlite). Migración aplicada y probado en la web real por Bárbara (9-oct): todo funciona.
 
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes
