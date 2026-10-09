@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/brand/Logo";
 import { HQ_MENU, type HqItem } from "@/lib/hq";
 import { useHqAvisos } from "@/lib/hq-avisos";
+import { AutomatizacionesAlAbrir } from "@/lib/hq-automatizaciones";
 
 /** Marco de FullTime HQ: menú lateral y acceso solo para la dueña de la plataforma. */
 export function HqShell({ children }: { children: ReactNode }) {
@@ -93,6 +94,7 @@ export function HqShell({ children }: { children: ReactNode }) {
         </nav>
       </div>
 
+      <AutomatizacionesAlAbrir />
       <main className="flex-1 min-w-0">{children}</main>
     </div>
   );

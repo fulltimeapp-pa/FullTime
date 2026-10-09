@@ -40,6 +40,7 @@ import { Route as AuthenticatedEntrenosIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedEntrenosNewRouteImport } from './routes/_authenticated/entrenos.new'
 import { Route as AuthenticatedHqIndexRouteImport } from './routes/_authenticated/hq.index'
 import { Route as AuthenticatedHqSeccionRouteImport } from './routes/_authenticated/hq.$seccion'
+import { Route as AuthenticatedHqAutomatizacionesRouteImport } from './routes/_authenticated/hq.automatizaciones'
 import { Route as AuthenticatedHqCalendarioRouteImport } from './routes/_authenticated/hq.calendario'
 import { Route as AuthenticatedHqContenidoRouteImport } from './routes/_authenticated/hq.contenido'
 import { Route as AuthenticatedHqCotizacionesRouteImport } from './routes/_authenticated/hq.cotizaciones'
@@ -212,6 +213,12 @@ const AuthenticatedHqSeccionRoute = AuthenticatedHqSeccionRouteImport.update({
   path: '/$seccion',
   getParentRoute: () => AuthenticatedHqRoute,
 } as any)
+const AuthenticatedHqAutomatizacionesRoute =
+  AuthenticatedHqAutomatizacionesRouteImport.update({
+    id: '/automatizaciones',
+    path: '/automatizaciones',
+    getParentRoute: () => AuthenticatedHqRoute,
+  } as any)
 const AuthenticatedHqCalendarioRoute =
   AuthenticatedHqCalendarioRouteImport.update({
     id: '/calendario',
@@ -297,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/cotizacion/$id': typeof AuthenticatedCotizacionIdRoute
   '/entrenos/new': typeof AuthenticatedEntrenosNewRoute
   '/hq/$seccion': typeof AuthenticatedHqSeccionRoute
+  '/hq/automatizaciones': typeof AuthenticatedHqAutomatizacionesRoute
   '/hq/calendario': typeof AuthenticatedHqCalendarioRoute
   '/hq/contenido': typeof AuthenticatedHqContenidoRoute
   '/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
@@ -336,6 +344,7 @@ export interface FileRoutesByTo {
   '/cotizacion/$id': typeof AuthenticatedCotizacionIdRoute
   '/entrenos/new': typeof AuthenticatedEntrenosNewRoute
   '/hq/$seccion': typeof AuthenticatedHqSeccionRoute
+  '/hq/automatizaciones': typeof AuthenticatedHqAutomatizacionesRoute
   '/hq/calendario': typeof AuthenticatedHqCalendarioRoute
   '/hq/contenido': typeof AuthenticatedHqContenidoRoute
   '/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
@@ -380,6 +389,7 @@ export interface FileRoutesById {
   '/_authenticated/cotizacion/$id': typeof AuthenticatedCotizacionIdRoute
   '/_authenticated/entrenos/new': typeof AuthenticatedEntrenosNewRoute
   '/_authenticated/hq/$seccion': typeof AuthenticatedHqSeccionRoute
+  '/_authenticated/hq/automatizaciones': typeof AuthenticatedHqAutomatizacionesRoute
   '/_authenticated/hq/calendario': typeof AuthenticatedHqCalendarioRoute
   '/_authenticated/hq/contenido': typeof AuthenticatedHqContenidoRoute
   '/_authenticated/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
@@ -424,6 +434,7 @@ export interface FileRouteTypes {
     | '/cotizacion/$id'
     | '/entrenos/new'
     | '/hq/$seccion'
+    | '/hq/automatizaciones'
     | '/hq/calendario'
     | '/hq/contenido'
     | '/hq/cotizaciones'
@@ -463,6 +474,7 @@ export interface FileRouteTypes {
     | '/cotizacion/$id'
     | '/entrenos/new'
     | '/hq/$seccion'
+    | '/hq/automatizaciones'
     | '/hq/calendario'
     | '/hq/contenido'
     | '/hq/cotizaciones'
@@ -506,6 +518,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cotizacion/$id'
     | '/_authenticated/entrenos/new'
     | '/_authenticated/hq/$seccion'
+    | '/_authenticated/hq/automatizaciones'
     | '/_authenticated/hq/calendario'
     | '/_authenticated/hq/contenido'
     | '/_authenticated/hq/cotizaciones'
@@ -752,6 +765,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHqSeccionRouteImport
       parentRoute: typeof AuthenticatedHqRoute
     }
+    '/_authenticated/hq/automatizaciones': {
+      id: '/_authenticated/hq/automatizaciones'
+      path: '/automatizaciones'
+      fullPath: '/hq/automatizaciones'
+      preLoaderRoute: typeof AuthenticatedHqAutomatizacionesRouteImport
+      parentRoute: typeof AuthenticatedHqRoute
+    }
     '/_authenticated/hq/calendario': {
       id: '/_authenticated/hq/calendario'
       path: '/calendario'
@@ -857,6 +877,7 @@ const AuthenticatedEntrenosRouteWithChildren =
 
 interface AuthenticatedHqRouteChildren {
   AuthenticatedHqSeccionRoute: typeof AuthenticatedHqSeccionRoute
+  AuthenticatedHqAutomatizacionesRoute: typeof AuthenticatedHqAutomatizacionesRoute
   AuthenticatedHqCalendarioRoute: typeof AuthenticatedHqCalendarioRoute
   AuthenticatedHqContenidoRoute: typeof AuthenticatedHqContenidoRoute
   AuthenticatedHqCotizacionesRoute: typeof AuthenticatedHqCotizacionesRoute
@@ -871,6 +892,7 @@ interface AuthenticatedHqRouteChildren {
 
 const AuthenticatedHqRouteChildren: AuthenticatedHqRouteChildren = {
   AuthenticatedHqSeccionRoute: AuthenticatedHqSeccionRoute,
+  AuthenticatedHqAutomatizacionesRoute: AuthenticatedHqAutomatizacionesRoute,
   AuthenticatedHqCalendarioRoute: AuthenticatedHqCalendarioRoute,
   AuthenticatedHqContenidoRoute: AuthenticatedHqContenidoRoute,
   AuthenticatedHqCotizacionesRoute: AuthenticatedHqCotizacionesRoute,

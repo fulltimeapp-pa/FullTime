@@ -49,6 +49,7 @@ export type HqClub = {
   created_at: string;
   trial_days_left: number;
   admin_name: string | null;
+  admin_email?: string | null;
   jugadoras_total: number;
   convocatorias_total: number;
   ultima_actividad: string | null;
@@ -129,6 +130,12 @@ export async function saveMeeting(input: MeetingInput, id?: string): Promise<voi
 
 export async function deleteMeeting(id: string): Promise<void> {
   const { error } = await meetings().delete().eq("id", id);
+  if (error) throw error;
+}
+
+/** Cambia la etapa de un prospecto y, si viene, lo liga a su club (automatizaciones). */
+export async function updateProspectStage(id: string, stage: ProspectStage, clubId?: string): Promise<void> {
+  const { error } = await prospects().update(clubId ? { stage, club_id: clubId } : { stage }).eq("id", id);
   if (error) throw error;
 }
 
@@ -510,7 +517,7 @@ export const HQ_MENU: { group: string; items: HqItem[] }[] = [
     items: [
       { title: "Contenido", to: "/hq/contenido", icon: Clapperboard, ready: true },
       { title: "Inbox", to: "/hq/inbox", icon: Inbox, ready: true },
-      { title: "Automatizaciones", to: "/hq/automatizaciones", icon: Zap, ready: false },
+      { title: "Automatizaciones", to: "/hq/automatizaciones", icon: Zap, ready: true },
     ],
   },
   {

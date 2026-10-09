@@ -190,7 +190,7 @@ Reemplaza la Tarea 1.
   HQ"). El botón del panel del club ahora dice "🛠 FullTime HQ".
 - Probado en la web real (8-oct): Bárbara agregó su primer prospecto (Carlos Rivera, Inter CF,
   demo agendada) y aparece en "Para hoy" como "Mañana".
-- Siguientes fases: Automatizaciones, Jarvis.
+- Siguientes fases: Jarvis (asistente con IA; antes ver el costo mensual).
 
 ### FullTime HQ: Reuniones (9-oct)
 - `/hq/reuniones`: anotar cada reunión con título, fecha, con quién, prospecto del CRM, qué pasó,
@@ -276,6 +276,18 @@ Reemplaza la Tarea 1.
 - Tablas nuevas `hq_templates` y `hq_conversations` (migración `20261009220000_hq_inbox.sql`, trae
   las 5 plantillas). Solo la dueña las ve (probado en PGlite). Migración aplicada y probado en la
   web real por Bárbara (9-oct): funciona.
+
+### FullTime HQ: Automatizaciones (9-oct)
+- Corren solas al abrir HQ (como mucho cada 10 minutos por pestaña) y con "Revisar ahora". No
+  mandan avisos al celular (la regla del push sigue igual: solo convocatorias).
+  1. Conversación del Inbox esperando 3+ días → tarea "Mandar seguimiento a …" para hoy (una vez por
+     cada último contacto; no se repite aunque la marques hecha).
+  2. Prospecto que se registró (club ligado o mismo correo que el dueño del club) → "En prueba" y
+     se liga al club.
+  3. Prospecto cuyo club tiene el pago al día → "Pagando".
+- `/hq/automatizaciones`: explica las 3 reglas y muestra lo que hicieron (historial en ese
+  navegador). Lógica en `src/lib/hq-automatizaciones.ts`, probada con datos de ejemplo (11 casos).
+  Sin tablas nuevas. Falta: que Bárbara lo pruebe en la web real.
 
 ### Sección de Ayuda (9-oct)
 - `/ayuda` (pública, no hace falta entrar): preguntas frecuentes con pestañas "Soy entrenador" y
