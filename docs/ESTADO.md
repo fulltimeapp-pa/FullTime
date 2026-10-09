@@ -235,7 +235,7 @@ Reemplaza la Tarea 1.
 - Contador rojo en el menú con los avisos nuevos. "Visto" se recuerda en ese navegador (al salir de
   la pantalla o con "Marcar todo como visto"); en otro aparato vuelven a salir como nuevos.
 - Lógica en `src/lib/hq-avisos.ts` (`buildAvisos`), probada con datos de ejemplo (12 casos).
-  Falta: que Bárbara lo pruebe en la web real.
+  Probado en la web real por Bárbara (9-oct): funciona.
 
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes
