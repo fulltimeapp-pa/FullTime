@@ -361,7 +361,10 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   (debe decir "Todo al día"). Luego en el Inbox poner la conversación de Carlos en "Le toca a la
   otra persona" con último contacto de hace 4 días y volver a "Revisar ahora": debe crear la tarea
   "Mandar seguimiento a Carlos Rivera".
-- Decidir con Bárbara qué hacer con el feedback de Carlos (ver abajo) y si Carlos prueba la app.
+- Decidir con Bárbara qué ideas de Carlos van primero (ver abajo). El 9-oct ella le escribió que
+  integraría "algunas de sus ideas" en una o dos semanas y luego le ayuda a montar su equipo e
+  invitar a las jugadoras (volver a escribirle ~23-oct). Antes: cambiar CLAUDE.md si se amplía
+  wellness/RPE y definir reglas para datos de salud de menores.
 - Los videos tutoriales quedaron para la semana del 12-oct.
 
 **Pruebas con el celular (Bárbara):**
