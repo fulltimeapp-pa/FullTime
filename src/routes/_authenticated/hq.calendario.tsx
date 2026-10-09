@@ -8,19 +8,20 @@ import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { HqHeader } from "@/components/hq/HqShell";
 import { formatDayEs } from "@/components/ui/date-field";
 import { friendlyError } from "@/lib/errors";
-import { listMeetings, listProspects, listTasks, saveTask, setTaskDone, todayPA } from "@/lib/hq";
+import { POST_NETWORKS, listMeetings, listPosts, listProspects, listTasks, saveTask, setTaskDone, todayPA } from "@/lib/hq";
 
 export const Route = createFileRoute("/_authenticated/hq/calendario")({
   component: HqCalendario,
 });
 
-type Kind = "tarea" | "crm" | "reunion";
+type Kind = "tarea" | "crm" | "reunion" | "contenido";
 type Item = { key: string; day: string; kind: Kind; text: string; done?: boolean; taskId?: string; to: string };
 
 const KIND_STYLE: Record<Kind, { dot: string; chip: string; label: string }> = {
   tarea: { dot: "bg-ink", chip: "bg-ink/10", label: "Tarea" },
   crm: { dot: "bg-lime border border-ink", chip: "bg-lime/50", label: "CRM" },
   reunion: { dot: "bg-pa-red", chip: "bg-pa-red/15", label: "Reunión" },
+  contenido: { dot: "bg-paper border-2 border-ink", chip: "bg-paper border border-ink/30", label: "Contenido" },
 };
 
 const toDay = (d: Date) => format(d, "yyyy-MM-dd");
@@ -30,6 +31,7 @@ function HqCalendario() {
   const tasksQ = useQuery({ queryKey: ["hq-tasks"], queryFn: listTasks });
   const prospectsQ = useQuery({ queryKey: ["hq-prospects"], queryFn: listProspects });
   const meetingsQ = useQuery({ queryKey: ["hq-meetings"], queryFn: () => listMeetings() });
+  const postsQ = useQuery({ queryKey: ["hq-posts"], queryFn: listPosts });
 
   const hoy = todayPA();
   const [mes, setMes] = useState(() => startOfMonth(new Date(`${hoy}T12:00:00`)));
@@ -64,6 +66,10 @@ function HqCalendario() {
     ...(meetingsQ.data ?? []).map((m) => ({
       key: `m-${m.id}`, day: m.meeting_date, kind: "reunion" as const, to: "/hq/reuniones", text: m.title,
     })),
+    ...(postsQ.data ?? []).filter((p) => p.publish_date).map((p) => ({
+      key: `c-${p.id}`, day: p.publish_date!, kind: "contenido" as const, to: "/hq/contenido", done: p.status === "publicada",
+      text: `${POST_NETWORKS.find((n) => n.value === p.network)?.label ?? ""}: ${p.title}`,
+    })),
   ];
   const porDia = new Map<string, Item[]>();
   for (const it of items) porDia.set(it.day, [...(porDia.get(it.day) ?? []), it]);
@@ -72,13 +78,13 @@ function HqCalendario() {
   const inicio = startOfWeek(mes, { weekStartsOn: 1 });
   const celdas = Array.from({ length: 42 }, (_, i) => addDays(inicio, i));
   const delDia = porDia.get(dia) ?? [];
-  const cargando = tasksQ.isLoading || prospectsQ.isLoading || meetingsQ.isLoading;
+  const cargando = tasksQ.isLoading || prospectsQ.isLoading || meetingsQ.isLoading || postsQ.isLoading;
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-8 md:py-10">
-      <HqHeader title="Calendario" subtitle="Tus tareas, los próximos pasos del CRM y tus reuniones, por día." />
+      <HqHeader title="Calendario" subtitle="Tus tareas, los próximos pasos del CRM, tus reuniones y tu contenido, por día." />
 
-      {(tasksQ.isError || prospectsQ.isError || meetingsQ.isError) && (
+      {(tasksQ.isError || prospectsQ.isError || meetingsQ.isError || postsQ.isError) && (
         <p className="mt-6 rounded-lg border-2 border-pa-red bg-pa-red/10 px-3 py-2 text-sm font-medium text-pa-red">
           No pudimos cargar todo. Recarga la página.
         </p>

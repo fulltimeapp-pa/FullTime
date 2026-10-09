@@ -190,7 +190,7 @@ Reemplaza la Tarea 1.
   HQ"). El botón del panel del club ahora dice "🛠 FullTime HQ".
 - Probado en la web real (8-oct): Bárbara agregó su primer prospecto (Carlos Rivera, Inter CF,
   demo agendada) y aparece en "Para hoy" como "Mañana".
-- Siguientes fases: Contenido, Inbox, Automatizaciones, Jarvis.
+- Siguientes fases: Inbox, Automatizaciones, Jarvis.
 
 ### FullTime HQ: Reuniones (9-oct)
 - `/hq/reuniones`: anotar cada reunión con título, fecha, con quién, prospecto del CRM, qué pasó,
@@ -251,6 +251,15 @@ Reemplaza la Tarea 1.
   proyecto manda tu orden; en Tareas, Inicio y Calendario sigue el orden por fecha. Columna
   `position` en `hq_tasks` (migración `20261009200000_hq_tareas_orden.sql`, arranca con el orden por
   fecha). Migración aplicada y probado en la web real por Bárbara (9-oct): funciona.
+
+### FullTime HQ: Contenido (9-oct)
+- `/hq/contenido`: columnas Idea → Borrador → Programada → Publicada (como las carpetas del
+  Escritorio de Bárbara). Cada publicación: idea, red (Instagram, TikTok, Facebook, LinkedIn),
+  formato (post, carrusel, reel, story), fecha, texto (copy) con botón Copiar y notas (ej. archivo).
+  Flechas en cada tarjeta para pasarla al estado siguiente o anterior.
+- En el Calendario de HQ salen las publicaciones con fecha ("Contenido"); las publicadas, tachadas.
+- Tabla nueva `hq_posts` (migración `20261009210000_hq_contenido.sql`), solo la dueña la ve
+  (probado en PGlite). Falta: aplicar la migración y probarlo en la web real.
 
 ### Sección de Ayuda (9-oct)
 - `/ayuda` (pública, no hace falta entrar): preguntas frecuentes con pestañas "Soy entrenador" y

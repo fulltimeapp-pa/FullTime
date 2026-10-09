@@ -41,6 +41,7 @@ import { Route as AuthenticatedEntrenosNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedHqIndexRouteImport } from './routes/_authenticated/hq.index'
 import { Route as AuthenticatedHqSeccionRouteImport } from './routes/_authenticated/hq.$seccion'
 import { Route as AuthenticatedHqCalendarioRouteImport } from './routes/_authenticated/hq.calendario'
+import { Route as AuthenticatedHqContenidoRouteImport } from './routes/_authenticated/hq.contenido'
 import { Route as AuthenticatedHqCotizacionesRouteImport } from './routes/_authenticated/hq.cotizaciones'
 import { Route as AuthenticatedHqCrmRouteImport } from './routes/_authenticated/hq.crm'
 import { Route as AuthenticatedHqNotificacionesRouteImport } from './routes/_authenticated/hq.notificaciones'
@@ -216,6 +217,12 @@ const AuthenticatedHqCalendarioRoute =
     path: '/calendario',
     getParentRoute: () => AuthenticatedHqRoute,
   } as any)
+const AuthenticatedHqContenidoRoute =
+  AuthenticatedHqContenidoRouteImport.update({
+    id: '/contenido',
+    path: '/contenido',
+    getParentRoute: () => AuthenticatedHqRoute,
+  } as any)
 const AuthenticatedHqCotizacionesRoute =
   AuthenticatedHqCotizacionesRouteImport.update({
     id: '/cotizaciones',
@@ -285,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/entrenos/new': typeof AuthenticatedEntrenosNewRoute
   '/hq/$seccion': typeof AuthenticatedHqSeccionRoute
   '/hq/calendario': typeof AuthenticatedHqCalendarioRoute
+  '/hq/contenido': typeof AuthenticatedHqContenidoRoute
   '/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
   '/hq/crm': typeof AuthenticatedHqCrmRoute
   '/hq/notificaciones': typeof AuthenticatedHqNotificacionesRoute
@@ -322,6 +330,7 @@ export interface FileRoutesByTo {
   '/entrenos/new': typeof AuthenticatedEntrenosNewRoute
   '/hq/$seccion': typeof AuthenticatedHqSeccionRoute
   '/hq/calendario': typeof AuthenticatedHqCalendarioRoute
+  '/hq/contenido': typeof AuthenticatedHqContenidoRoute
   '/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
   '/hq/crm': typeof AuthenticatedHqCrmRoute
   '/hq/notificaciones': typeof AuthenticatedHqNotificacionesRoute
@@ -364,6 +373,7 @@ export interface FileRoutesById {
   '/_authenticated/entrenos/new': typeof AuthenticatedEntrenosNewRoute
   '/_authenticated/hq/$seccion': typeof AuthenticatedHqSeccionRoute
   '/_authenticated/hq/calendario': typeof AuthenticatedHqCalendarioRoute
+  '/_authenticated/hq/contenido': typeof AuthenticatedHqContenidoRoute
   '/_authenticated/hq/cotizaciones': typeof AuthenticatedHqCotizacionesRoute
   '/_authenticated/hq/crm': typeof AuthenticatedHqCrmRoute
   '/_authenticated/hq/notificaciones': typeof AuthenticatedHqNotificacionesRoute
@@ -406,6 +416,7 @@ export interface FileRouteTypes {
     | '/entrenos/new'
     | '/hq/$seccion'
     | '/hq/calendario'
+    | '/hq/contenido'
     | '/hq/cotizaciones'
     | '/hq/crm'
     | '/hq/notificaciones'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '/entrenos/new'
     | '/hq/$seccion'
     | '/hq/calendario'
+    | '/hq/contenido'
     | '/hq/cotizaciones'
     | '/hq/crm'
     | '/hq/notificaciones'
@@ -484,6 +496,7 @@ export interface FileRouteTypes {
     | '/_authenticated/entrenos/new'
     | '/_authenticated/hq/$seccion'
     | '/_authenticated/hq/calendario'
+    | '/_authenticated/hq/contenido'
     | '/_authenticated/hq/cotizaciones'
     | '/_authenticated/hq/crm'
     | '/_authenticated/hq/notificaciones'
@@ -734,6 +747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHqCalendarioRouteImport
       parentRoute: typeof AuthenticatedHqRoute
     }
+    '/_authenticated/hq/contenido': {
+      id: '/_authenticated/hq/contenido'
+      path: '/contenido'
+      fullPath: '/hq/contenido'
+      preLoaderRoute: typeof AuthenticatedHqContenidoRouteImport
+      parentRoute: typeof AuthenticatedHqRoute
+    }
     '/_authenticated/hq/cotizaciones': {
       id: '/_authenticated/hq/cotizaciones'
       path: '/cotizaciones'
@@ -819,6 +839,7 @@ const AuthenticatedEntrenosRouteWithChildren =
 interface AuthenticatedHqRouteChildren {
   AuthenticatedHqSeccionRoute: typeof AuthenticatedHqSeccionRoute
   AuthenticatedHqCalendarioRoute: typeof AuthenticatedHqCalendarioRoute
+  AuthenticatedHqContenidoRoute: typeof AuthenticatedHqContenidoRoute
   AuthenticatedHqCotizacionesRoute: typeof AuthenticatedHqCotizacionesRoute
   AuthenticatedHqCrmRoute: typeof AuthenticatedHqCrmRoute
   AuthenticatedHqNotificacionesRoute: typeof AuthenticatedHqNotificacionesRoute
@@ -831,6 +852,7 @@ interface AuthenticatedHqRouteChildren {
 const AuthenticatedHqRouteChildren: AuthenticatedHqRouteChildren = {
   AuthenticatedHqSeccionRoute: AuthenticatedHqSeccionRoute,
   AuthenticatedHqCalendarioRoute: AuthenticatedHqCalendarioRoute,
+  AuthenticatedHqContenidoRoute: AuthenticatedHqContenidoRoute,
   AuthenticatedHqCotizacionesRoute: AuthenticatedHqCotizacionesRoute,
   AuthenticatedHqCrmRoute: AuthenticatedHqCrmRoute,
   AuthenticatedHqNotificacionesRoute: AuthenticatedHqNotificacionesRoute,

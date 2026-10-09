@@ -319,6 +319,74 @@ export async function deleteQuote(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export type PostNetwork = "instagram" | "tiktok" | "facebook" | "linkedin";
+export type PostFormat = "post" | "carrusel" | "reel" | "story";
+export type PostStatus = "idea" | "borrador" | "programada" | "publicada";
+
+export const POST_NETWORKS: { value: PostNetwork; label: string }[] = [
+  { value: "instagram", label: "Instagram" },
+  { value: "tiktok", label: "TikTok" },
+  { value: "facebook", label: "Facebook" },
+  { value: "linkedin", label: "LinkedIn" },
+];
+export const POST_FORMATS: { value: PostFormat; label: string }[] = [
+  { value: "post", label: "Post" },
+  { value: "carrusel", label: "Carrusel" },
+  { value: "reel", label: "Reel" },
+  { value: "story", label: "Story" },
+];
+export const POST_STATUS: { value: PostStatus; label: string }[] = [
+  { value: "idea", label: "Idea" },
+  { value: "borrador", label: "Borrador" },
+  { value: "programada", label: "Programada" },
+  { value: "publicada", label: "Publicada" },
+];
+
+export type HqPost = {
+  id: string;
+  created_at: string;
+  title: string;
+  network: PostNetwork;
+  format: PostFormat;
+  status: PostStatus;
+  publish_date: string | null; // YYYY-MM-DD
+  caption: string | null;
+  notes: string | null;
+};
+
+export type HqPostInput = Omit<HqPost, "id" | "created_at">;
+
+const posts = () => supabase.from("hq_posts" as never) as any;
+
+export async function listPosts(): Promise<HqPost[]> {
+  const { data, error } = await posts().select("*").order("publish_date", { ascending: true, nullsFirst: false }).order("created_at");
+  if (error) throw error;
+  return (data ?? []) as HqPost[];
+}
+
+export async function savePost(input: HqPostInput, id?: string): Promise<void> {
+  const clean = {
+    ...input,
+    title: input.title.trim(),
+    caption: input.caption?.trim() || null,
+    notes: input.notes?.trim() || null,
+    publish_date: input.publish_date || null,
+  };
+  if (!clean.title) throw new Error("Escribe la idea de la publicación.");
+  const { error } = await (id ? posts().update(clean).eq("id", id) : posts().insert(clean));
+  if (error) throw error;
+}
+
+export async function setPostStatus(id: string, status: PostStatus): Promise<void> {
+  const { error } = await posts().update({ status }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deletePost(id: string): Promise<void> {
+  const { error } = await posts().delete().eq("id", id);
+  if (error) throw error;
+}
+
 export async function listClubs(): Promise<HqClub[]> {
   const { data, error } = await supabase.rpc("platform_overview");
   if (error) throw error;
@@ -362,7 +430,7 @@ export const HQ_MENU: { group: string; items: HqItem[] }[] = [
   {
     group: "Redes sociales",
     items: [
-      { title: "Contenido", to: "/hq/contenido", icon: Clapperboard, ready: false },
+      { title: "Contenido", to: "/hq/contenido", icon: Clapperboard, ready: true },
       { title: "Inbox", to: "/hq/inbox", icon: Inbox, ready: false },
       { title: "Automatizaciones", to: "/hq/automatizaciones", icon: Zap, ready: false },
     ],
