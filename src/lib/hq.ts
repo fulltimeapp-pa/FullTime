@@ -142,6 +142,43 @@ export async function updateProspectFollowUp(
   if (error) throw error;
 }
 
+export type HqTask = {
+  id: string;
+  created_at: string;
+  title: string;
+  due_date: string | null; // YYYY-MM-DD
+  urgent: boolean;
+  prospect_id: string | null;
+  done_at: string | null;
+};
+
+export type HqTaskInput = Pick<HqTask, "title" | "due_date" | "urgent" | "prospect_id">;
+
+const tasks = () => supabase.from("hq_tasks" as never) as any;
+
+export async function listTasks(): Promise<HqTask[]> {
+  const { data, error } = await tasks().select("*").order("due_date", { ascending: true, nullsFirst: false }).order("created_at");
+  if (error) throw error;
+  return (data ?? []) as HqTask[];
+}
+
+export async function saveTask(input: HqTaskInput, id?: string): Promise<void> {
+  const clean = { ...input, title: input.title.trim(), due_date: input.due_date || null };
+  if (!clean.title) throw new Error("Escribe qué tienes que hacer.");
+  const { error } = await (id ? tasks().update(clean).eq("id", id) : tasks().insert(clean));
+  if (error) throw error;
+}
+
+export async function setTaskDone(id: string, done: boolean): Promise<void> {
+  const { error } = await tasks().update({ done_at: done ? new Date().toISOString() : null }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteTask(id: string): Promise<void> {
+  const { error } = await tasks().delete().eq("id", id);
+  if (error) throw error;
+}
+
 export async function listClubs(): Promise<HqClub[]> {
   const { data, error } = await supabase.rpc("platform_overview");
   if (error) throw error;
@@ -176,7 +213,7 @@ export const HQ_MENU: { group: string; items: HqItem[] }[] = [
   {
     group: "Productividad",
     items: [
-      { title: "Tareas", to: "/hq/tareas", icon: CheckSquare, ready: false },
+      { title: "Tareas", to: "/hq/tareas", icon: CheckSquare, ready: true },
       { title: "Calendario", to: "/hq/calendario", icon: CalendarDays, ready: false },
       { title: "Reuniones", to: "/hq/reuniones", icon: Mic, ready: true },
       { title: "Métricas", to: "/panel-fulltime", icon: TrendingUp, ready: true },
