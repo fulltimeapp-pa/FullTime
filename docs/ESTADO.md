@@ -212,7 +212,7 @@ Reemplaza la Tarea 1.
 - `/hq/calendario`: vista de mes (lunes primero) que junta tareas, próximos pasos del CRM y
   reuniones, con colores por tipo. Tocas un día y se abre una ventana con todo lo de ese día; puedes marcar tareas como hechas y
   agregar una tarea para ese día. En celular se ven puntitos; en computadora, el texto.
-- No usa tablas nuevas. Falta: que Bárbara lo pruebe en la web real.
+- No usa tablas nuevas. Probado en la web real por Bárbara (9-oct): funciona.
 
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes
