@@ -190,7 +190,7 @@ Reemplaza la Tarea 1.
   HQ"). El botón del panel del club ahora dice "🛠 FullTime HQ".
 - Probado en la web real (8-oct): Bárbara agregó su primer prospecto (Carlos Rivera, Inter CF,
   demo agendada) y aparece en "Para hoy" como "Mañana".
-- Siguientes fases: Cotizaciones → Contenido, Inbox, Jarvis.
+- Siguientes fases: Contenido, Inbox, Notificaciones, Proyectos, Automatizaciones, Jarvis.
 
 ### FullTime HQ: Reuniones (9-oct)
 - `/hq/reuniones`: anotar cada reunión con título, fecha, con quién, prospecto del CRM, qué pasó,
@@ -213,6 +213,19 @@ Reemplaza la Tarea 1.
   reuniones, con colores por tipo. Tocas un día y se abre una ventana con todo lo de ese día; puedes marcar tareas como hechas y
   agregar una tarea para ese día. En celular se ven puntitos; en computadora, el texto.
 - No usa tablas nuevas. Probado en la web real por Bárbara (9-oct): funciona.
+
+### FullTime HQ: Cotizaciones (9-oct)
+- Precios (los de la portada, ahora en `src/lib/precios.ts` para que portada y cotización coincidan):
+  Plan Equipo $9.99/mes; Plan Academia 1er equipo $9.99, 2 a 4 $7.99 c/u, del 5to $6.99 c/u.
+- Decidido con Bárbara: pago de 1, 3, 6 o 12 meses en un solo pago. 3 meses −5%, 6 meses −10%,
+  12 meses = 2 meses gratis. Descuento especial opcional en % (ej. "precio fundador"). Sin ITBMS
+  por ahora. Pago por Yappy al +507 6991-1552; los datos de cuenta bancaria NO van en el PDF (se
+  mandan por WhatsApp al confirmar).
+- `/hq/cotizaciones`: lista con número (COT-0001), estado (borrador, enviada, aceptada, rechazada)
+  y botón PDF. `/cotizacion/<id>`: hoja tamaño carta lista para "Guardar como PDF".
+- Tabla nueva `hq_quotes` (migración `20261009170000_hq_cotizaciones.sql`); el total se guarda al
+  cotizar. Solo la dueña la ve (probado en PGlite). Cálculos probados (12 meses Plan Equipo =
+  $99.90; Academia 3 equipos × 12 meses = $259.70). Falta: aplicar la migración y probarlo en la web.
 
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes

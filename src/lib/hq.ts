@@ -8,6 +8,7 @@ import {
   Home, Inbox, Mic, Target, TrendingUp, Zap, type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { calcQuote, type Months, type Plan } from "@/lib/precios";
 
 export type ProspectStage = "contacto" | "demo_agendada" | "demo_hecha" | "en_prueba" | "pagando" | "perdido";
 
@@ -179,6 +180,82 @@ export async function deleteTask(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export type QuoteStatus = "borrador" | "enviada" | "aceptada" | "rechazada";
+
+export const QUOTE_STATUS: { value: QuoteStatus; label: string }[] = [
+  { value: "borrador", label: "Borrador" },
+  { value: "enviada", label: "Enviada" },
+  { value: "aceptada", label: "Aceptada" },
+  { value: "rechazada", label: "Rechazada" },
+];
+
+export type HqQuote = {
+  id: string;
+  number: number;
+  created_at: string;
+  client_name: string;
+  team: string | null;
+  prospect_id: string | null;
+  plan: Plan;
+  teams: number;
+  months: Months;
+  extra_discount: number;
+  total: number;
+  status: QuoteStatus;
+  valid_until: string; // YYYY-MM-DD
+  notes: string | null;
+};
+
+export type HqQuoteInput = Omit<HqQuote, "id" | "number" | "created_at" | "total">;
+
+export const quoteCode = (n: number) => `COT-${String(n).padStart(4, "0")}`;
+
+const quotes = () => supabase.from("hq_quotes" as never) as any;
+
+export async function listQuotes(): Promise<HqQuote[]> {
+  const { data, error } = await quotes().select("*").order("number", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((q: HqQuote) => ({ ...q, total: Number(q.total), extra_discount: Number(q.extra_discount) }));
+}
+
+export async function getQuote(id: string): Promise<HqQuote | null> {
+  const { data, error } = await quotes().select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data ? { ...data, total: Number(data.total), extra_discount: Number(data.extra_discount) } : null;
+}
+
+/** Guarda la cotización con el total calculado en ese momento. Devuelve su id. */
+export async function saveQuote(input: HqQuoteInput, id?: string): Promise<string> {
+  const teams = input.plan === "equipo" ? 1 : Math.max(1, Math.round(input.teams));
+  const clean = {
+    ...input,
+    client_name: input.client_name.trim(),
+    team: input.team?.trim() || null,
+    notes: input.notes?.trim() || null,
+    teams,
+    total: calcQuote(input.plan, teams, input.months, input.extra_discount).total,
+  };
+  if (!clean.client_name) throw new Error("Escribe a quién va la cotización.");
+  if (id) {
+    const { error } = await quotes().update(clean).eq("id", id);
+    if (error) throw error;
+    return id;
+  }
+  const { data, error } = await quotes().insert(clean).select("id").single();
+  if (error) throw error;
+  return data.id as string;
+}
+
+export async function setQuoteStatus(id: string, status: QuoteStatus): Promise<void> {
+  const { error } = await quotes().update({ status }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteQuote(id: string): Promise<void> {
+  const { error } = await quotes().delete().eq("id", id);
+  if (error) throw error;
+}
+
 export async function listClubs(): Promise<HqClub[]> {
   const { data, error } = await supabase.rpc("platform_overview");
   if (error) throw error;
@@ -231,7 +308,7 @@ export const HQ_MENU: { group: string; items: HqItem[] }[] = [
     group: "Ventas",
     items: [
       { title: "CRM", to: "/hq/crm", icon: Target, ready: true },
-      { title: "Cotizaciones", to: "/hq/cotizaciones", icon: FileText, ready: false },
+      { title: "Cotizaciones", to: "/hq/cotizaciones", icon: FileText, ready: true },
     ],
   },
 ];

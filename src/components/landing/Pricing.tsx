@@ -1,19 +1,6 @@
 import { useMemo, useState } from "react";
 import { Calendar } from "lucide-react";
-
-
-function calcAcademia(n: number): number {
-  if (n <= 0) return 0;
-  let total = 9.99; // 1st
-  if (n >= 2) {
-    const tier2 = Math.min(n, 4) - 1; // teams 2..4
-    total += tier2 * 7.99;
-  }
-  if (n >= 5) {
-    total += (n - 4) * 6.99;
-  }
-  return Math.round(total * 100) / 100;
-}
+import { calcAcademia } from "@/lib/precios";
 
 
 export function Pricing() {
