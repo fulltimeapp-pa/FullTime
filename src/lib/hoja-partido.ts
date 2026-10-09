@@ -5,16 +5,8 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 
-export type MatchType = "liga" | "torneo" | "copa" | "amistoso";
 export type LineupRole = "titular" | "suplente";
 export type EventKind = "gol" | "autogol_rival" | "gol_contra" | "amarilla" | "roja" | "cambio" | "lesion";
-
-export const MATCH_TYPES: { value: MatchType; label: string }[] = [
-  { value: "liga", label: "Liga" },
-  { value: "torneo", label: "Torneo" },
-  { value: "copa", label: "Copa" },
-  { value: "amistoso", label: "Amistoso" },
-];
 
 export const DURATIONS = [40, 50, 60, 70, 80, 90];
 
@@ -35,7 +27,7 @@ export const EVENT_ICON: Record<EventKind, string> = {
 export type MatchReport = {
   call_up_id: string;
   opponent: string | null;
-  match_type: MatchType;
+  competition: string | null; // la escribe el entrenador: "LFF", "Torneo Nacional Sub-16"…
   duration_min: number;
   notes: string | null;
 };
@@ -62,7 +54,7 @@ const events = () => supabase.from("match_events" as never) as any;
 
 export async function getMatchSheet(callUpId: string): Promise<{ report: MatchReport | null; lineup: LineupRow[]; events: MatchEvent[] }> {
   const [r, l, e] = await Promise.all([
-    reports().select("call_up_id, opponent, match_type, duration_min, notes").eq("call_up_id", callUpId).maybeSingle(),
+    reports().select("call_up_id, opponent, competition, duration_min, notes").eq("call_up_id", callUpId).maybeSingle(),
     lineup().select("call_up_id, player_id, role").eq("call_up_id", callUpId),
     events().select("*").eq("call_up_id", callUpId).order("minute", { ascending: true, nullsFirst: false }).order("created_at"),
   ]);
@@ -72,19 +64,37 @@ export async function getMatchSheet(callUpId: string): Promise<{ report: MatchRe
   return { report: r.data as MatchReport | null, lineup: (l.data ?? []) as LineupRow[], events: (e.data ?? []) as MatchEvent[] };
 }
 
-/** Duración de la última hoja de esta categoría (para no preguntarla cada vez). */
-export async function lastDurationFor(categoryId: string): Promise<number | null> {
+/** Duración y competición de la última hoja de esta categoría (para no escribirlas cada vez). */
+export async function lastDefaultsFor(categoryId: string): Promise<{ duration: number | null; competition: string | null }> {
   const { data, error } = await reports()
-    .select("duration_min, call_ups!inner(category_id)")
+    .select("duration_min, competition, call_ups!inner(category_id)")
     .eq("call_ups.category_id", categoryId)
     .order("updated_at", { ascending: false })
     .limit(1);
-  if (error) return null;
-  return (data?.[0]?.duration_min as number | undefined) ?? null;
+  if (error || !data?.[0]) return { duration: null, competition: null };
+  return { duration: data[0].duration_min ?? null, competition: data[0].competition ?? null };
+}
+
+/** Competiciones que el club ya usó, las más recientes primero (sin repetir). */
+export async function listCompetitions(clubId: string): Promise<string[]> {
+  const { data, error } = await reports()
+    .select("competition, updated_at")
+    .eq("club_id", clubId)
+    .not("competition", "is", null)
+    .order("updated_at", { ascending: false })
+    .limit(200);
+  if (error) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const r of data ?? []) {
+    const name = String(r.competition).trim();
+    if (name && !seen.has(name.toLowerCase())) { seen.add(name.toLowerCase()); out.push(name); }
+  }
+  return out;
 }
 
 export async function saveReport(callUpId: string, input: Omit<MatchReport, "call_up_id">): Promise<void> {
-  const clean = { ...input, opponent: input.opponent?.trim() || null, notes: input.notes?.trim() || null };
+  const clean = { ...input, opponent: input.opponent?.trim() || null, competition: input.competition?.trim() || null, notes: input.notes?.trim() || null };
   // club_id lo pone la base a partir de la convocatoria; se manda cualquiera porque es obligatorio.
   const { error } = await reports().upsert({ call_up_id: callUpId, club_id: "00000000-0000-0000-0000-000000000000", ...clean });
   if (error) throw error;

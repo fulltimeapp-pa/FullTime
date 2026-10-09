@@ -176,9 +176,9 @@ Reemplaza la Tarea 1.
   `/panel-fulltime` (botón "🛠 Panel de dueña" en su panel).
 
 ### Hoja de partido (9-oct, idea de Carlos Rivera + revisión de goTeam)
-- En cada partido, el cuerpo técnico ve "Hoja del partido" → `/hoja/<id>`: (1) datos: rival, tipo
-  (liga, torneo, copa, amistoso), duración (40–90 o la que sea; recuerda la última de la categoría)
-  y notas; (2) titular / suplente de cada convocada (las que dijeron "No puedo" no salen);
+- En cada partido, el cuerpo técnico ve "Hoja del partido" → `/hoja/<id>`: (1) datos: rival,
+  **competición escrita por el entrenador** ("LFF", "Torneo Nacional Sub-16"; las que el club ya
+  usó salen como botones y viene puesta la última de la categoría, igual que la duración) y notas; (2) titular / suplente de cada convocada (las que dijeron "No puedo" no salen);
   (3) incidencias con minuto: gol (con quién), **autogol del rival** (sin jugadora), **gol en
   contra** (sin jugadora), amarilla, roja, cambio (sale / entra), lesión con nota; (4) tabla de
   minutos, goles y tarjetas. Marcador arriba y "Copiar resumen" para WhatsApp.
@@ -189,7 +189,8 @@ Reemplaza la Tarea 1.
 - Decidido con Bárbara: el cuerpo técnico ve todo; cada jugadora solo lo suyo (sus incidencias,
   su titularidad, su lesión con la nota) y los datos generales de sus partidos; las compañeras no.
 - Tablas nuevas `match_reports`, `match_lineup`, `match_events` (migración
-  `20261010120000_hoja_de_partido.sql`). El club lo pone la base desde la convocatoria; solo
+  `20261010120000_hoja_de_partido.sql`; la competición libre en `20261010130000_hoja_competicion.sql`,
+  que reemplazó el tipo fijo liga/torneo/copa/amistoso). El club lo pone la base desde la convocatoria; solo
   partidos; solo jugadoras del club. Probado en PGlite con dueña, coach, dos jugadoras y alguien de
   otro club (17 pruebas). Falta: aplicar la migración, probarla en la web real y la siguiente fase
   (estadísticas de temporada por equipo y por jugadora).

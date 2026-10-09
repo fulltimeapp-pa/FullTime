@@ -8,8 +8,8 @@ import { StaffShell } from "@/components/staff/StaffShell";
 import { friendlyError } from "@/lib/errors";
 import { formatWhen } from "@/lib/call-ups";
 import {
-  DURATIONS, EVENT_ICON, EVENT_LABEL, MATCH_TYPES, addEvent, deleteEvent, getMatchSheet, lastDurationFor, saveReport,
-  setLineup, summarizeMatch, type EventKind, type LineupRole, type MatchReport, type MatchType,
+  DURATIONS, EVENT_ICON, EVENT_LABEL, addEvent, deleteEvent, getMatchSheet, lastDefaultsFor, listCompetitions, saveReport,
+  setLineup, summarizeMatch, type EventKind, type LineupRole, type MatchReport,
 } from "@/lib/hoja-partido";
 
 export const Route = createFileRoute("/_authenticated/hoja/$id")({
@@ -63,22 +63,28 @@ function HojaDePartido() {
   });
   const sheetQ = useQuery({ queryKey: ["hoja", id], enabled: !!isStaffQ.data, queryFn: () => getMatchSheet(id) });
   const lastDurQ = useQuery({
-    queryKey: ["hoja-last-duration", cuQ.data?.category_id],
+    queryKey: ["hoja-last-defaults", cuQ.data?.category_id],
     enabled: !!isStaffQ.data && !!cuQ.data?.category_id && sheetQ.isSuccess && !sheetQ.data?.report,
-    queryFn: () => lastDurationFor(cuQ.data!.category_id),
+    queryFn: () => lastDefaultsFor(cuQ.data!.category_id),
+  });
+  const compsQ = useQuery({
+    queryKey: ["hoja-competitions", cuQ.data?.club_id],
+    enabled: !!isStaffQ.data && !!cuQ.data?.club_id,
+    queryFn: () => listCompetitions(cuQ.data!.club_id),
   });
 
   // Datos del partido (se guardan con el botón o solos al anotar lo primero).
-  const [form, setForm] = useState<Omit<MatchReport, "call_up_id">>({ opponent: "", match_type: "liga", duration_min: 90, notes: "" });
+  const [form, setForm] = useState<Omit<MatchReport, "call_up_id">>({ opponent: "", competition: "", duration_min: 90, notes: "" });
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     if (loaded || !sheetQ.data) return;
     const r = sheetQ.data.report;
     if (r) {
-      setForm({ opponent: r.opponent ?? "", match_type: r.match_type, duration_min: r.duration_min, notes: r.notes ?? "" });
+      setForm({ opponent: r.opponent ?? "", competition: r.competition ?? "", duration_min: r.duration_min, notes: r.notes ?? "" });
       setLoaded(true);
     } else if (lastDurQ.isFetched || !cuQ.data?.category_id) {
-      if (lastDurQ.data) setForm((f) => ({ ...f, duration_min: lastDurQ.data! }));
+      const d = lastDurQ.data;
+      if (d) setForm((f) => ({ ...f, duration_min: d.duration ?? f.duration_min, competition: d.competition ?? f.competition }));
       setLoaded(true);
     }
   }, [sheetQ.data, lastDurQ.isFetched, lastDurQ.data, loaded, cuQ.data?.category_id]);
@@ -90,7 +96,11 @@ function HojaDePartido() {
 
   const reportMut = useMutation({
     mutationFn: () => saveReport(id, form),
-    onSuccess: () => { toast.success("Datos del partido guardados"); refresh(); },
+    onSuccess: () => {
+      toast.success("Datos del partido guardados");
+      refresh();
+      qc.invalidateQueries({ queryKey: ["hoja-competitions"] });
+    },
     onError: (e) => toast.error(friendlyError(e, "No pudimos guardar. Vuelve a intentarlo.")),
   });
   const lineupMut = useMutation({
@@ -134,7 +144,7 @@ function HojaDePartido() {
 
   function copiarResumen() {
     const lines = [
-      `${clubName} ${summary.goalsFor} – ${summary.goalsAgainst} ${rival}`,
+      `${clubName} ${summary.goalsFor} – ${summary.goalsAgainst} ${rival}${sheet?.report?.competition ? ` (${sheet.report.competition})` : ""}`,
       formatWhen(cu.starts_at, cu.ends_at, cu.meet_at),
       "",
       ...(sheet?.events ?? []).map((e) => {
@@ -172,7 +182,10 @@ function HojaDePartido() {
 
         <main className="mx-auto max-w-4xl px-5 py-8">
           <p className="text-xs font-mono uppercase tracking-wider text-ink/50">Hoja del partido · {cu.categories?.name}</p>
-          <p className="mt-1 text-sm text-ink/60">{formatWhen(cu.starts_at, cu.ends_at, cu.meet_at)}</p>
+          <p className="mt-1 text-sm text-ink/60">
+            {formatWhen(cu.starts_at, cu.ends_at, cu.meet_at)}
+            {(sheet?.report?.competition ?? form.competition) ? ` · ${sheet?.report?.competition ?? form.competition}` : ""}
+          </p>
 
           {/* Marcador */}
           <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border-2 border-ink bg-ink p-5 text-paper">
@@ -194,16 +207,20 @@ function HojaDePartido() {
               <label>Rival
                 <input className={inputCls} value={form.opponent ?? ""} onChange={(e) => setForm({ ...form, opponent: e.target.value })} placeholder="Origen FC" />
               </label>
-              <div>Tipo de partido
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {MATCH_TYPES.map((t) => (
-                    <button key={t.value} type="button" onClick={() => setForm({ ...form, match_type: t.value as MatchType })}
-                      className={`rounded-full border-2 px-3 py-1.5 text-sm ${form.match_type === t.value ? "border-ink bg-lime" : "border-ink/20 bg-paper"}`}>
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <label>Competición
+                <input className={inputCls} value={form.competition ?? ""} onChange={(e) => setForm({ ...form, competition: e.target.value })}
+                  placeholder="LFF, Torneo Nacional Sub-16, Amistoso…" maxLength={80} />
+                {(compsQ.data ?? []).length > 0 && (
+                  <span className="mt-2 flex flex-wrap gap-1.5">
+                    {(compsQ.data ?? []).slice(0, 8).map((c) => (
+                      <button key={c} type="button" onClick={() => setForm({ ...form, competition: c })}
+                        className={`rounded-full border-2 px-2.5 py-1 text-xs ${form.competition?.trim().toLowerCase() === c.toLowerCase() ? "border-ink bg-lime" : "border-ink/20 bg-paper"}`}>
+                        {c}
+                      </button>
+                    ))}
+                  </span>
+                )}
+              </label>
               <div className="sm:col-span-2">¿Cuántos minutos dura el partido?
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   {DURATIONS.map((d) => (
