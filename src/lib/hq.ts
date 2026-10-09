@@ -214,7 +214,7 @@ export const HQ_MENU: { group: string; items: HqItem[] }[] = [
     group: "Productividad",
     items: [
       { title: "Tareas", to: "/hq/tareas", icon: CheckSquare, ready: true },
-      { title: "Calendario", to: "/hq/calendario", icon: CalendarDays, ready: false },
+      { title: "Calendario", to: "/hq/calendario", icon: CalendarDays, ready: true },
       { title: "Reuniones", to: "/hq/reuniones", icon: Mic, ready: true },
       { title: "Métricas", to: "/panel-fulltime", icon: TrendingUp, ready: true },
     ],

@@ -190,7 +190,7 @@ Reemplaza la Tarea 1.
   HQ"). El botón del panel del club ahora dice "🛠 FullTime HQ".
 - Probado en la web real (8-oct): Bárbara agregó su primer prospecto (Carlos Rivera, Inter CF,
   demo agendada) y aparece en "Para hoy" como "Mañana".
-- Siguientes fases: Calendario → Cotizaciones → Contenido, Inbox, Jarvis.
+- Siguientes fases: Cotizaciones → Contenido, Inbox, Jarvis.
 
 ### FullTime HQ: Reuniones (9-oct)
 - `/hq/reuniones`: anotar cada reunión con título, fecha, con quién, prospecto del CRM, qué pasó,
@@ -207,6 +207,12 @@ Reemplaza la Tarea 1.
 - Las de hoy y las atrasadas salen en Inicio → "Para hoy" con botón "✅ Hecha".
 - Tabla nueva `hq_tasks` (migración `20261009150000_hq_tareas.sql`), solo la dueña la ve (probado
   en PGlite). Migración aplicada y probado en la web real por Bárbara (9-oct): todo funciona.
+
+### FullTime HQ: Calendario (9-oct)
+- `/hq/calendario`: vista de mes (lunes primero) que junta tareas, próximos pasos del CRM y
+  reuniones, con colores por tipo. Tocas un día y ves su lista; puedes marcar tareas como hechas y
+  agregar una tarea para ese día. En celular se ven puntitos; en computadora, el texto.
+- No usa tablas nuevas. Falta: que Bárbara lo pruebe en la web real.
 
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes
