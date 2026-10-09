@@ -175,6 +175,25 @@ Reemplaza la Tarea 1.
 - `fulltimeapp.pa@gmail.com` agregada a `platform_admins` desde el SQL Editor. Bárbara ya entra a
   `/panel-fulltime` (botón "🛠 Panel de dueña" en su panel).
 
+### Hoja de partido (9-oct, idea de Carlos Rivera + revisión de goTeam)
+- En cada partido, el cuerpo técnico ve "Hoja del partido" → `/hoja/<id>`: (1) datos: rival, tipo
+  (liga, torneo, copa, amistoso), duración (40–90 o la que sea; recuerda la última de la categoría)
+  y notas; (2) titular / suplente de cada convocada (las que dijeron "No puedo" no salen);
+  (3) incidencias con minuto: gol (con quién), **autogol del rival** (sin jugadora), **gol en
+  contra** (sin jugadora), amarilla, roja, cambio (sale / entra), lesión con nota; (4) tabla de
+  minutos, goles y tarjetas. Marcador arriba y "Copiar resumen" para WhatsApp.
+- Resultado y minutos se calculan solos (`src/lib/hoja-partido.ts`, `summarizeMatch`): titular
+  desde el 0, suplente desde que entra, sale con cambio, roja o lesión; **puede volver a entrar**
+  (cambios ilimitados en juveniles) y se suman sus ratos. Probado con 9 casos.
+- La jugadora ve en el partido "Tus números": sus minutos, goles y tarjetas, y si salió lesionada.
+- Decidido con Bárbara: el cuerpo técnico ve todo; cada jugadora solo lo suyo (sus incidencias,
+  su titularidad, su lesión con la nota) y los datos generales de sus partidos; las compañeras no.
+- Tablas nuevas `match_reports`, `match_lineup`, `match_events` (migración
+  `20261010120000_hoja_de_partido.sql`). El club lo pone la base desde la convocatoria; solo
+  partidos; solo jugadoras del club. Probado en PGlite con dueña, coach, dos jugadoras y alguien de
+  otro club (17 pruebas). Falta: aplicar la migración, probarla en la web real y la siguiente fase
+  (estadísticas de temporada por equipo y por jugadora).
+
 ### FullTime HQ, fase 1 (8-oct)
 - Zona `/hq`, solo para la dueña de la plataforma, con el menú que diseñó Bárbara: General
   (Inicio, Notificaciones, Proyectos, Clientes, Jarvis), Productividad (Tareas, Calendario,

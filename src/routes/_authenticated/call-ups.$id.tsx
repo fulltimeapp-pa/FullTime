@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatWhen, kindLabel, toStartEnd, toMatchTimes, type CallUp, type CallUpPlayerRow, type ResponseStatus } from "@/lib/call-ups";
 import { PlanView } from "@/components/training/PlanView";
 import { StaffShell } from "@/components/staff/StaffShell";
+import { MatchSheetCard } from "@/components/match/MatchSheetCard";
 
 import { WellnessForm, RpeForm, WellnessSummary, RpeSummary, type WellnessKey } from "@/components/training/Wellness";
 import type { PlanActivity, PlanPart, Intensity } from "@/lib/training-plan";
@@ -630,6 +631,10 @@ function CallUpDetail() {
         )}
 
         {cu.kind === "entreno" && <PlanView activities={planQ.data ?? []} />}
+
+        {cu.kind === "partido" && (isStaff || isPlayer) && (
+          <MatchSheetCard callUpId={id} isStaff={isStaff} playerId={myRow?.player_id ?? null} started={started} />
+        )}
 
         {isEntreno && isPlayer && myRow && cu.wellness_enabled && (
           <WellnessForm

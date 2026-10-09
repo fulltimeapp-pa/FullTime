@@ -38,6 +38,7 @@ import { Route as AuthenticatedCallUpsNewRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCotizacionIdRouteImport } from './routes/_authenticated/cotizacion.$id'
 import { Route as AuthenticatedEntrenosIndexRouteImport } from './routes/_authenticated/entrenos.index'
 import { Route as AuthenticatedEntrenosNewRouteImport } from './routes/_authenticated/entrenos.new'
+import { Route as AuthenticatedHojaIdRouteImport } from './routes/_authenticated/hoja.$id'
 import { Route as AuthenticatedHqIndexRouteImport } from './routes/_authenticated/hq.index'
 import { Route as AuthenticatedHqSeccionRouteImport } from './routes/_authenticated/hq.$seccion'
 import { Route as AuthenticatedHqAutomatizacionesRouteImport } from './routes/_authenticated/hq.automatizaciones'
@@ -203,6 +204,11 @@ const AuthenticatedEntrenosNewRoute =
     path: '/new',
     getParentRoute: () => AuthenticatedEntrenosRoute,
   } as any)
+const AuthenticatedHojaIdRoute = AuthenticatedHojaIdRouteImport.update({
+  id: '/hoja/$id',
+  path: '/hoja/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHqIndexRoute = AuthenticatedHqIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -303,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/call-ups/new': typeof AuthenticatedCallUpsNewRoute
   '/cotizacion/$id': typeof AuthenticatedCotizacionIdRoute
   '/entrenos/new': typeof AuthenticatedEntrenosNewRoute
+  '/hoja/$id': typeof AuthenticatedHojaIdRoute
   '/hq/$seccion': typeof AuthenticatedHqSeccionRoute
   '/hq/automatizaciones': typeof AuthenticatedHqAutomatizacionesRoute
   '/hq/calendario': typeof AuthenticatedHqCalendarioRoute
@@ -343,6 +350,7 @@ export interface FileRoutesByTo {
   '/call-ups/new': typeof AuthenticatedCallUpsNewRoute
   '/cotizacion/$id': typeof AuthenticatedCotizacionIdRoute
   '/entrenos/new': typeof AuthenticatedEntrenosNewRoute
+  '/hoja/$id': typeof AuthenticatedHojaIdRoute
   '/hq/$seccion': typeof AuthenticatedHqSeccionRoute
   '/hq/automatizaciones': typeof AuthenticatedHqAutomatizacionesRoute
   '/hq/calendario': typeof AuthenticatedHqCalendarioRoute
@@ -388,6 +396,7 @@ export interface FileRoutesById {
   '/_authenticated/call-ups/new': typeof AuthenticatedCallUpsNewRoute
   '/_authenticated/cotizacion/$id': typeof AuthenticatedCotizacionIdRoute
   '/_authenticated/entrenos/new': typeof AuthenticatedEntrenosNewRoute
+  '/_authenticated/hoja/$id': typeof AuthenticatedHojaIdRoute
   '/_authenticated/hq/$seccion': typeof AuthenticatedHqSeccionRoute
   '/_authenticated/hq/automatizaciones': typeof AuthenticatedHqAutomatizacionesRoute
   '/_authenticated/hq/calendario': typeof AuthenticatedHqCalendarioRoute
@@ -433,6 +442,7 @@ export interface FileRouteTypes {
     | '/call-ups/new'
     | '/cotizacion/$id'
     | '/entrenos/new'
+    | '/hoja/$id'
     | '/hq/$seccion'
     | '/hq/automatizaciones'
     | '/hq/calendario'
@@ -473,6 +483,7 @@ export interface FileRouteTypes {
     | '/call-ups/new'
     | '/cotizacion/$id'
     | '/entrenos/new'
+    | '/hoja/$id'
     | '/hq/$seccion'
     | '/hq/automatizaciones'
     | '/hq/calendario'
@@ -517,6 +528,7 @@ export interface FileRouteTypes {
     | '/_authenticated/call-ups/new'
     | '/_authenticated/cotizacion/$id'
     | '/_authenticated/entrenos/new'
+    | '/_authenticated/hoja/$id'
     | '/_authenticated/hq/$seccion'
     | '/_authenticated/hq/automatizaciones'
     | '/_authenticated/hq/calendario'
@@ -751,6 +763,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEntrenosNewRouteImport
       parentRoute: typeof AuthenticatedEntrenosRoute
     }
+    '/_authenticated/hoja/$id': {
+      id: '/_authenticated/hoja/$id'
+      path: '/hoja/$id'
+      fullPath: '/hoja/$id'
+      preLoaderRoute: typeof AuthenticatedHojaIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/hq/': {
       id: '/_authenticated/hq/'
       path: '/'
@@ -925,6 +944,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPerfilEntrenadorRoute: typeof AuthenticatedPerfilEntrenadorRoute
   AuthenticatedRosterRoute: typeof AuthenticatedRosterRoute
   AuthenticatedCotizacionIdRoute: typeof AuthenticatedCotizacionIdRoute
+  AuthenticatedHojaIdRoute: typeof AuthenticatedHojaIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -943,6 +963,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPerfilEntrenadorRoute: AuthenticatedPerfilEntrenadorRoute,
   AuthenticatedRosterRoute: AuthenticatedRosterRoute,
   AuthenticatedCotizacionIdRoute: AuthenticatedCotizacionIdRoute,
+  AuthenticatedHojaIdRoute: AuthenticatedHojaIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
