@@ -373,6 +373,13 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   Android (revisar en la base que tenga suscripción `fcm.googleapis.com`).
 
 **Siguientes mejoras (fuera del plan original):**
+- **Idea: chat dentro de la app (Bárbara, 9-oct). Solo anotada, NO decidida.** Chat del equipo
+  completo, chat entre jugadoras de uno a uno (sin que ellas armen grupos) y chat del entrenador con
+  cada jugadora. Antes de construir hay que decidir: (1) choca con CLAUDE.md, que pone "chat o
+  avisos de texto libre" fuera del alcance; (2) menores de edad: un chat privado adulto–menor o
+  entre menores necesita reglas (¿lo ven los papás? ¿el cuerpo técnico ve los chats entre
+  jugadoras? ¿se puede reportar o bloquear?); (3) moderación y quién responde por lo que se
+  escribe. Preguntas pendientes para Bárbara cuando haya tiempo.
 - Límites por plan (recordatorio de Bárbara, 6-oct): Plan Equipo (un equipo) y Plan Academia
   (varios equipos, precio por equipo). Hoy la app deja crear categorías sin límite; controlarlo
   desde el panel de la dueña.
