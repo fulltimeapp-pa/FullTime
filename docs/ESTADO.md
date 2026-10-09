@@ -225,7 +225,8 @@ Reemplaza la Tarea 1.
   y botón PDF. `/cotizacion/<id>`: hoja tamaño carta lista para "Guardar como PDF".
 - Tabla nueva `hq_quotes` (migración `20261009170000_hq_cotizaciones.sql`); el total se guarda al
   cotizar. Solo la dueña la ve (probado en PGlite). Cálculos probados (12 meses Plan Equipo =
-  $99.90; Academia 3 equipos × 12 meses = $259.70). Falta: aplicar la migración y probarlo en la web.
+  $99.90; Academia 3 equipos × 12 meses = $259.70). Migración aplicada; probado en la web real por
+  Bárbara (9-oct), con PDF: funciona.
 
 ### Detalles menores del prompt original (8-oct)
 - Perfil de entrenador: el rol se ve como "Dueño/a del club", "Admin" o "Cuerpo técnico" (antes
