@@ -25,8 +25,10 @@ import { Route as AuthenticatedEstadisticasRouteImport } from './routes/_authent
 import { Route as AuthenticatedFormulariosRouteImport } from './routes/_authenticated/formularios'
 import { Route as AuthenticatedHqRouteImport } from './routes/_authenticated/hq'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
+import { Route as AuthenticatedMiCalendarioRouteImport } from './routes/_authenticated/mi-calendario'
 import { Route as AuthenticatedMiPerfilRouteImport } from './routes/_authenticated/mi-perfil'
 import { Route as AuthenticatedMisConvocatoriasRouteImport } from './routes/_authenticated/mis-convocatorias'
+import { Route as AuthenticatedMisEstadisticasRouteImport } from './routes/_authenticated/mis-estadisticas'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedPanelFulltimeRouteImport } from './routes/_authenticated/panel-fulltime'
 import { Route as AuthenticatedPerfilEntrenadorRouteImport } from './routes/_authenticated/perfil-entrenador'
@@ -136,6 +138,12 @@ const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
   path: '/inicio',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMiCalendarioRoute =
+  AuthenticatedMiCalendarioRouteImport.update({
+    id: '/mi-calendario',
+    path: '/mi-calendario',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMiPerfilRoute = AuthenticatedMiPerfilRouteImport.update({
   id: '/mi-perfil',
   path: '/mi-perfil',
@@ -145,6 +153,12 @@ const AuthenticatedMisConvocatoriasRoute =
   AuthenticatedMisConvocatoriasRouteImport.update({
     id: '/mis-convocatorias',
     path: '/mis-convocatorias',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMisEstadisticasRoute =
+  AuthenticatedMisEstadisticasRouteImport.update({
+    id: '/mis-estadisticas',
+    path: '/mis-estadisticas',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
@@ -312,8 +326,10 @@ export interface FileRoutesByFullPath {
   '/formularios': typeof AuthenticatedFormulariosRoute
   '/hq': typeof AuthenticatedHqRouteWithChildren
   '/inicio': typeof AuthenticatedInicioRoute
+  '/mi-calendario': typeof AuthenticatedMiCalendarioRoute
   '/mi-perfil': typeof AuthenticatedMiPerfilRoute
   '/mis-convocatorias': typeof AuthenticatedMisConvocatoriasRoute
+  '/mis-estadisticas': typeof AuthenticatedMisEstadisticasRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/panel-fulltime': typeof AuthenticatedPanelFulltimeRoute
   '/perfil-entrenador': typeof AuthenticatedPerfilEntrenadorRoute
@@ -355,8 +371,10 @@ export interface FileRoutesByTo {
   '/estadisticas': typeof AuthenticatedEstadisticasRoute
   '/formularios': typeof AuthenticatedFormulariosRoute
   '/inicio': typeof AuthenticatedInicioRoute
+  '/mi-calendario': typeof AuthenticatedMiCalendarioRoute
   '/mi-perfil': typeof AuthenticatedMiPerfilRoute
   '/mis-convocatorias': typeof AuthenticatedMisConvocatoriasRoute
+  '/mis-estadisticas': typeof AuthenticatedMisEstadisticasRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/panel-fulltime': typeof AuthenticatedPanelFulltimeRoute
   '/perfil-entrenador': typeof AuthenticatedPerfilEntrenadorRoute
@@ -403,8 +421,10 @@ export interface FileRoutesById {
   '/_authenticated/formularios': typeof AuthenticatedFormulariosRoute
   '/_authenticated/hq': typeof AuthenticatedHqRouteWithChildren
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
+  '/_authenticated/mi-calendario': typeof AuthenticatedMiCalendarioRoute
   '/_authenticated/mi-perfil': typeof AuthenticatedMiPerfilRoute
   '/_authenticated/mis-convocatorias': typeof AuthenticatedMisConvocatoriasRoute
+  '/_authenticated/mis-estadisticas': typeof AuthenticatedMisEstadisticasRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/panel-fulltime': typeof AuthenticatedPanelFulltimeRoute
   '/_authenticated/perfil-entrenador': typeof AuthenticatedPerfilEntrenadorRoute
@@ -451,8 +471,10 @@ export interface FileRouteTypes {
     | '/formularios'
     | '/hq'
     | '/inicio'
+    | '/mi-calendario'
     | '/mi-perfil'
     | '/mis-convocatorias'
+    | '/mis-estadisticas'
     | '/onboarding'
     | '/panel-fulltime'
     | '/perfil-entrenador'
@@ -494,8 +516,10 @@ export interface FileRouteTypes {
     | '/estadisticas'
     | '/formularios'
     | '/inicio'
+    | '/mi-calendario'
     | '/mi-perfil'
     | '/mis-convocatorias'
+    | '/mis-estadisticas'
     | '/onboarding'
     | '/panel-fulltime'
     | '/perfil-entrenador'
@@ -541,8 +565,10 @@ export interface FileRouteTypes {
     | '/_authenticated/formularios'
     | '/_authenticated/hq'
     | '/_authenticated/inicio'
+    | '/_authenticated/mi-calendario'
     | '/_authenticated/mi-perfil'
     | '/_authenticated/mis-convocatorias'
+    | '/_authenticated/mis-estadisticas'
     | '/_authenticated/onboarding'
     | '/_authenticated/panel-fulltime'
     | '/_authenticated/perfil-entrenador'
@@ -698,6 +724,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInicioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mi-calendario': {
+      id: '/_authenticated/mi-calendario'
+      path: '/mi-calendario'
+      fullPath: '/mi-calendario'
+      preLoaderRoute: typeof AuthenticatedMiCalendarioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/mi-perfil': {
       id: '/_authenticated/mi-perfil'
       path: '/mi-perfil'
@@ -710,6 +743,13 @@ declare module '@tanstack/react-router' {
       path: '/mis-convocatorias'
       fullPath: '/mis-convocatorias'
       preLoaderRoute: typeof AuthenticatedMisConvocatoriasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mis-estadisticas': {
+      id: '/_authenticated/mis-estadisticas'
+      path: '/mis-estadisticas'
+      fullPath: '/mis-estadisticas'
+      preLoaderRoute: typeof AuthenticatedMisEstadisticasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -979,8 +1019,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFormulariosRoute: typeof AuthenticatedFormulariosRoute
   AuthenticatedHqRoute: typeof AuthenticatedHqRouteWithChildren
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
+  AuthenticatedMiCalendarioRoute: typeof AuthenticatedMiCalendarioRoute
   AuthenticatedMiPerfilRoute: typeof AuthenticatedMiPerfilRoute
   AuthenticatedMisConvocatoriasRoute: typeof AuthenticatedMisConvocatoriasRoute
+  AuthenticatedMisEstadisticasRoute: typeof AuthenticatedMisEstadisticasRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPanelFulltimeRoute: typeof AuthenticatedPanelFulltimeRoute
   AuthenticatedPerfilEntrenadorRoute: typeof AuthenticatedPerfilEntrenadorRoute
@@ -1000,8 +1042,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFormulariosRoute: AuthenticatedFormulariosRoute,
   AuthenticatedHqRoute: AuthenticatedHqRouteWithChildren,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
+  AuthenticatedMiCalendarioRoute: AuthenticatedMiCalendarioRoute,
   AuthenticatedMiPerfilRoute: AuthenticatedMiPerfilRoute,
   AuthenticatedMisConvocatoriasRoute: AuthenticatedMisConvocatoriasRoute,
+  AuthenticatedMisEstadisticasRoute: AuthenticatedMisEstadisticasRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPanelFulltimeRoute: AuthenticatedPanelFulltimeRoute,
   AuthenticatedPerfilEntrenadorRoute: AuthenticatedPerfilEntrenadorRoute,

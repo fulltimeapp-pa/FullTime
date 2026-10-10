@@ -193,6 +193,14 @@ Reemplaza la Tarea 1.
   respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
 - Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
 
+### Menú de la jugadora (9-oct, pedido de Bárbara)
+- `PlayerShell`: barra abajo en el celular (como app) y menú arriba en la computadora, con Inicio,
+  Partidos (`/mis-convocatorias?tipo=partido`), Entrenos (`?tipo=entreno`), Calendario
+  (`/mi-calendario`, mes con puntitos por día y la lista del día), Mis números (`/mis-estadisticas`:
+  asistencia total, de entrenos y de partidos + "Tu temporada") y Perfil. El perfil ya no repite la
+  asistencia ni la temporada (enlaza a Mis números). Si alguien del cuerpo técnico abre "Mis
+  convocatorias", ve la pantalla de antes. Falta: probarlo en el celular.
+
 ### Wellness y RPE, parte 2: recordatorios automáticos (9-oct)
 - En el cron de cada 15 min (`runReminders`): **wellness** cuando faltan 2 h o menos para la hora de
   referencia del entreno (convocatoria o inicio); **RPE** entre 30 min y 6 h después del fin (o de

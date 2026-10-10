@@ -9,6 +9,7 @@ import { Logo } from "@/components/brand/Logo";
 import { ClubCrest } from "@/components/brand/ClubCrest";
 
 import { PushOptIn } from "@/components/push/PushOptIn";
+import { PlayerShell } from "@/components/player/PlayerShell";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
@@ -92,23 +93,7 @@ function PlayerHome() {
   const upcoming = callUpsQ.data ?? [];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-paper/70 border-b border-ink/10">
-        <div className="mx-auto max-w-5xl px-5 py-3.5 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2">
-            <Logo className="h-9 w-9" />
-            <span className="font-display text-lg font-bold tracking-tight">
-              FullTime<span className="text-pa-red">.</span>
-            </span>
-          </a>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="hidden sm:inline text-ink/60 font-mono text-xs">{user.email}</span>
-            <button onClick={signOut} className="btn-ghost !py-2 !px-4 !text-sm">
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
-      </header>
+    <PlayerShell>
 
       <main className="mx-auto max-w-5xl px-5 py-10 md:py-14">
         <div className="max-w-3xl">
@@ -227,7 +212,7 @@ function PlayerHome() {
           )}
         </section>
       </main>
-    </div>
+    </PlayerShell>
   );
 }
 

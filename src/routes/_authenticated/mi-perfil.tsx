@@ -5,6 +5,7 @@ import { ArrowLeft, Mail, Phone, Hash, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyActiveClub, isStaffRole } from "@/lib/active-club";
 import { MiTemporada } from "@/components/match/MiTemporada";
+import { PlayerShell } from "@/components/player/PlayerShell";
 
 export const Route = createFileRoute("/_authenticated/mi-perfil")({
   head: () => ({
@@ -106,14 +107,7 @@ function MyProfile() {
 
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-paper/70 border-b border-ink/10">
-        <div className="mx-auto max-w-3xl px-5 py-3.5 flex items-center">
-          <Link to="/inicio" className="flex items-center gap-2 text-sm font-semibold hover:opacity-70">
-            <ArrowLeft size={16} /> Volver
-          </Link>
-        </div>
-      </header>
+    <PlayerShell>
 
       <main className="mx-auto max-w-3xl px-5 py-10">
         <span className="chip">
@@ -154,33 +148,9 @@ function MyProfile() {
               </div>
             </section>
 
-            {att && (att.marcadas > 0 || attendanceQ.isSuccess) && (
-              <section className="rounded-2xl border-2 border-ink bg-card p-6 md:p-7">
-                <h2 className="font-display text-xl font-bold">Tu asistencia</h2>
-                {att.marcadas === 0 ? (
-                  <p className="mt-2 text-sm text-ink/60">Aún sin datos.</p>
-                ) : (
-                  <>
-                    <p className="mt-2 text-3xl font-display font-bold">
-                      {att.pct}%
-                    </p>
-                    <p className="mt-1 text-sm text-ink/60">
-                      Asististe a {att.asistio} de {att.marcadas} eventos.
-                    </p>
-                    <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-ink/10">
-                      <div
-                        className={`h-full rounded-full ${att.pct != null && att.pct < 60 ? "bg-pa-red" : "bg-lime"}`}
-                        style={{ width: `${att.pct ?? 0}%` }}
-                      />
-                    </div>
-                  </>
-                )}
-              </section>
-            )}
-
-
-
-            <MiTemporada clubId={me.club_id} playerId={me.id} />
+            <Link to="/mis-estadisticas" className="block rounded-2xl border-2 border-ink bg-card p-5 font-semibold hover:shadow-[4px_4px_0_0_var(--color-lime)]">
+              📊 Tu asistencia, minutos, goles y tarjetas están en <span className="underline">Mis números</span>
+            </Link>
 
             <section className="rounded-2xl border-2 border-ink bg-card p-6 md:p-7">
               <h2 className="font-display text-xl font-bold">Tus datos</h2>
@@ -219,7 +189,7 @@ function MyProfile() {
           </div>
         )}
       </main>
-    </div>
+    </PlayerShell>
   );
 }
 

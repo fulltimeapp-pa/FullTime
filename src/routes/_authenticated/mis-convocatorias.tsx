@@ -4,8 +4,13 @@ import { ArrowLeft, Calendar, MapPin, Check, X, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyActiveClub, isStaffRole } from "@/lib/active-club";
 import { formatShort, kindLabel } from "@/lib/call-ups";
+import { PlayerShell } from "@/components/player/PlayerShell";
 
 export const Route = createFileRoute("/_authenticated/mis-convocatorias")({
+  // ?tipo=partido | entreno: el menú de la jugadora separa Partidos y Entrenos.
+  validateSearch: (s: Record<string, unknown>): { tipo?: "partido" | "entreno" } => ({
+    tipo: s.tipo === "partido" || s.tipo === "entreno" ? s.tipo : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "FullTime — Mis convocatorias" },
@@ -21,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/mis-convocatorias")({
 
 function MyCallUps() {
   const { user } = Route.useRouteContext();
+  const { tipo } = Route.useSearch();
   const clubQ = useQuery({ queryKey: ["my-club"], queryFn: getMyActiveClub });
   const homePath = clubQ.data && !isStaffRole(clubQ.data.role) ? "/inicio" : "/dashboard";
 
@@ -57,11 +63,29 @@ function MyCallUps() {
     },
   });
 
-  const items = q.data ?? [];
+  const items = (q.data ?? []).filter((i: any) => !tipo || i.kind === tipo);
+  const isPlayer = !!clubQ.data && !isStaffRole(clubQ.data.role);
+  const titulo = tipo === "partido" ? ["Mis", "partidos"] : tipo === "entreno" ? ["Mis", "entrenos"] : ["Mis", "convocatorias"];
   const now = Date.now();
   const upcoming = items.filter((i: any) => new Date(i.starts_at).getTime() >= now - 2 * 60 * 60 * 1000);
   const past = items.filter((i: any) => !upcoming.includes(i));
 
+  const content = (
+    <>
+
+      <main className="mx-auto max-w-4xl px-5 py-10">
+        <span className="chip"><span className="h-1.5 w-1.5 rounded-full bg-lime inline-block" /> Tus convocatorias</span>
+        <h1 className="mt-4 text-display text-4xl md:text-5xl font-bold leading-[0.95]">
+          {titulo[0]} <span className="marker-underline">{titulo[1]}</span>
+        </h1>
+
+        <Section title="Próximas" items={upcoming} loading={q.isLoading} empty={tipo === "partido" ? "No tienes partidos próximos." : tipo === "entreno" ? "No tienes entrenos próximos." : "No tienes convocatorias próximas."} />
+        <Section title="Anteriores" items={past} loading={q.isLoading} empty="No hay historial todavía." past />
+      </main>
+    </>
+  );
+
+  if (isPlayer) return <PlayerShell>{content}</PlayerShell>;
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 backdrop-blur-md bg-paper/70 border-b border-ink/10">
@@ -71,16 +95,7 @@ function MyCallUps() {
           </Link>
         </div>
       </header>
-
-      <main className="mx-auto max-w-4xl px-5 py-10">
-        <span className="chip"><span className="h-1.5 w-1.5 rounded-full bg-lime inline-block" /> Tus convocatorias</span>
-        <h1 className="mt-4 text-display text-4xl md:text-5xl font-bold leading-[0.95]">
-          Mis <span className="marker-underline">convocatorias</span>
-        </h1>
-
-        <Section title="Próximas" items={upcoming} loading={q.isLoading} empty="No tienes convocatorias próximas." />
-        <Section title="Anteriores" items={past} loading={q.isLoading} empty="No hay historial todavía." past />
-      </main>
+      {content}
     </div>
   );
 }

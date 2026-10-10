@@ -4,9 +4,16 @@ import { buildSeason, loadSeasonMatches } from "@/lib/estadisticas";
 /** En el perfil de la jugadora: sus números de la temporada (solo los suyos). */
 export function MiTemporada({ clubId, playerId }: { clubId: string; playerId: string }) {
   const q = useQuery({ queryKey: ["my-season", clubId], queryFn: () => loadSeasonMatches(clubId) });
-  if (!q.isSuccess || q.data.length === 0) return null;
-  const me = buildSeason(q.data).players[playerId];
-  if (!me) return null;
+  if (!q.isSuccess) return null;
+  const me = q.data.length ? buildSeason(q.data).players[playerId] : undefined;
+  if (!me) {
+    return (
+      <section className="rounded-2xl border-2 border-ink bg-card p-6 md:p-7">
+        <h2 className="font-display text-xl font-bold">Tu temporada</h2>
+        <p className="mt-2 text-sm text-ink/60">Tus minutos, goles y tarjetas aparecen cuando tu Profe llene la hoja de un partido donde jugaste.</p>
+      </section>
+    );
+  }
 
   return (
     <section className="rounded-2xl border-2 border-ink bg-card p-6 md:p-7">
