@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Mail, Phone, Hash, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyActiveClub, isStaffRole } from "@/lib/active-club";
+import { MiTemporada } from "@/components/match/MiTemporada";
 
 export const Route = createFileRoute("/_authenticated/mi-perfil")({
   head: () => ({
@@ -178,6 +179,8 @@ function MyProfile() {
             )}
 
 
+
+            <MiTemporada clubId={me.club_id} playerId={me.id} />
 
             <section className="rounded-2xl border-2 border-ink bg-card p-6 md:p-7">
               <h2 className="font-display text-xl font-bold">Tus datos</h2>

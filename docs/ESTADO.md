@@ -175,6 +175,18 @@ Reemplaza la Tarea 1.
 - `fulltimeapp.pa@gmail.com` agregada a `platform_admins` desde el SQL Editor. Bárbara ya entra a
   `/panel-fulltime` (botón "🛠 Panel de dueña" en su panel).
 
+### Estadísticas de temporada (9-oct)
+- `/estadisticas` (menú del cuerpo técnico, "Estadísticas"): salen solo de los partidos con hoja.
+  Filtros por categoría y competición. Equipo: partidos, ganados / empates / perdidos, goles a favor
+  y en contra, tarjetas, goleadoras y goles por tramo de minutos. Tabla por jugadora: convocatorias,
+  partidos jugados, titular, suplente que entró / que no, minutos, goles, tarjetas y lesiones;
+  ordenable y con "Descargar" (CSV para Excel o Google Sheets). Lista de partidos con resultado
+  (abre la hoja).
+- La jugadora ve "Tu temporada" en su perfil: sus minutos, partidos, goles, titularidades y
+  tarjetas (la base solo le da lo suyo).
+- Lógica en `src/lib/estadisticas.ts` (`buildSeason`), probada con 7 casos. Sin tablas nuevas.
+  Falta: probarlo en la web real.
+
 ### Hoja de partido (9-oct, idea de Carlos Rivera + revisión de goTeam)
 - En cada partido, el cuerpo técnico ve "Hoja del partido" → `/hoja/<id>`: (1) datos: rival,
   **competición escrita por el entrenador** ("LFF", "Torneo Nacional Sub-16"; las que el club ya

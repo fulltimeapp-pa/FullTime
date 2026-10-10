@@ -21,6 +21,7 @@ import { Route as AuthenticatedCallUpsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEntrenosRouteImport } from './routes/_authenticated/entrenos'
 import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated/equipo'
+import { Route as AuthenticatedEstadisticasRouteImport } from './routes/_authenticated/estadisticas'
 import { Route as AuthenticatedHqRouteImport } from './routes/_authenticated/hq'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedMiPerfilRouteImport } from './routes/_authenticated/mi-perfil'
@@ -112,6 +113,12 @@ const AuthenticatedEquipoRoute = AuthenticatedEquipoRouteImport.update({
   path: '/equipo',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEstadisticasRoute =
+  AuthenticatedEstadisticasRouteImport.update({
+    id: '/estadisticas',
+    path: '/estadisticas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedHqRoute = AuthenticatedHqRouteImport.update({
   id: '/hq',
   path: '/hq',
@@ -294,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/entrenos': typeof AuthenticatedEntrenosRouteWithChildren
   '/equipo': typeof AuthenticatedEquipoRoute
+  '/estadisticas': typeof AuthenticatedEstadisticasRoute
   '/hq': typeof AuthenticatedHqRouteWithChildren
   '/inicio': typeof AuthenticatedInicioRoute
   '/mi-perfil': typeof AuthenticatedMiPerfilRoute
@@ -336,6 +344,7 @@ export interface FileRoutesByTo {
   '/calendario': typeof AuthenticatedCalendarioRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/equipo': typeof AuthenticatedEquipoRoute
+  '/estadisticas': typeof AuthenticatedEstadisticasRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/mi-perfil': typeof AuthenticatedMiPerfilRoute
   '/mis-convocatorias': typeof AuthenticatedMisConvocatoriasRoute
@@ -381,6 +390,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/entrenos': typeof AuthenticatedEntrenosRouteWithChildren
   '/_authenticated/equipo': typeof AuthenticatedEquipoRoute
+  '/_authenticated/estadisticas': typeof AuthenticatedEstadisticasRoute
   '/_authenticated/hq': typeof AuthenticatedHqRouteWithChildren
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/mi-perfil': typeof AuthenticatedMiPerfilRoute
@@ -427,6 +437,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/entrenos'
     | '/equipo'
+    | '/estadisticas'
     | '/hq'
     | '/inicio'
     | '/mi-perfil'
@@ -469,6 +480,7 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/dashboard'
     | '/equipo'
+    | '/estadisticas'
     | '/inicio'
     | '/mi-perfil'
     | '/mis-convocatorias'
@@ -513,6 +525,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/entrenos'
     | '/_authenticated/equipo'
+    | '/_authenticated/estadisticas'
     | '/_authenticated/hq'
     | '/_authenticated/inicio'
     | '/_authenticated/mi-perfil'
@@ -642,6 +655,13 @@ declare module '@tanstack/react-router' {
       path: '/equipo'
       fullPath: '/equipo'
       preLoaderRoute: typeof AuthenticatedEquipoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/estadisticas': {
+      id: '/_authenticated/estadisticas'
+      path: '/estadisticas'
+      fullPath: '/estadisticas'
+      preLoaderRoute: typeof AuthenticatedEstadisticasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/hq': {
@@ -935,6 +955,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEntrenosRoute: typeof AuthenticatedEntrenosRouteWithChildren
   AuthenticatedEquipoRoute: typeof AuthenticatedEquipoRoute
+  AuthenticatedEstadisticasRoute: typeof AuthenticatedEstadisticasRoute
   AuthenticatedHqRoute: typeof AuthenticatedHqRouteWithChildren
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedMiPerfilRoute: typeof AuthenticatedMiPerfilRoute
@@ -954,6 +975,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEntrenosRoute: AuthenticatedEntrenosRouteWithChildren,
   AuthenticatedEquipoRoute: AuthenticatedEquipoRoute,
+  AuthenticatedEstadisticasRoute: AuthenticatedEstadisticasRoute,
   AuthenticatedHqRoute: AuthenticatedHqRouteWithChildren,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedMiPerfilRoute: AuthenticatedMiPerfilRoute,
