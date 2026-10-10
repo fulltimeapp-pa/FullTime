@@ -189,7 +189,8 @@ Reemplaza la Tarea 1.
   agregar, cambiar nombre (corrige también los partidos que la usaban) o borrar (sale de la lista; los
   partidos viejos mantienen el nombre). Una competición nueva escrita en la hoja entra sola. Tabla
   `club_competitions` (migración `20261010140000_competiciones.sql`, arranca con las ya usadas), solo
-  cuerpo técnico; probado en PGlite (6 pruebas).
+  cuerpo técnico; probado en PGlite (6 pruebas). Hoja + competiciones probadas en la web real por
+  Bárbara (9-oct): funcionan.
 - Al crear un partido, la app lleva directo a la hoja ("✅ Partido creado y aviso enviado") para poner
   rival, competición y titulares de una vez; goles, tarjetas y cambios se muestran desde la hora de
   convocatoria (o con "Anotar ahora de todas formas"). Todo sigue editable después del partido.
