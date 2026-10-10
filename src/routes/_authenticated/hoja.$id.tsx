@@ -13,6 +13,8 @@ import {
 } from "@/lib/hoja-partido";
 
 export const Route = createFileRoute("/_authenticated/hoja/$id")({
+  // ?nuevo=1 cuando se acaba de crear el partido.
+  validateSearch: (s: Record<string, unknown>): { nuevo?: boolean } => ({ nuevo: s.nuevo === true || s.nuevo === "true" || s.nuevo === 1 ? true : undefined }),
   head: () => ({ meta: [{ title: "FullTime — Hoja del partido" }] }),
   component: HojaDePartido,
 });
@@ -23,7 +25,9 @@ const ORDER: EventKind[] = ["gol", "autogol_rival", "gol_contra", "amarilla", "r
 
 function HojaDePartido() {
   const { id } = Route.useParams();
+  const { nuevo } = Route.useSearch();
   const { user } = Route.useRouteContext();
+  const [verIncidencias, setVerIncidencias] = useState(false);
   const qc = useQueryClient();
 
   const cuQ = useQuery({
@@ -140,6 +144,8 @@ function HojaDePartido() {
   }
 
   const clubName = cu.clubs?.name ?? "Nosotras";
+  const empezo = new Date(cu.meet_at ?? cu.starts_at).getTime() <= Date.now();
+  const mostrarPartido = empezo || verIncidencias || (sheet?.events ?? []).length > 0;
   const rival = (sheet?.report?.opponent ?? form.opponent) || "Rival";
 
   function copiarResumen() {
@@ -181,6 +187,14 @@ function HojaDePartido() {
         </header>
 
         <main className="mx-auto max-w-4xl px-5 py-8">
+          {nuevo && (
+            <div className="mb-5 rounded-2xl border-2 border-ink bg-lime/40 p-4">
+              <p className="font-display text-lg font-bold">✅ Partido creado y aviso enviado</p>
+              <p className="text-sm text-ink/70">
+                Si ya lo tienes claro, pon el rival y marca titulares y suplentes. Si no, hazlo después: lo encuentras en el partido.
+              </p>
+            </div>
+          )}
           <p className="text-xs font-mono uppercase tracking-wider text-ink/50">Hoja del partido · {cu.categories?.name}</p>
           <p className="mt-1 text-sm text-ink/60">
             {formatWhen(cu.starts_at, cu.ends_at, cu.meet_at)}
@@ -278,6 +292,19 @@ function HojaDePartido() {
             )}
           </section>
 
+          {!mostrarPartido && (
+            <section className="mt-6 rounded-2xl border-2 border-dashed border-ink/25 bg-paper p-5">
+              <h2 className="font-display text-xl font-bold text-ink/60">3. Lo que pase en el partido</h2>
+              <p className="mt-1 text-sm text-ink/60">
+                Goles, tarjetas, cambios y lesiones se anotan durante o después del partido. Los minutos salen solos.
+              </p>
+              <button type="button" onClick={() => setVerIncidencias(true)} className="mt-2 text-sm font-semibold underline">
+                Anotar ahora de todas formas
+              </button>
+            </section>
+          )}
+
+          {mostrarPartido && (<>
           {/* 3. Incidencias */}
           <section className="mt-6 rounded-2xl border-2 border-ink bg-card p-5">
             <h2 className="font-display text-xl font-bold">3. Lo que pasó</h2>
@@ -343,6 +370,11 @@ function HojaDePartido() {
               </table>
             </div>
           </section>
+          </>)}
+
+          <div className="mt-8 flex justify-center">
+            <Link to="/call-ups/$id" params={{ id }} className="btn-primary">Listo, ir al partido</Link>
+          </div>
         </main>
 
         {adding && (

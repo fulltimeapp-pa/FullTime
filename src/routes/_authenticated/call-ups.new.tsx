@@ -139,7 +139,8 @@ function NewCallUp() {
       }
       return cu.id as string;
     },
-    onSuccess: (id) => navigate({ to: "/call-ups/$id", params: { id } }),
+    // Recién creado: directo a la hoja del partido para poner rival, competición y titulares.
+    onSuccess: (id) => navigate({ to: "/hoja/$id", params: { id }, search: { nuevo: true } }),
     onError: (e) => setError(friendlyError(e, "No pudimos crear la convocatoria. Vuelve a intentarlo.")),
   });
 

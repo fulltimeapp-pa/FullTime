@@ -185,6 +185,9 @@ Reemplaza la Tarea 1.
 - Resultado y minutos se calculan solos (`src/lib/hoja-partido.ts`, `summarizeMatch`): titular
   desde el 0, suplente desde que entra, sale con cambio, roja o lesión; **puede volver a entrar**
   (cambios ilimitados en juveniles) y se suman sus ratos. Probado con 9 casos.
+- Al crear un partido, la app lleva directo a la hoja ("✅ Partido creado y aviso enviado") para poner
+  rival, competición y titulares de una vez; goles, tarjetas y cambios se muestran desde la hora de
+  convocatoria (o con "Anotar ahora de todas formas"). Todo sigue editable después del partido.
 - La jugadora ve en el partido "Tus números": sus minutos, goles y tarjetas, y si salió lesionada.
 - Decidido con Bárbara: el cuerpo técnico ve todo; cada jugadora solo lo suyo (sus incidencias,
   su titularidad, su lesión con la nota) y los datos generales de sus partidos; las compañeras no.
