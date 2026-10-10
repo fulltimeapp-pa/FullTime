@@ -220,7 +220,8 @@ Reemplaza la Tarea 1.
   que no lo llenaron (y para RPE, que no estén marcadas como ausentes). Una vez por jugadora y entreno
   (columnas `remind_wellness_at`, `remind_rpe_at`, migración `20261010160000_recordatorio_wellness_rpe.sql`).
   Texto del servidor: "¿Cómo llegas al entreno?" / "¿Qué tan duro fue el entreno?". Se registran en
-  push_log como auto_wellness / auto_rpe. Ventanas probadas (9 casos). Falta: probarlo en el celular.
+  push_log como auto_wellness / auto_rpe. Ventanas probadas (9 casos). Probado en el iPhone de
+  Bárbara (9-oct): llegaron los dos (wellness antes y RPE ~30 min después del fin).
 
 ### Estadísticas de temporada (9-oct)
 - `/estadisticas` (menú del cuerpo técnico, "Estadísticas"): salen solo de los partidos con hoja.
