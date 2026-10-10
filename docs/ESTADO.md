@@ -203,7 +203,8 @@ Reemplaza la Tarea 1.
 - Carga (sRPE) = RPE × minutos del entreno (fin − inicio, o 90). Junta respuestas nuevas y viejas.
   Lógica en `src/lib/carga.ts`, probada (9 casos). Sin tablas nuevas.
 - La jugadora ve en Mis números "Tu wellness y RPE" de los últimos 30 días (promedios y últimos días).
-- Falta: probarlo en la web real con respuestas de verdad.
+- Probado en la web real por Bárbara (9-oct): funciona. (Hubo un pedido de deshacer `carga.ts` y
+  `bienestar.tsx`; se borraron solo en local y luego Bárbara pidió dejarlos: quedaron como estaban.)
 
 ### Menú de la jugadora (9-oct, pedido de Bárbara)
 - `PlayerShell`: barra abajo en el celular (como app) y menú arriba en la computadora, con Inicio,
@@ -211,7 +212,7 @@ Reemplaza la Tarea 1.
   (`/mi-calendario`, mes con puntitos por día y la lista del día), Mis números (`/mis-estadisticas`:
   asistencia total, de entrenos y de partidos + "Tu temporada") y Perfil. El perfil ya no repite la
   asistencia ni la temporada (enlaza a Mis números). Si alguien del cuerpo técnico abre "Mis
-  convocatorias", ve la pantalla de antes. Falta: probarlo en el celular.
+  convocatorias", ve la pantalla de antes.
 
 ### Wellness y RPE, parte 2: recordatorios automáticos (9-oct)
 - En el cron de cada 15 min (`runReminders`): **wellness** cuando faltan 2 h o menos para la hora de
