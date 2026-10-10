@@ -193,6 +193,18 @@ Reemplaza la Tarea 1.
   respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
 - Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
 
+### Wellness y RPE, parte 3: historial e informes (9-oct)
+- `/bienestar` ("Bienestar y carga" en el menú del cuerpo técnico): filtros por categoría y periodo
+  (4 u 8 semanas, este mes o fechas a elección, ej. pretemporada). Dos gráficos de barras por semana
+  (wellness promedio; carga promedio por jugadora), tabla por jugadora (wellness promedio y último,
+  RPE promedio, carga total) y su historial día por día con cada respuesta. Alertas "Para mirar":
+  promedio de sus últimos 3 wellness ≤ 2.5, o carga de los últimos 7 días > 1.5 × su promedio
+  semanal de las 3 semanas anteriores.
+- Carga (sRPE) = RPE × minutos del entreno (fin − inicio, o 90). Junta respuestas nuevas y viejas.
+  Lógica en `src/lib/carga.ts`, probada (9 casos). Sin tablas nuevas.
+- La jugadora ve en Mis números "Tu wellness y RPE" de los últimos 30 días (promedios y últimos días).
+- Falta: probarlo en la web real con respuestas de verdad.
+
 ### Menú de la jugadora (9-oct, pedido de Bárbara)
 - `PlayerShell`: barra abajo en el celular (como app) y menú arriba en la computadora, con Inicio,
   Partidos (`/mis-convocatorias?tipo=partido`), Entrenos (`?tipo=entreno`), Calendario

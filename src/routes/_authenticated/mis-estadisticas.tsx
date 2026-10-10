@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PlayerShell } from "@/components/player/PlayerShell";
 import { MiTemporada } from "@/components/match/MiTemporada";
+import { addDaysISO, dayPA, loadEntries } from "@/lib/carga";
+import { formatDayEs } from "@/components/ui/date-field";
 
 export const Route = createFileRoute("/_authenticated/mis-estadisticas")({
   head: () => ({ meta: [{ title: "FullTime — Mis números" }] }),
@@ -90,9 +92,57 @@ function MisNumeros() {
             </section>
 
             <MiTemporada clubId={me.club_id} playerId={me.id} />
+            <MiBienestar clubId={me.club_id} playerId={me.id} />
           </div>
         )}
       </main>
     </PlayerShell>
+  );
+}
+
+/** Su wellness y RPE del último mes (la base solo le da lo suyo). */
+function MiBienestar({ clubId, playerId }: { clubId: string; playerId: string }) {
+  const q = useQuery({ queryKey: ["my-load", clubId], queryFn: () => loadEntries(clubId) });
+  if (!q.isSuccess) return null;
+  const desde = addDaysISO(dayPA(new Date().toISOString()), -30);
+  const mine = q.data.filter((e) => e.playerId === playerId && e.day >= desde);
+  const w = mine.filter((e) => e.kind === "wellness");
+  const r = mine.filter((e) => e.kind === "rpe");
+  const avg = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : null);
+  const ultimos = [...new Set(mine.map((e) => e.day))].sort().reverse().slice(0, 5);
+
+  return (
+    <section className="rounded-2xl border-2 border-ink bg-card p-6 md:p-7">
+      <h2 className="font-display text-xl font-bold">Tu wellness y RPE</h2>
+      <p className="mt-1 text-sm text-ink/60">Últimos 30 días.</p>
+      {mine.length === 0 ? (
+        <p className="mt-3 text-sm text-ink/60">Todavía no has respondido wellness ni RPE en este tiempo.</p>
+      ) : (
+        <>
+          <div className="mt-4 grid grid-cols-2 gap-2 text-center">
+            <div className="rounded-xl bg-paper p-3">
+              <p className="font-display text-2xl font-bold">{avg(w.map((e) => e.score)) ?? "—"}</p>
+              <p className="text-xs font-semibold text-ink/60">Wellness promedio (de 5)</p>
+            </div>
+            <div className="rounded-xl bg-paper p-3">
+              <p className="font-display text-2xl font-bold">{avg(r.map((e) => e.score)) ?? "—"}</p>
+              <p className="text-xs font-semibold text-ink/60">RPE promedio (de 10)</p>
+            </div>
+          </div>
+          <ul className="mt-4 divide-y divide-ink/10 text-sm">
+            {ultimos.map((d) => {
+              const we = w.find((e) => e.day === d);
+              const re = r.find((e) => e.day === d);
+              return (
+                <li key={d} className="flex justify-between gap-3 py-2">
+                  <span className="capitalize text-ink/70">{formatDayEs(d, true)}</span>
+                  <span className="font-semibold">{we ? `Wellness ${we.score}` : ""}{we && re ? " · " : ""}{re ? `RPE ${re.score}` : ""}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+    </section>
   );
 }

@@ -16,6 +16,7 @@ import { Route as AyudaRouteImport } from './routes/ayuda'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAsistenciaRouteImport } from './routes/_authenticated/asistencia'
+import { Route as AuthenticatedBienestarRouteImport } from './routes/_authenticated/bienestar'
 import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
 import { Route as AuthenticatedCallUpsRouteImport } from './routes/_authenticated/call-ups'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -89,6 +90,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AuthenticatedAsistenciaRoute = AuthenticatedAsistenciaRouteImport.update({
   id: '/asistencia',
   path: '/asistencia',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBienestarRoute = AuthenticatedBienestarRouteImport.update({
+  id: '/bienestar',
+  path: '/bienestar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCalendarioRoute = AuthenticatedCalendarioRouteImport.update({
@@ -317,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/privacidad': typeof PrivacidadRoute
   '/reset-password': typeof ResetPasswordRoute
   '/asistencia': typeof AuthenticatedAsistenciaRoute
+  '/bienestar': typeof AuthenticatedBienestarRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
   '/call-ups': typeof AuthenticatedCallUpsRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -365,6 +372,7 @@ export interface FileRoutesByTo {
   '/privacidad': typeof PrivacidadRoute
   '/reset-password': typeof ResetPasswordRoute
   '/asistencia': typeof AuthenticatedAsistenciaRoute
+  '/bienestar': typeof AuthenticatedBienestarRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/equipo': typeof AuthenticatedEquipoRoute
@@ -412,6 +420,7 @@ export interface FileRoutesById {
   '/privacidad': typeof PrivacidadRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/asistencia': typeof AuthenticatedAsistenciaRoute
+  '/_authenticated/bienestar': typeof AuthenticatedBienestarRoute
   '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
   '/_authenticated/call-ups': typeof AuthenticatedCallUpsRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -462,6 +471,7 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/reset-password'
     | '/asistencia'
+    | '/bienestar'
     | '/calendario'
     | '/call-ups'
     | '/dashboard'
@@ -510,6 +520,7 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/reset-password'
     | '/asistencia'
+    | '/bienestar'
     | '/calendario'
     | '/dashboard'
     | '/equipo'
@@ -556,6 +567,7 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/reset-password'
     | '/_authenticated/asistencia'
+    | '/_authenticated/bienestar'
     | '/_authenticated/calendario'
     | '/_authenticated/call-ups'
     | '/_authenticated/dashboard'
@@ -659,6 +671,13 @@ declare module '@tanstack/react-router' {
       path: '/asistencia'
       fullPath: '/asistencia'
       preLoaderRoute: typeof AuthenticatedAsistenciaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/bienestar': {
+      id: '/_authenticated/bienestar'
+      path: '/bienestar'
+      fullPath: '/bienestar'
+      preLoaderRoute: typeof AuthenticatedBienestarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/calendario': {
@@ -1010,6 +1029,7 @@ const AuthenticatedHqRouteWithChildren = AuthenticatedHqRoute._addFileChildren(
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAsistenciaRoute: typeof AuthenticatedAsistenciaRoute
+  AuthenticatedBienestarRoute: typeof AuthenticatedBienestarRoute
   AuthenticatedCalendarioRoute: typeof AuthenticatedCalendarioRoute
   AuthenticatedCallUpsRoute: typeof AuthenticatedCallUpsRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -1033,6 +1053,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAsistenciaRoute: AuthenticatedAsistenciaRoute,
+  AuthenticatedBienestarRoute: AuthenticatedBienestarRoute,
   AuthenticatedCalendarioRoute: AuthenticatedCalendarioRoute,
   AuthenticatedCallUpsRoute: AuthenticatedCallUpsRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
