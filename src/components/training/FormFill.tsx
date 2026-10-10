@@ -122,7 +122,9 @@ export function FormResults({ kind, questions, rows, responses }: {
   const low = (s: number | null) => s != null && (kind === "wellness" ? s <= 2.5 : s >= 9);
 
   // Columnas: las preguntas del formulario actual (las respuestas viejas se leen por id).
-  const cols = questions.filter((q) => q.type !== "texto");
+  const cols = questions.filter((q) => q.type !== "texto" && (kind === "wellness" || q.type !== "escala10"));
+  // Número de cada pregunta según el orden del formulario (el mismo que ve la jugadora).
+  const num = (id: string) => questions.findIndex((q) => q.id === id) + 1;
   const texts = questions.filter((q) => q.type === "texto");
 
   return (
@@ -135,6 +137,19 @@ export function FormResults({ kind, questions, rows, responses }: {
         {avg != null ? ` · promedio ${avg}${kind === "wellness" ? " de 5" : " de 10"}` : ""}
         {kind === "wellness" ? " · 5 = llega muy bien" : ""}
       </p>
+      {answered.length > 0 && cols.length > 0 && (
+        <ol className="mt-3 space-y-1 rounded-2xl border-2 border-ink/15 bg-paper p-3 text-sm">
+          {cols.map((q) => (
+            <li key={q.id} className="flex gap-2">
+              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-ink text-[11px] font-bold text-lime">{num(q.id)}</span>
+              <span>
+                <span className="font-semibold">{q.label}</span>
+                {q.hint && <span className="text-ink/50"> · {q.hint}</span>}
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
       {answered.length > 0 && (
         <div className="mt-3 overflow-x-auto rounded-2xl border-2 border-ink bg-card">
           <table className="w-full min-w-[480px] text-sm">
@@ -142,7 +157,11 @@ export function FormResults({ kind, questions, rows, responses }: {
               <tr className="text-left text-[11px] font-mono uppercase tracking-wider text-ink/50">
                 <th className="px-3 py-2">Jugadora</th>
                 <th className="px-2">{kind === "wellness" ? "Total" : "RPE"}</th>
-                {cols.filter((q) => kind === "wellness" || q.type !== "escala10").map((q) => <th key={q.id} className="px-2" title={q.label}>{q.label.length > 14 ? `${q.label.slice(0, 13)}…` : q.label}</th>)}
+                {cols.map((q) => (
+                  <th key={q.id} className="px-2 text-center" title={q.label}>
+                    <span className="inline-grid h-5 w-5 place-items-center rounded-full bg-ink text-[11px] font-bold text-lime">{num(q.id)}</span>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/10">
@@ -153,9 +172,9 @@ export function FormResults({ kind, questions, rows, responses }: {
                   <tr key={r.playerId} className={low(resp.score) ? "bg-pa-red/10" : ""}>
                     <td className="px-3 py-2 font-semibold">{r.name}</td>
                     <td className="px-2 font-mono font-bold">{resp.score ?? "—"}</td>
-                    {cols.filter((q) => kind === "wellness" || q.type !== "escala10").map((q) => {
+                    {cols.map((q) => {
                       const v = val(q.id);
-                      return <td key={q.id} className="px-2">{v === true ? "Sí" : v === false ? "No" : v ?? "—"}</td>;
+                      return <td key={q.id} className="px-2 text-center">{v === true ? "Sí" : v === false ? "No" : v ?? "—"}</td>;
                     })}
                   </tr>
                 );
@@ -167,7 +186,7 @@ export function FormResults({ kind, questions, rows, responses }: {
               {answered.flatMap((r) =>
                 texts.map((q) => {
                   const v = byPlayer.get(r.playerId)!.answers.find((a) => a.id === q.id)?.value;
-                  return v ? <p key={`${r.playerId}-${q.id}`}><b>{r.name}:</b> {String(v)}</p> : null;
+                  return v ? <p key={`${r.playerId}-${q.id}`}><b>{r.name}</b> <span className="text-ink/50">({q.label})</span>: {String(v)}</p> : null;
                 }),
               )}
             </div>
