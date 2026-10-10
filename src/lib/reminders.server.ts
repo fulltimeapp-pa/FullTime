@@ -5,6 +5,10 @@
  * - "Unas horas antes": cuando faltan 3 horas o menos para la hora de referencia, que es la
  *   hora de convocatoria si el profe la puso (a qué hora llegar) o, si no, la de inicio.
  * - "Noche anterior": entre 6 y 9 p. m. de Panamá, para lo de mañana.
+ * - Wellness (decidido 9-oct): entrenos que lo piden, cuando faltan 2 horas o menos para la hora
+ *   de referencia, a las convocadas que todavía no lo llenaron.
+ * - RPE (decidido 9-oct): entre 30 minutos y 6 horas después de que termina el entreno (hora de fin
+ *   o, si no hay, 90 minutos después del inicio), a las convocadas que todavía no lo llenaron.
  * Cada jugadora recibe cada recordatorio una sola vez (columnas remind_*_at), y se salta a
  * las que ya dijeron que no van.
  */
@@ -12,6 +16,10 @@ import { logPush, sendToSubscriptions, type PushBody } from "./push-notify.serve
 
 const PA_OFFSET_MS = 5 * 60 * 60 * 1000;
 const SOON_WINDOW_MS = 3 * 60 * 60 * 1000;
+const WELLNESS_WINDOW_MS = 2 * 60 * 60 * 1000;
+const RPE_AFTER_MS = 30 * 60 * 1000;
+const RPE_UNTIL_MS = 6 * 60 * 60 * 1000;
+const DEFAULT_TRAINING_MS = 90 * 60 * 1000;
 
 /** Hora en formato es-PA, ej "6:00 p. m." */
 export function horaPA(iso: string): string {
@@ -37,6 +45,7 @@ export type ReminderCallUp = {
   club_id?: string;
   kind: string;
   starts_at: string;
+  ends_at?: string | null;
   meet_at?: string | null;
   place: string | null;
 };
@@ -67,6 +76,39 @@ export function buildNightMessage(cu: ReminderCallUp): PushBody {
   const parts = [`Mañana · ${horasTexto(cu)}`];
   if (cu.place?.trim()) parts.push(cu.place.trim());
   return { title, body: parts.join(" · "), url: `/call-ups/${cu.id}` };
+}
+
+/** Wellness: faltan 2 horas o menos para la hora de referencia y todavía no empezó. */
+export function inWellnessWindow(cu: ReminderCallUp, now: Date): boolean {
+  const ref = new Date(horaReferencia(cu)).getTime();
+  return ref > now.getTime() && ref <= now.getTime() + WELLNESS_WINDOW_MS;
+}
+
+/** Hora en que termina el entreno (fin, o 90 minutos después del inicio). */
+export function finEntreno(cu: ReminderCallUp): number {
+  return cu.ends_at ? new Date(cu.ends_at).getTime() : new Date(cu.starts_at).getTime() + DEFAULT_TRAINING_MS;
+}
+
+/** RPE: entre 30 minutos y 6 horas después del fin. */
+export function inRpeWindow(cu: ReminderCallUp, now: Date): boolean {
+  const end = finEntreno(cu);
+  return now.getTime() >= end + RPE_AFTER_MS && now.getTime() <= end + RPE_UNTIL_MS;
+}
+
+export function buildWellnessMessage(cu: ReminderCallUp): PushBody {
+  return {
+    title: "¿Cómo llegas al entreno?",
+    body: `Llena tu wellness antes de las ${horaPA(horaReferencia(cu))}. Es un minuto.`,
+    url: `/call-ups/${cu.id}`,
+  };
+}
+
+export function buildRpeMessage(cu: ReminderCallUp): PushBody {
+  return {
+    title: "¿Qué tan duro fue el entreno?",
+    body: "Cuéntale al Profe tu RPE. Es un minuto.",
+    url: `/call-ups/${cu.id}`,
+  };
 }
 
 /** Las que entran en la ventana de "unas horas antes" según su hora de referencia. */
@@ -145,9 +187,79 @@ async function processCallUps(
   return sent;
 }
 
+/**
+ * Wellness o RPE: a las convocadas (que no dijeron que no) sin respuesta de ese formulario y a las
+ * que todavía no se les recordó. Una vez por jugadora y por entreno.
+ */
+async function processFormReminders(
+  admin: Admin,
+  callUps: ReminderCallUp[],
+  kind: "wellness" | "rpe",
+  build: (cu: ReminderCallUp) => PushBody,
+): Promise<number> {
+  const column = kind === "wellness" ? "remind_wellness_at" : "remind_rpe_at";
+  let sent = 0;
+  for (const cu of callUps) {
+    const { data: rows, error } = await (admin as any)
+      .from("call_up_players")
+      .select("id, player_id, status, attended, players(user_id)")
+      .eq("call_up_id", cu.id)
+      .is(column, null);
+    if (error) throw error;
+    const { data: answered, error: aErr } = await (admin as any)
+      .from("form_responses")
+      .select("player_id")
+      .eq("call_up_id", cu.id)
+      .eq("kind", kind);
+    if (aErr) throw aErr;
+    const yaRespondieron = new Set((answered ?? []).map((r: any) => r.player_id as string));
+
+    // Para el RPE también se salta a las que el Profe marcó que no asistieron.
+    const pending = (rows ?? []).filter(
+      (r: any) => r.status !== "declined" && !yaRespondieron.has(r.player_id) && !(kind === "rpe" && r.attended === false),
+    );
+    if (pending.length === 0) continue;
+
+    const userIds: string[] = Array.from(new Set<string>(pending.map((r: any) => r.players?.user_id as string | null).filter((v: string | null): v is string => !!v)));
+    let res = { sent: 0, failed: 0, detail: null as string | null };
+    let reachable = 0;
+    if (userIds.length > 0) {
+      const { data: subs, error: sErr } = await admin
+        .from("push_subscriptions")
+        .select("id, user_id, endpoint, p256dh, auth")
+        .in("user_id", userIds);
+      if (sErr) throw sErr;
+      reachable = new Set((subs ?? []).map((s: any) => s.user_id as string)).size;
+      res = await sendToSubscriptions((subs ?? []) as any, build(cu), async (ids) => {
+        await admin.from("push_subscriptions").delete().in("id", ids);
+      });
+    }
+    sent += res.sent;
+
+    await logPush(admin as any, {
+      club_id: cu.club_id ?? null,
+      call_up_id: cu.id,
+      kind: kind === "wellness" ? "auto_wellness" : "auto_rpe",
+      targeted: pending.length,
+      reachable,
+      sent: res.sent,
+      failed: res.failed,
+      detail: res.detail,
+    });
+
+    await (admin as any)
+      .from("call_up_players")
+      .update({ [column]: new Date().toISOString() })
+      .in("id", pending.map((r: any) => r.id as string));
+  }
+  return sent;
+}
+
 export async function runReminders(now: Date = new Date()): Promise<{
   soon_sent: number;
   night_sent: number;
+  wellness_sent: number;
+  rpe_sent: number;
 }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const admin = supabaseAdmin as Admin;
@@ -192,5 +304,37 @@ export async function runReminders(now: Date = new Date()): Promise<{
     );
   }
 
-  return { soon_sent, night_sent };
+  // (C) Wellness antes del entreno.
+  const { data: wRows, error: wErr } = await (admin as any)
+    .from("call_ups")
+    .select("id, club_id, kind, starts_at, ends_at, meet_at, place")
+    .eq("kind", "entreno")
+    .eq("wellness_enabled", true)
+    .gte("starts_at", now.toISOString())
+    .lte("starts_at", new Date(now.getTime() + 5 * 60 * 60 * 1000).toISOString());
+  if (wErr) throw wErr;
+  const wellness_sent = await processFormReminders(
+    admin,
+    ((wRows ?? []) as ReminderCallUp[]).filter((cu) => inWellnessWindow(cu, now)),
+    "wellness",
+    buildWellnessMessage,
+  );
+
+  // (D) RPE después del entreno. Basta mirar los que empezaron en las últimas 12 horas.
+  const { data: rRows, error: rErr } = await (admin as any)
+    .from("call_ups")
+    .select("id, club_id, kind, starts_at, ends_at, meet_at, place")
+    .eq("kind", "entreno")
+    .eq("rpe_enabled", true)
+    .gte("starts_at", new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString())
+    .lte("starts_at", now.toISOString());
+  if (rErr) throw rErr;
+  const rpe_sent = await processFormReminders(
+    admin,
+    ((rRows ?? []) as ReminderCallUp[]).filter((cu) => inRpeWindow(cu, now)),
+    "rpe",
+    buildRpeMessage,
+  );
+
+  return { soon_sent, night_sent, wellness_sent, rpe_sent };
 }

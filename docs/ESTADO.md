@@ -193,6 +193,15 @@ Reemplaza la Tarea 1.
   respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
 - Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
 
+### Wellness y RPE, parte 2: recordatorios automáticos (9-oct)
+- En el cron de cada 15 min (`runReminders`): **wellness** cuando faltan 2 h o menos para la hora de
+  referencia del entreno (convocatoria o inicio); **RPE** entre 30 min y 6 h después del fin (o de
+  inicio + 90 min si no hay fin). Solo entrenos que lo piden, solo a convocadas que no dijeron que no,
+  que no lo llenaron (y para RPE, que no estén marcadas como ausentes). Una vez por jugadora y entreno
+  (columnas `remind_wellness_at`, `remind_rpe_at`, migración `20261010160000_recordatorio_wellness_rpe.sql`).
+  Texto del servidor: "¿Cómo llegas al entreno?" / "¿Qué tan duro fue el entreno?". Se registran en
+  push_log como auto_wellness / auto_rpe. Ventanas probadas (9 casos). Falta: probarlo en el celular.
+
 ### Estadísticas de temporada (9-oct)
 - `/estadisticas` (menú del cuerpo técnico, "Estadísticas"): salen solo de los partidos con hoja.
   Filtros por categoría y competición. Equipo: partidos, ganados / empates / perdidos, goles a favor
