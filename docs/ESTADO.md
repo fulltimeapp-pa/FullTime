@@ -185,6 +185,11 @@ Reemplaza la Tarea 1.
 - Resultado y minutos se calculan solos (`src/lib/hoja-partido.ts`, `summarizeMatch`): titular
   desde el 0, suplente desde que entra, sale con cambio, roja o lesión; **puede volver a entrar**
   (cambios ilimitados en juveniles) y se suman sus ratos. Probado con 9 casos.
+- **Lista de competiciones del club** (pedido de Bárbara, 9-oct): "Editar lista" en la hoja para
+  agregar, cambiar nombre (corrige también los partidos que la usaban) o borrar (sale de la lista; los
+  partidos viejos mantienen el nombre). Una competición nueva escrita en la hoja entra sola. Tabla
+  `club_competitions` (migración `20261010140000_competiciones.sql`, arranca con las ya usadas), solo
+  cuerpo técnico; probado en PGlite (6 pruebas).
 - Al crear un partido, la app lleva directo a la hoja ("✅ Partido creado y aviso enviado") para poner
   rival, competición y titulares de una vez; goles, tarjetas y cambios se muestran desde la hora de
   convocatoria (o con "Anotar ahora de todas formas"). Todo sigue editable después del partido.

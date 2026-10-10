@@ -8,8 +8,9 @@ import { StaffShell } from "@/components/staff/StaffShell";
 import { friendlyError } from "@/lib/errors";
 import { formatWhen } from "@/lib/call-ups";
 import {
-  DURATIONS, EVENT_ICON, EVENT_LABEL, addEvent, deleteEvent, getMatchSheet, lastDefaultsFor, listCompetitions, saveReport,
-  setLineup, summarizeMatch, type EventKind, type LineupRole, type MatchReport,
+  DURATIONS, EVENT_ICON, EVENT_LABEL, addCompetition, addEvent, deleteCompetition, deleteEvent, getMatchSheet, lastDefaultsFor,
+  listCompetitions, renameCompetition, saveReport, setLineup, summarizeMatch,
+  type Competition, type EventKind, type LineupRole, type MatchReport,
 } from "@/lib/hoja-partido";
 
 export const Route = createFileRoute("/_authenticated/hoja/$id")({
@@ -95,11 +96,11 @@ function HojaDePartido() {
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["hoja", id] });
   const ensureReport = async () => {
-    if (!sheetQ.data?.report) await saveReport(id, form);
+    if (!sheetQ.data?.report) await saveReport(id, form, cuQ.data?.club_id);
   };
 
   const reportMut = useMutation({
-    mutationFn: () => saveReport(id, form),
+    mutationFn: () => saveReport(id, form, cuQ.data?.club_id),
     onSuccess: () => {
       toast.success("Datos del partido guardados");
       refresh();
@@ -122,6 +123,7 @@ function HojaDePartido() {
   });
 
   const [adding, setAdding] = useState<EventKind | null>(null);
+  const [editComps, setEditComps] = useState(false);
 
   const players = playersQ.data ?? [];
   const nameOf = useMemo(() => {
@@ -224,16 +226,17 @@ function HojaDePartido() {
               <label>Competición
                 <input className={inputCls} value={form.competition ?? ""} onChange={(e) => setForm({ ...form, competition: e.target.value })}
                   placeholder="LFF, Torneo Nacional Sub-16, Amistoso…" maxLength={80} />
-                {(compsQ.data ?? []).length > 0 && (
-                  <span className="mt-2 flex flex-wrap gap-1.5">
-                    {(compsQ.data ?? []).slice(0, 8).map((c) => (
-                      <button key={c} type="button" onClick={() => setForm({ ...form, competition: c })}
-                        className={`rounded-full border-2 px-2.5 py-1 text-xs ${form.competition?.trim().toLowerCase() === c.toLowerCase() ? "border-ink bg-lime" : "border-ink/20 bg-paper"}`}>
-                        {c}
-                      </button>
-                    ))}
-                  </span>
-                )}
+                <span className="mt-2 flex flex-wrap items-center gap-1.5">
+                  {(compsQ.data ?? []).map((c) => (
+                    <button key={c.id} type="button" onClick={() => setForm({ ...form, competition: c.name })}
+                      className={`rounded-full border-2 px-2.5 py-1 text-xs ${form.competition?.trim().toLowerCase() === c.name.toLowerCase() ? "border-ink bg-lime" : "border-ink/20 bg-paper"}`}>
+                      {c.name}
+                    </button>
+                  ))}
+                  <button type="button" onClick={() => setEditComps(true)} className="text-xs font-semibold underline text-ink/60">
+                    {(compsQ.data ?? []).length > 0 ? "Editar lista" : "Crear lista de competiciones"}
+                  </button>
+                </span>
               </label>
               <div className="sm:col-span-2">¿Cuántos minutos dura el partido?
                 <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -377,6 +380,21 @@ function HojaDePartido() {
           </div>
         </main>
 
+        {editComps && (
+          <CompetitionsModal
+            clubId={cu.club_id}
+            items={compsQ.data ?? []}
+            onClose={() => setEditComps(false)}
+            onChanged={(renamed) => {
+              qc.invalidateQueries({ queryKey: ["hoja-competitions"] });
+              if (renamed) {
+                refresh();
+                if (form.competition?.trim().toLowerCase() === renamed.from.toLowerCase()) setForm((f) => ({ ...f, competition: renamed.to }));
+              }
+            }}
+          />
+        )}
+
         {adding && (
           <EventModal
             kind={adding}
@@ -474,6 +492,83 @@ function EventModal({ kind, duration, players, onClose, onSave }: {
           <button type="button" onClick={onClose} className="btn-ghost">Cancelar</button>
         </div>
       </form>
+    </div>
+  );
+}
+
+function CompetitionsModal({ clubId, items, onClose, onChanged }: {
+  clubId: string; items: Competition[]; onClose: () => void;
+  onChanged: (renamed?: { from: string; to: string }) => void;
+}) {
+  const [nueva, setNueva] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function run(fn: () => Promise<void>, after?: () => void) {
+    setError("");
+    setBusy(true);
+    try {
+      await fn();
+      after?.();
+    } catch (e) {
+      setError(friendlyError(e, "No pudimos guardarlo. Vuelve a intentarlo."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-ink/40 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-2xl border-2 border-ink bg-paper p-5 shadow-[6px_6px_0_0_var(--color-ink)]">
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-xl font-bold">Competiciones</h3>
+          <button type="button" onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
+        </div>
+        <p className="mt-1 text-sm text-ink/60">
+          Si cambias un nombre, se corrige también en los partidos donde la usaste. Si la borras, sale de la lista pero los partidos viejos la mantienen.
+        </p>
+
+        <form onSubmit={(e) => { e.preventDefault(); if (nueva.trim()) run(() => addCompetition(clubId, nueva), () => { setNueva(""); onChanged(); }); }}
+          className="mt-4 flex gap-2">
+          <input value={nueva} onChange={(e) => setNueva(e.target.value)} maxLength={80} placeholder="Nueva: Torneo Nacional Sub-16"
+            className="min-w-0 flex-1 rounded-xl border-2 border-ink/20 focus:border-ink bg-paper px-3 py-2.5 outline-none" />
+          <button type="submit" disabled={busy || !nueva.trim()} className="btn-primary !py-2.5">Agregar</button>
+        </form>
+
+        {items.length === 0 ? (
+          <p className="mt-4 text-sm text-ink/50">Todavía no tienes competiciones.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-ink/10">
+            {items.map((c) => (
+              <li key={c.id} className="flex items-center gap-2 py-2">
+                {editId === c.id ? (
+                  <form className="flex flex-1 gap-2"
+                    onSubmit={(e) => { e.preventDefault(); run(() => renameCompetition(c.id, editName), () => { setEditId(null); onChanged({ from: c.name, to: editName.trim() }); }); }}>
+                    <input value={editName} onChange={(e) => setEditName(e.target.value)} maxLength={80} autoFocus aria-label="Nuevo nombre"
+                      className="min-w-0 flex-1 rounded-lg border-2 border-ink/30 focus:border-ink bg-paper px-2 py-1.5 text-sm outline-none" />
+                    <button type="submit" disabled={busy} className="btn-primary !py-1.5 !px-3 !text-sm">Guardar</button>
+                    <button type="button" onClick={() => setEditId(null)} className="text-sm font-semibold text-ink/60">Cancelar</button>
+                  </form>
+                ) : (
+                  <>
+                    <span className="min-w-0 flex-1 font-semibold">{c.name}</span>
+                    <button type="button" onClick={() => { setEditId(c.id); setEditName(c.name); }} className="text-sm font-semibold underline">Cambiar nombre</button>
+                    <button type="button" disabled={busy} aria-label={`Borrar ${c.name}`}
+                      onClick={() => { if (confirm(`¿Sacar "${c.name}" de la lista? Los partidos viejos mantienen el nombre.`)) run(() => deleteCompetition(c.id), () => onChanged()); }}
+                      className="text-pa-red hover:opacity-70"><Trash2 size={15} /></button>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {error && <p className="mt-3 rounded-lg border-2 border-pa-red bg-pa-red/10 px-3 py-2 text-sm font-medium text-pa-red">{error}</p>}
+        <button type="button" onClick={onClose} className="btn-ghost mt-5">Listo</button>
+      </div>
     </div>
   );
 }

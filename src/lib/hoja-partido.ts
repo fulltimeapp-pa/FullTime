@@ -75,29 +75,45 @@ export async function lastDefaultsFor(categoryId: string): Promise<{ duration: n
   return { duration: data[0].duration_min ?? null, competition: data[0].competition ?? null };
 }
 
-/** Competiciones que el club ya usó, las más recientes primero (sin repetir). */
-export async function listCompetitions(clubId: string): Promise<string[]> {
-  const { data, error } = await reports()
-    .select("competition, updated_at")
-    .eq("club_id", clubId)
-    .not("competition", "is", null)
-    .order("updated_at", { ascending: false })
-    .limit(200);
-  if (error) return [];
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const r of data ?? []) {
-    const name = String(r.competition).trim();
-    if (name && !seen.has(name.toLowerCase())) { seen.add(name.toLowerCase()); out.push(name); }
-  }
-  return out;
+export type Competition = { id: string; name: string };
+
+const competitions = () => supabase.from("club_competitions" as never) as any;
+
+/** Lista de competiciones del club (las más nuevas primero). */
+export async function listCompetitions(clubId: string): Promise<Competition[]> {
+  const { data, error } = await competitions().select("id, name").eq("club_id", clubId).order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Competition[];
 }
 
-export async function saveReport(callUpId: string, input: Omit<MatchReport, "call_up_id">): Promise<void> {
+/** Agrega una competición; si ya existe con ese nombre, no hace nada. */
+export async function addCompetition(clubId: string, name: string): Promise<void> {
+  const clean = name.trim();
+  if (!clean) throw new Error("Escribe el nombre de la competición.");
+  const { error } = await competitions().insert({ club_id: clubId, name: clean });
+  if (error && error.code !== "23505") throw error;
+}
+
+export async function renameCompetition(id: string, name: string): Promise<void> {
+  const clean = name.trim();
+  if (!clean) throw new Error("Escribe el nombre de la competición.");
+  const { error } = await competitions().update({ name: clean }).eq("id", id);
+  if (error?.code === "23505") throw new Error("Ya tienes una competición con ese nombre.");
+  if (error) throw error;
+}
+
+export async function deleteCompetition(id: string): Promise<void> {
+  const { error } = await competitions().delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function saveReport(callUpId: string, input: Omit<MatchReport, "call_up_id">, clubId?: string): Promise<void> {
   const clean = { ...input, opponent: input.opponent?.trim() || null, competition: input.competition?.trim() || null, notes: input.notes?.trim() || null };
   // club_id lo pone la base a partir de la convocatoria; se manda cualquiera porque es obligatorio.
   const { error } = await reports().upsert({ call_up_id: callUpId, club_id: "00000000-0000-0000-0000-000000000000", ...clean });
   if (error) throw error;
+  // Una competición nueva escrita en la hoja entra sola a la lista del club.
+  if (clubId && clean.competition) await addCompetition(clubId, clean.competition).catch(() => {});
 }
 
 export async function setLineup(callUpId: string, playerId: string, role: LineupRole | null): Promise<void> {
