@@ -43,13 +43,17 @@ No migrar a otro hosting ni volver a Lovable sin preguntar.
   recordar a las que no han respondido), siempre con texto armado en el
   servidor y solo si quien lo dispara es del cuerpo técnico. Si se crean
   varios entrenos de una vez, va un solo aviso de resumen (decidido 6-oct).
+  Excepción (decidida 9-oct): recordatorio automático de wellness antes del
+  entreno y de RPE después, solo a las convocadas de ese entreno que no lo
+  han llenado, máximo uno de cada por entreno, con texto armado en el servidor.
   No existe push de texto libre y así se queda.
 
 ## Fuera del alcance
 
 Chat o avisos de texto libre · email como canal · entrenamientos
-prediseñados · ampliar wellness o RPE · planes y pagos · rediseño visual ·
-refactors grandes.
+prediseñados · planes y pagos · rediseño visual ·
+refactors grandes. (Wellness y RPE se ampliaron el 9-oct por pedido de Carlos
+Rivera: formularios editables, recordatorios e historial.)
 
 ## Decisiones que no tomas tú
 

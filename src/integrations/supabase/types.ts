@@ -115,6 +115,8 @@ export type Database = {
           starts_at: string
           updated_at: string
           wellness_enabled: boolean
+          wellness_form_id: string | null
+          rpe_form_id: string | null
         }
         Insert: {
           category_id: string
@@ -132,6 +134,8 @@ export type Database = {
           starts_at: string
           updated_at?: string
           wellness_enabled?: boolean
+          wellness_form_id?: string | null
+          rpe_form_id?: string | null
         }
         Update: {
           category_id?: string
@@ -149,6 +153,8 @@ export type Database = {
           starts_at?: string
           updated_at?: string
           wellness_enabled?: boolean
+          wellness_form_id?: string | null
+          rpe_form_id?: string | null
         }
         Relationships: [
           {

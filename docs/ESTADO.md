@@ -175,6 +175,24 @@ Reemplaza la Tarea 1.
 - `fulltimeapp.pa@gmail.com` agregada a `platform_admins` desde el SQL Editor. Bárbara ya entra a
   `/panel-fulltime` (botón "🛠 Panel de dueña" en su panel).
 
+### Wellness y RPE, parte 1: formularios editables (9-oct)
+- Decidido con Bárbara (a pedido de Carlos): se amplían wellness y RPE (CLAUDE.md actualizado) y se
+  permite un recordatorio automático de wellness antes y de RPE después del entreno, solo a las
+  convocadas que no lo llenaron, máximo uno de cada, texto del servidor. Periodo menstrual: no, por ahora.
+- `/formularios` ("Wellness y RPE" en el menú): formularios tipo Google Forms. Plantillas de FullTime
+  (wellness: sueño, energía, ánimo, dolor, estrés; RPE: 1–10 + comentario) que se pueden editar,
+  duplicar o crear desde cero. Tipos: escala 1–5 (con "5 es malo" para dolor/estrés), escala 1–10,
+  sí/no, opciones, texto. Obligatoria u opcional, ordenar, vista previa "Así lo ve la jugadora".
+  ⭐ = el que se usa por defecto; al crear un entreno se puede elegir otro.
+- La jugadora llena el formulario del entreno (wellness hasta la hora del entreno; RPE desde que
+  empieza). El cuerpo técnico ve una tabla con el total y cada respuesta; wellness bajo (≤ 2.5) en rojo.
+- Puntaje: wellness = promedio de las escalas 1–5 (las "5 es malo" cuentan al revés); RPE = la escala
+  1–10. Probado (10 casos). Las respuestas guardan la pregunta tal como estaba.
+- Tablas `club_forms`, `form_responses` y columnas `wellness_form_id` / `rpe_form_id` en `call_ups`
+  (migración `20261010150000_formularios_wellness_rpe.sql`). Probado en PGlite (16 pruebas). Las
+  respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
+- Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
+
 ### Estadísticas de temporada (9-oct)
 - `/estadisticas` (menú del cuerpo técnico, "Estadísticas"): salen solo de los partidos con hoja.
   Filtros por categoría y competición. Equipo: partidos, ganados / empates / perdidos, goles a favor

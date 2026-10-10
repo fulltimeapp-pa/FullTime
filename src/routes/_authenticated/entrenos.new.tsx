@@ -13,6 +13,7 @@ import { sendPush, sendPushBulk } from "@/lib/push.functions";
 import { addMinutesToTime, toStartEnd } from "@/lib/call-ups";
 import { WEEKDAYS, buildRepeatDates, endOfMonth, shortDayLabel, MAX_REPEAT, type Weekday } from "@/lib/repetir";
 import { DateField } from "@/components/ui/date-field";
+import { DEFAULT_FORMS, listForms, type ClubForm, type FormKind } from "@/lib/formularios";
 
 export const Route = createFileRoute("/_authenticated/entrenos/new")({
   // ?repetir=1 abre directo en "Varios días" (desde el recordatorio del panel).
@@ -85,6 +86,7 @@ function NewEntreno() {
 
   const clubQ = useQuery({ queryKey: ["my-club"], queryFn: getMyActiveClub });
   const clubId = clubQ.data?.club_id;
+  const formsQ = useQuery({ queryKey: ["club-forms", clubId], enabled: !!clubId, queryFn: () => listForms(clubId!) });
 
   const catsQ = useQuery({
     queryKey: ["categories", clubId],
@@ -145,6 +147,8 @@ function NewEntreno() {
   const [activities, setActivities] = useState<PlanActivity[]>([]);
   const [wellnessEnabled, setWellnessEnabled] = useState(false);
   const [rpeEnabled, setRpeEnabled] = useState(false);
+  const [wellnessFormId, setWellnessFormId] = useState(""); // "" = el de por defecto
+  const [rpeFormId, setRpeFormId] = useState("");
   const [showLoad, setShowLoad] = useState(false);
   const [showSave, setShowSave] = useState(false);
 
@@ -261,6 +265,8 @@ function NewEntreno() {
           objetivo: objetivo.trim() || null,
           wellness_enabled: wellnessEnabled,
           rpe_enabled: rpeEnabled,
+          wellness_form_id: wellnessEnabled && wellnessFormId ? wellnessFormId : null,
+          rpe_form_id: rpeEnabled && rpeFormId ? rpeFormId : null,
           note: note.trim() || null, created_by: user.id,
         };
         const { data: cus, error: mErr } = await supabase
@@ -310,6 +316,8 @@ function NewEntreno() {
           objetivo: objetivo.trim() || null,
           wellness_enabled: wellnessEnabled,
           rpe_enabled: rpeEnabled,
+          wellness_form_id: wellnessEnabled && wellnessFormId ? wellnessFormId : null,
+          rpe_form_id: rpeEnabled && rpeFormId ? rpeFormId : null,
           note: note.trim() || null, created_by: user.id,
         })
         .select("id").single();
@@ -593,13 +601,20 @@ function NewEntreno() {
               <Toggle
                 on={wellnessEnabled} onChange={setWellnessEnabled}
                 title="Pedir wellness antes del entreno"
-                desc="Cómo llega la jugadora: sueño, energía, ánimo y molestias."
+                desc="Cómo llega la jugadora, con tu formulario de wellness."
               />
+              {wellnessEnabled && (
+                <FormPicker kind="wellness" forms={formsQ.data ?? []} value={wellnessFormId} onChange={setWellnessFormId} />
+              )}
               <Toggle
                 on={rpeEnabled} onChange={setRpeEnabled}
                 title="Pedir RPE después del entreno"
-                desc="Qué tan exigente sintió el entreno (escala 1 a 10)."
+                desc="Qué tan exigente sintió el entreno, con tu formulario de RPE."
               />
+              {rpeEnabled && (
+                <FormPicker kind="rpe" forms={formsQ.data ?? []} value={rpeFormId} onChange={setRpeFormId} />
+              )}
+              <Link to="/formularios" className="inline-block text-xs font-semibold underline text-ink/60">Editar mis formularios de wellness y RPE</Link>
             </div>
           </div>
 
@@ -761,5 +776,22 @@ function SaveTemplateModal({
         </div>
       </div>
     </div>
+  );
+}
+
+
+/** Elegir qué formulario se usa en este entreno (vacío = el de por defecto). */
+function FormPicker({ kind, forms, value, onChange }: { kind: FormKind; forms: ClubForm[]; value: string; onChange: (v: string) => void }) {
+  const mine = forms.filter((f) => f.kind === kind);
+  const def = mine.find((f) => f.is_default);
+  if (mine.length <= 1) {
+    return <p className="pl-2 text-xs text-ink/50">Formulario: {def?.name ?? mine[0]?.name ?? DEFAULT_FORMS[kind].name}</p>;
+  }
+  return (
+    <select value={value} onChange={(e) => onChange(e.target.value)} aria-label="Formulario"
+      className="ml-2 rounded-lg border-2 border-ink/20 bg-paper px-2 py-1.5 text-sm">
+      <option value="">Por defecto: {def?.name ?? DEFAULT_FORMS[kind].name}</option>
+      {mine.filter((f) => !f.is_default).map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+    </select>
   );
 }

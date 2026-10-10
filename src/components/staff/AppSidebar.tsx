@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Users, Trophy, Dumbbell, Calendar, User, LogOut, Shield, BarChart3, LifeBuoy, Medal } from "lucide-react";
+import { Home, Users, Trophy, Dumbbell, Calendar, User, LogOut, Shield, BarChart3, LifeBuoy, Medal, ClipboardCheck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -29,6 +29,7 @@ const items = [
   { title: "Calendario", url: "/calendario", icon: Calendar },
   { title: "Asistencia", url: "/asistencia", icon: BarChart3 },
   { title: "Estadísticas", url: "/estadisticas", icon: Medal },
+  { title: "Wellness y RPE", url: "/formularios", icon: ClipboardCheck },
 
   { title: "Perfil", url: "/perfil-entrenador", icon: User },
   { title: "Ayuda", url: "/ayuda", icon: LifeBuoy },

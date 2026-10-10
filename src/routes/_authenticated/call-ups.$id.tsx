@@ -13,7 +13,9 @@ import { PlanView } from "@/components/training/PlanView";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { MatchSheetCard } from "@/components/match/MatchSheetCard";
 
-import { WellnessForm, RpeForm, WellnessSummary, RpeSummary, type WellnessKey } from "@/components/training/Wellness";
+import { WellnessSummary, RpeSummary } from "@/components/training/Wellness";
+import { FormFill, FormResults } from "@/components/training/FormFill";
+import { listForms, listResponses, resolveForm, saveResponse, type Answer, type FormKind } from "@/lib/formularios";
 import type { PlanActivity, PlanPart, Intensity } from "@/lib/training-plan";
 
 
@@ -53,11 +55,11 @@ function CallUpDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("call_ups")
-        .select("id, club_id, category_id, kind, starts_at, ends_at, meet_at, place, note, objetivo, wellness_enabled, rpe_enabled, created_by, created_at, categories(name)")
+        .select("id, club_id, category_id, kind, starts_at, ends_at, meet_at, place, note, objetivo, wellness_enabled, rpe_enabled, wellness_form_id, rpe_form_id, created_by, created_at, categories(name)")
         .eq("id", id).maybeSingle();
       if (error) throw error;
       if (!data) throw new Error("No encontramos la convocatoria.");
-      return data as CallUp & { wellness_enabled: boolean; rpe_enabled: boolean; categories: { name: string } | null };
+      return data as CallUp & { wellness_enabled: boolean; rpe_enabled: boolean; wellness_form_id: string | null; rpe_form_id: string | null; categories: { name: string } | null };
     },
   });
 
@@ -180,47 +182,33 @@ function CallUpDetail() {
     },
   });
 
-  const wellnessMut = useMutation({
-    mutationFn: async (v: Record<WellnessKey, number>) => {
-      if (!myRow) throw new Error("No estás en esta convocatoria.");
-      assertOnline();
-      const { data, error } = await withTimeout(
-        Promise.resolve(
-          supabase.from("call_up_players").update({
-            ...v, wellness_at: new Date().toISOString(),
-          }).eq("id", myRow.id).select("id").abortSignal(timeoutSignal()),
-        ),
-      );
-      if (error) throw error;
-      if (!data || data.length === 0) throw new Error("No pudimos guardar cómo llegas.");
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["call-up-rows", id] }),
-    onError: (e, vars) =>
-      toast.error(friendlyError(e, "No pudimos guardar cómo llegas."), {
-        duration: 15000,
-        action: { label: "Reintentar", onClick: () => wellnessMut.mutate(vars) },
-      }),
+  // Wellness y RPE con los formularios del club (o las plantillas por defecto).
+  const usaFormularios = !!cuQ.data && cuQ.data.kind === "entreno" && (cuQ.data.wellness_enabled || cuQ.data.rpe_enabled);
+  const formsQ = useQuery({
+    queryKey: ["club-forms", cuQ.data?.club_id],
+    enabled: usaFormularios,
+    queryFn: () => listForms(cuQ.data!.club_id),
   });
-
-  const rpeMut = useMutation({
-    mutationFn: async (rpe: number) => {
+  const responsesQ = useQuery({
+    queryKey: ["form-responses", id],
+    enabled: usaFormularios,
+    queryFn: () => listResponses(id),
+  });
+  const formMut = useMutation({
+    mutationFn: async ({ kind, values }: { kind: FormKind; values: Record<string, Answer["value"]> }) => {
       if (!myRow) throw new Error("No estás en esta convocatoria.");
       assertOnline();
-      const { data, error } = await withTimeout(
-        Promise.resolve(
-          supabase.from("call_up_players").update({
-            rpe, rpe_at: new Date().toISOString(),
-          }).eq("id", myRow.id).select("id").abortSignal(timeoutSignal()),
-        ),
-      );
-      if (error) throw error;
-      if (!data || data.length === 0) throw new Error("No pudimos guardar el esfuerzo del entreno.");
+      const f = resolveForm(kind, kind === "wellness" ? cuQ.data?.wellness_form_id : cuQ.data?.rpe_form_id, formsQ.data ?? []);
+      await withTimeout(saveResponse({ callUpId: id, playerId: myRow.player_id, kind, formId: f.id, questions: f.questions, values }));
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["call-up-rows", id] }),
+    onSuccess: (_d, { kind }) => {
+      toast.success(kind === "wellness" ? "¡Listo! El Profe ya sabe cómo llegas." : "¡Gracias! RPE enviado.");
+      qc.invalidateQueries({ queryKey: ["form-responses", id] });
+    },
     onError: (e, vars) =>
-      toast.error(friendlyError(e, "No pudimos guardar el esfuerzo del entreno."), {
+      toast.error(friendlyError(e, "No pudimos guardar tus respuestas."), {
         duration: 15000,
-        action: { label: "Reintentar", onClick: () => rpeMut.mutate(vars) },
+        action: { label: "Reintentar", onClick: () => formMut.mutate(vars) },
       }),
   });
 
@@ -492,6 +480,9 @@ function CallUpDetail() {
     wellness_at: r.wellness_at,
     rpe: r.rpe,
   }));
+  const convocadasActivas = (rowsQ.data ?? [])
+    .filter((r) => r.status !== "declined")
+    .map((r) => ({ playerId: r.player_id, name: r.player?.full_name ?? "" }));
   const backTo = isStaff ? (isEntreno ? "/entrenos" : "/call-ups") : "/mis-convocatorias";
 
 
@@ -636,22 +627,29 @@ function CallUpDetail() {
           <MatchSheetCard callUpId={id} isStaff={isStaff} playerId={myRow?.player_id ?? null} started={started} />
         )}
 
-        {isEntreno && isPlayer && myRow && cu.wellness_enabled && (
-          <WellnessForm
-            values={myRow}
-            closed={started}
-            saving={wellnessMut.isPending}
-            onSave={(v) => wellnessMut.mutate(v)}
+        {isEntreno && isPlayer && myRow && cu.wellness_enabled && formsQ.isSuccess && responsesQ.isSuccess && (
+          <FormFill
+            key={`w-${responsesQ.dataUpdatedAt}`}
+            kind="wellness"
+            questions={resolveForm("wellness", cu.wellness_form_id, formsQ.data).questions}
+            response={responsesQ.data.find((r) => r.kind === "wellness" && r.player_id === myRow.player_id) ?? null}
+            open={!started}
+            closedText="El entreno ya empezó. Tu wellness quedó guardado así."
+            saving={formMut.isPending}
+            onSave={(values) => formMut.mutate({ kind: "wellness", values })}
           />
         )}
 
-        {isEntreno && isPlayer && myRow && cu.rpe_enabled && (
-          <RpeForm
-            value={myRow.rpe}
-            savedAt={myRow.rpe_at}
-            available={started}
-            saving={rpeMut.isPending}
-            onSave={(n) => rpeMut.mutate(n)}
+        {isEntreno && isPlayer && myRow && cu.rpe_enabled && formsQ.isSuccess && responsesQ.isSuccess && (
+          <FormFill
+            key={`r-${responsesQ.dataUpdatedAt}`}
+            kind="rpe"
+            questions={resolveForm("rpe", cu.rpe_form_id, formsQ.data).questions}
+            response={responsesQ.data.find((r) => r.kind === "rpe" && r.player_id === myRow.player_id) ?? null}
+            open={started}
+            closedText="Vas a poder responder cuando arranque el entreno."
+            saving={formMut.isPending}
+            onSave={(values) => formMut.mutate({ kind: "rpe", values })}
           />
         )}
 
@@ -673,12 +671,17 @@ function CallUpDetail() {
           />
         )}
 
-        {isEntreno && isStaff && cu.wellness_enabled && (
-          <WellnessSummary rows={summaryRows} />
+        {isEntreno && isStaff && cu.wellness_enabled && formsQ.isSuccess && (
+          <FormResults kind="wellness" questions={resolveForm("wellness", cu.wellness_form_id, formsQ.data).questions}
+            rows={convocadasActivas} responses={responsesQ.data ?? []} />
         )}
-        {isEntreno && isStaff && cu.rpe_enabled && (
-          <RpeSummary rows={summaryRows} />
+        {isEntreno && isStaff && cu.rpe_enabled && formsQ.isSuccess && (
+          <FormResults kind="rpe" questions={resolveForm("rpe", cu.rpe_form_id, formsQ.data).questions}
+            rows={convocadasActivas} responses={responsesQ.data ?? []} />
         )}
+        {/* Respuestas de antes de los formularios editables (9-oct). */}
+        {isEntreno && isStaff && summaryRows.some((r) => r.wellness_at) && <WellnessSummary rows={summaryRows} />}
+        {isEntreno && isStaff && summaryRows.some((r) => r.rpe != null) && <RpeSummary rows={summaryRows} />}
       </main>
 
     </div>
