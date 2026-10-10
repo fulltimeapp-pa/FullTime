@@ -182,10 +182,10 @@ Reemplaza la Tarea 1.
   partidos jugados, titular, suplente que entró / que no, minutos, goles, tarjetas y lesiones;
   ordenable y con "Descargar" (CSV para Excel o Google Sheets). Lista de partidos con resultado
   (abre la hoja).
-- La jugadora ve "Tu temporada" en su perfil: sus minutos, partidos, goles, titularidades y
-  tarjetas (la base solo le da lo suyo).
+- La jugadora ve "Tu temporada" en su perfil: minutos, partidos, goles, titular, amarillas y rojas
+  (siempre visibles, aunque sean 0; pedido de Bárbara). La base solo le da lo suyo.
+- Probado en la web real por Bárbara (9-oct): funciona.
 - Lógica en `src/lib/estadisticas.ts` (`buildSeason`), probada con 7 casos. Sin tablas nuevas.
-  Falta: probarlo en la web real.
 
 ### Hoja de partido (9-oct, idea de Carlos Rivera + revisión de goTeam)
 - En cada partido, el cuerpo técnico ve "Hoja del partido" → `/hoja/<id>`: (1) datos: rival,

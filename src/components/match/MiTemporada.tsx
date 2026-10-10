@@ -16,11 +16,11 @@ export function MiTemporada({ clubId, playerId }: { clubId: string; playerId: st
         <Stat label="Minutos" value={`${me.minutos}'`} />
         <Stat label="Partidos" value={String(me.jugados)} />
         <Stat label="Goles" value={String(me.goles)} />
+        <Stat label="Titular" value={String(me.titular)} />
+        <Stat label="🟨 Amarillas" value={String(me.amarillas)} />
+        <Stat label="🟥 Rojas" value={String(me.rojas)} />
       </div>
-      <p className="mt-3 text-sm text-ink/70">
-        Titular en {me.titular} {me.titular === 1 ? "partido" : "partidos"} · convocada a {me.convocada}
-        {me.amarillas || me.rojas ? ` · ${me.amarillas} 🟨 ${me.rojas} 🟥` : ""}
-      </p>
+      <p className="mt-3 text-sm text-ink/70">Convocada a {me.convocada} {me.convocada === 1 ? "partido" : "partidos"}.</p>
     </section>
   );
 }
