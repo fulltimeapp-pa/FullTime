@@ -11,7 +11,7 @@ import { DateField, formatDayEs } from "@/components/ui/date-field";
 import { BodyMap } from "@/components/injuries/BodyMap";
 import {
   INJURY_TYPES, ZONES, byZone, daysOut, deleteInjury, dischargeInjury, isActive, listInjuries, saveInjury, suggestZone,
-  typeLabel, zoneText,
+  injuryTypeText, zoneText,
   type BodySide, type Injury, type InjuryInput, type InjuryType, type Laterality, type Zone,
 } from "@/lib/lesiones";
 
@@ -92,11 +92,11 @@ function LesionesPage() {
   function nueva(side: BodySide, x: number, y: number) {
     const s = suggestZone(side, x, y);
     setDraft({
-      value: { body_side: side, pos_x: x, pos_y: y, zone: s.zone, laterality: s.laterality, injury_type: "golpe", description: "", injured_on: hoy, expected_return: null, returned_on: null },
+      value: { body_side: side, pos_x: x, pos_y: y, zone: s.zone, laterality: s.laterality, injury_type: "golpe", injury_type_other: "", description: "", injured_on: hoy, expected_return: null, returned_on: null },
     });
   }
   const editar = (i: Injury) =>
-    setDraft({ id: i.id, value: { body_side: i.body_side, pos_x: i.pos_x, pos_y: i.pos_y, zone: i.zone, laterality: i.laterality, injury_type: i.injury_type, description: i.description ?? "", injured_on: i.injured_on, expected_return: i.expected_return, returned_on: i.returned_on } });
+    setDraft({ id: i.id, value: { body_side: i.body_side, pos_x: i.pos_x, pos_y: i.pos_y, zone: i.zone, laterality: i.laterality, injury_type: i.injury_type, injury_type_other: i.injury_type_other ?? "", description: i.description ?? "", injured_on: i.injured_on, expected_return: i.expected_return, returned_on: i.returned_on } });
 
   const sel = "rounded-xl border-2 border-ink bg-paper px-3 py-2 text-sm font-semibold";
 
@@ -216,7 +216,7 @@ function LesionesPage() {
                         <div className="flex flex-wrap items-start gap-3">
                           <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold text-paper ${act ? "bg-pa-red" : "bg-ink/45"}`}>{numero.get(i.id)}</span>
                           <button onClick={() => editar(i)} className="min-w-0 flex-1 text-left">
-                            <p className="font-semibold leading-tight">{typeLabel(i.injury_type)} · {zoneText(i.zone, i.laterality)}</p>
+                            <p className="font-semibold leading-tight">{injuryTypeText(i)} · {zoneText(i.zone, i.laterality)}</p>
                             <p className="text-xs text-ink/60">
                               Desde el {formatDayEs(i.injured_on)}
                               {act
@@ -306,14 +306,27 @@ function InjuryModal({ playerId, playerName, draft, onClose, onSaved }: {
           </label>
           <label className="sm:col-span-2">Tipo de lesión
             <select className={inputCls} value={v.injury_type} onChange={(e) => set({ injury_type: e.target.value as InjuryType })}>
-              {INJURY_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              {INJURY_TYPES.map((t) => <option key={t.value} value={t.value}>{t.value === "otra" ? "Otra (escríbela tú)" : t.label}</option>)}
             </select>
           </label>
+          {v.injury_type === "otra" && (
+            <label className="sm:col-span-2">¿Qué lesión es?
+              <input className={inputCls} value={v.injury_type_other ?? ""} maxLength={60} autoFocus
+                onChange={(e) => set({ injury_type_other: e.target.value })} placeholder="Ej.: pubalgia, fascitis plantar…" />
+            </label>
+          )}
           <div>Fecha de baja *
             <DateField value={v.injured_on} onChange={(d) => set({ injured_on: d })} ariaLabel="Fecha de baja" className={inputCls} />
           </div>
-          <div>Previsión de alta
+          <div>Previsión de alta <span className="font-normal text-ink/50">(opcional)</span>
             <DateField value={v.expected_return ?? ""} onChange={(d) => set({ expected_return: d || null })} ariaLabel="Previsión de alta" className={inputCls} />
+            {v.expected_return ? (
+              <button type="button" onClick={() => set({ expected_return: null })} className="mt-1 text-xs font-semibold underline text-ink/60">
+                Quitar la fecha
+              </button>
+            ) : (
+              <span className="mt-1 block text-xs font-normal text-ink/50">Déjala vacía si todavía no se sabe.</span>
+            )}
           </div>
           {id && (
             <div className="sm:col-span-2">Alta (cuando ya puede jugar)

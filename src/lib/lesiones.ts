@@ -50,6 +50,10 @@ export type InjuryType = (typeof INJURY_TYPES)[number]["value"];
 export const zoneLabel = (z: string) => ZONES.find((x) => x.value === z)?.label ?? z;
 export const typeLabel = (t: string) => INJURY_TYPES.find((x) => x.value === t)?.label ?? t;
 
+/** Tipo de la lesión para mostrar: si es "otra" y escribieron cuál, sale ese texto. */
+export const injuryTypeText = (i: Pick<Injury, "injury_type" | "injury_type_other">) =>
+  i.injury_type === "otra" && i.injury_type_other?.trim() ? i.injury_type_other.trim() : typeLabel(i.injury_type);
+
 export type Injury = {
   id: string;
   player_id: string;
@@ -59,6 +63,7 @@ export type Injury = {
   zone: Zone;
   laterality: Laterality;
   injury_type: InjuryType;
+  injury_type_other: string | null; // lo que escribió el cuerpo técnico cuando el tipo es "otra"
   description: string | null;
   injured_on: string;       // YYYY-MM-DD
   expected_return: string | null;
@@ -130,7 +135,7 @@ export function byZone(list: Pick<Injury, "zone">[]): { zone: Zone; label: strin
 }
 
 const table = () => supabase.from("player_injuries" as never) as any;
-const COLS = "id, player_id, body_side, pos_x, pos_y, zone, laterality, injury_type, description, injured_on, expected_return, returned_on";
+const COLS = "id, player_id, body_side, pos_x, pos_y, zone, laterality, injury_type, injury_type_other, description, injured_on, expected_return, returned_on";
 const fix = (r: any): Injury => ({ ...r, pos_x: Number(r.pos_x), pos_y: Number(r.pos_y) });
 
 /** Lesiones del club que la persona puede ver (el cuerpo técnico: su categoría; la jugadora: las suyas). */
@@ -142,10 +147,12 @@ export async function listInjuries(clubId: string): Promise<Injury[]> {
 
 export async function saveInjury(playerId: string, input: InjuryInput, id?: string): Promise<void> {
   if (!input.injured_on) throw new Error("Pon la fecha en que se lesionó.");
+  if (input.injury_type === "otra" && !input.injury_type_other?.trim()) throw new Error("Escribe qué lesión es.");
   if (input.expected_return && input.expected_return < input.injured_on) throw new Error("La previsión de alta no puede ser antes de la lesión.");
   if (input.returned_on && input.returned_on < input.injured_on) throw new Error("El alta no puede ser antes de la lesión.");
   const clean = {
     ...input,
+    injury_type_other: input.injury_type === "otra" ? input.injury_type_other?.trim().slice(0, 60) || null : null,
     description: input.description?.trim() || null,
     expected_return: input.expected_return || null,
     returned_on: input.returned_on || null,

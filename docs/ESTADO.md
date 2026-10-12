@@ -207,6 +207,9 @@ Reemplaza la Tarea 1.
   suyas en Mis números (no las crea ni cambia); sus compañeras no. Al convocar a una lesionada la app
   **avisa** ("🩹 Lesionada hasta…") pero deja convocarla. Tratamiento (notas del fisio): después.
   No se hicieron los estados "duda" ni "sancionada".
+- Ajustes pedidos por Bárbara al probarlo (12-oct): si el tipo es "Otra", se escribe cuál (columna
+  `injury_type_other`, migración `20261012160000_lesion_otro_tipo.sql`) y ese texto sale en la lista;
+  la previsión de alta dice "(opcional)" y se puede quitar.
 - Tabla `player_injuries` (migración `20261012150000_lesiones.sql`). Probado en PGlite con dos
   entrenadores de categorías distintas, jugadoras y otro club (13 pruebas); lógica de zonas, lado,
   estado y días de baja probada (15 casos). Falta: aplicar la migración y probarlo en la web real.

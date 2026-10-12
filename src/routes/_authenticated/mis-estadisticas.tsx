@@ -5,7 +5,7 @@ import { PlayerShell } from "@/components/player/PlayerShell";
 import { MiTemporada } from "@/components/match/MiTemporada";
 import { addDaysISO, dayPA, loadEntries } from "@/lib/carga";
 import { formatDayEs } from "@/components/ui/date-field";
-import { daysOut, isActive, listInjuries, typeLabel, zoneText } from "@/lib/lesiones";
+import { daysOut, injuryTypeText, isActive, listInjuries, zoneText } from "@/lib/lesiones";
 
 export const Route = createFileRoute("/_authenticated/mis-estadisticas")({
   head: () => ({ meta: [{ title: "FullTime — Mis números" }] }),
@@ -165,7 +165,7 @@ function MisLesiones({ clubId, playerId }: { clubId: string; playerId: string })
           const act = isActive(i, hoy);
           return (
             <li key={i.id} className={`rounded-xl border-2 p-3 ${act ? "border-pa-red/60 bg-pa-red/5" : "border-ink/15 bg-paper"}`}>
-              <p className="font-semibold">{typeLabel(i.injury_type)} · {zoneText(i.zone, i.laterality)}</p>
+              <p className="font-semibold">{injuryTypeText(i)} · {zoneText(i.zone, i.laterality)}</p>
               <p className="text-xs text-ink/60">
                 Desde el {formatDayEs(i.injured_on)}
                 {act
