@@ -457,6 +457,12 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   wellness/RPE y definir reglas para datos de salud de menores.
 - Los videos tutoriales quedaron para la semana del 12-oct.
 
+**Numeración real de los posts (12-oct):** Bárbara lleva 9 publicados. El de "¿Cuántas jugadoras
+manejas?" no salió el 11; sale hoy 12-oct y es el **Post 10**. En HQ quedan: Post 10 (12-oct),
+Post 11 · 58 equipos (13-oct), Post 12 · «No me entero…» (20-oct), Post 13 · Una semana de un profe
+(27-oct). Las carpetas del Escritorio y el artefacto de octubre siguen con los números viejos
+(11, 13, 10, 14). "Contestar comentarios" pasó al 13-oct.
+
 **Lista de clubes y academias (12-oct):** se investigaron 20 con fuentes públicas (9 de la LFF
 Apertura 2026 —el 10.º es Inter CF, el de Carlos, que ya estaba—, Cowgirls Academy,
 Fundación Golerinas, 3 academias mixtas y 6 equipos de niñas de Golerinas 2018) y se cargaron al CRM
