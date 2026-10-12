@@ -8,7 +8,7 @@ import { StaffShell } from "@/components/staff/StaffShell";
 import { getMyActiveClub } from "@/lib/active-club";
 import { friendlyError } from "@/lib/errors";
 import { DateField, formatDayEs } from "@/components/ui/date-field";
-import { BodyMap } from "@/components/injuries/BodyMap";
+import { BodyMap, type BodyTap } from "@/components/injuries/BodyMap";
 import {
   INJURY_TYPES, ZONES, byZone, daysOut, deleteInjury, dischargeInjury, isActive, listInjuries, saveInjury, suggestZone,
   injuryTypeText, zoneText,
@@ -89,8 +89,10 @@ function LesionesPage() {
   const marcas = (side: BodySide) =>
     lista.filter((i) => i.body_side === side).map((i) => ({ id: i.id, x: i.pos_x, y: i.pos_y, n: numero.get(i.id) ?? 0, active: isActive(i, hoy) }));
 
-  function nueva(side: BodySide, x: number, y: number) {
-    const s = suggestZone(side, x, y);
+  function nueva(side: BodySide, tap: BodyTap) {
+    const { x, y } = tap;
+    // La pieza tocada ya dice qué zona es; si no, se calcula por la posición.
+    const s = tap.zone && tap.laterality ? { zone: tap.zone, laterality: tap.laterality } : suggestZone(side, x, y);
     setDraft({
       value: { body_side: side, pos_x: x, pos_y: y, zone: s.zone, laterality: s.laterality, injury_type: "golpe", injury_type_other: "", description: "", injured_on: hoy, expected_return: null, returned_on: null },
     });
@@ -189,11 +191,11 @@ function LesionesPage() {
                   {activas.length ? "Lesionada" : "Disponible"}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-ink/60"><b className="text-ink">Toca la zona lesionada</b> en la figura para anotar una lesión nueva.</p>
+              <p className="mt-1 text-sm text-ink/60"><b className="text-ink">Toca el músculo o la zona lesionada</b> en la figura para anotar una lesión nueva.</p>
 
               <div className="mt-4 flex justify-center gap-6">
-                <BodyMap side="frente" markers={marcas("frente")} onTap={(x, y) => nueva("frente", x, y)} onMarker={(mid) => { const i = suyas.find((s) => s.id === mid); if (i) editar(i); }} />
-                <BodyMap side="espalda" markers={marcas("espalda")} onTap={(x, y) => nueva("espalda", x, y)} onMarker={(mid) => { const i = suyas.find((s) => s.id === mid); if (i) editar(i); }} />
+                <BodyMap side="frente" markers={marcas("frente")} onTap={(t) => nueva("frente", t)} onMarker={(mid) => { const i = suyas.find((s) => s.id === mid); if (i) editar(i); }} />
+                <BodyMap side="espalda" markers={marcas("espalda")} onTap={(t) => nueva("espalda", t)} onMarker={(mid) => { const i = suyas.find((s) => s.id === mid); if (i) editar(i); }} />
               </div>
 
               <div className="mt-5 grid max-w-xs grid-cols-2 gap-2 rounded-2xl border-2 border-ink bg-paper p-1">
