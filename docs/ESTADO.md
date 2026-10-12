@@ -552,6 +552,12 @@ ficha de cada prospecto (SQL suelto `crm-contactos-corregido.sql`). Bárbara qui
 masculino: hoy toda la app y la landing hablan en femenino; decidir cómo cuando un club masculino
 diga que sí.
 
+**Pedido de Bárbara (12-oct):** seguir revisando qué tiene goTeam para integrarlo en FullTime
+(inspiración, sin copiar su diseño ni sus ilustraciones). Lo ya visto está en `docs/GOTEAM.md`.
+Al empezar una sesión de producto: revisar goTeam, proponerle 2 o 3 cosas con recomendación y
+construir solo lo que ella elija. Pendiente de ella esta semana: escribirle a amigas jugadoras
+para conseguir contactos en UMECIT, Panamá Norte y otros clubes, y pedirle contactos a Carlos.
+
 **Pruebas con el celular (Bárbara):**
 - "No puedo" sin internet (baja prioridad): abrir la convocatoria con internet, apagar la red y
   tocar "No puedo". A los 10 s máximo debe salir error con "Reintentar" (arreglo 758ec8e, falta
