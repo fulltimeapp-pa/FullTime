@@ -212,7 +212,8 @@ Reemplaza la Tarea 1.
   la previsión de alta dice "(opcional)" y se puede quitar.
 - Tabla `player_injuries` (migración `20261012150000_lesiones.sql`). Probado en PGlite con dos
   entrenadores de categorías distintas, jugadoras y otro club (13 pruebas); lógica de zonas, lado,
-  estado y días de baja probada (15 casos). Falta: aplicar la migración y probarlo en la web real.
+  estado y días de baja probada (15 casos). Migraciones aplicadas y probado en la web real por
+  Bárbara (12-oct): funciona.
 
 ### Accesos por categoría (12-oct, pedido de Carlos; necesario para el Plan Academia)
 - Decidido con Bárbara: (1) un entrenador **con** categorías asignadas ve y maneja solo esas
