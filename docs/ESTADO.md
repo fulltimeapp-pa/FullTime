@@ -221,7 +221,7 @@ Reemplaza la Tarea 1.
   casilla por categoría y Guardar (los botoncitos de antes no se entendían). En la sección Categorías
   cada una muestra cuántos entrenadores tiene asignados.
 - Idea de Bárbara para planes (no hecha): **límite de entrenadores por categoría** (va con los
-  límites de Plan Equipo / Plan Academia). Falta: que pruebe la ventana nueva y entre como Pepe.
+  límites de Plan Equipo / Plan Academia). Probado en la web real por Bárbara (12-oct): funciona.
 
 ### Wellness y RPE, parte 3: historial e informes (9-oct)
 - `/bienestar` ("Bienestar y carga" en el menú del cuerpo técnico): filtros por categoría y periodo
