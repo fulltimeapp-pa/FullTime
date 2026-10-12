@@ -457,11 +457,16 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   wellness/RPE y definir reglas para datos de salud de menores.
 - Los videos tutoriales quedaron para la semana del 12-oct.
 
-**Numeración real de los posts (12-oct):** Bárbara lleva 9 publicados. El de "¿Cuántas jugadoras
-manejas?" no salió el 11; sale hoy 12-oct y es el **Post 10**. En HQ quedan: Post 10 (12-oct),
-Post 11 · 58 equipos (13-oct), Post 12 · «No me entero…» (20-oct), Post 13 · Una semana de un profe
-(27-oct). Las carpetas del Escritorio y el artefacto de octubre siguen con los números viejos
-(11, 13, 10, 14). "Contestar comentarios" pasó al 13-oct.
+**Contenido de octubre, calendario real (12-oct).** Bárbara actualizó su artefacto "Calendario
+FullTime Octubre": todo está programado en Meta Business Suite (solo Instagram `fulltime.pa`; no se
+toca el portfolio de Grupo Kosupa, que es otro negocio). Lleva 9 publicados y numera por orden de
+salida; los nombres "post 11/13/10/14" son solo las carpetas de la Mac. Quedó así y HQ se igualó con un
+SQL suelto: nº 10 carrusel «¿Cuántas jugadoras manejas?» (lun 12, 6 pm) · nº 11 reel «58 equipos»
+(mar 13, 12 pm) · nº 12 carrusel «58 equipos» (mié 14, medianoche; se movió sin querer y se deja) ·
+nº 13 reel y nº 14 carrusel «No me entero…» (mar 20) · nº 15 reel y nº 16 carrusel «Una semana de un
+profe» (mar 27). Story 1 de cada carrusel va programada (6:15 pm); las stories 2 y 3 (enlace,
+encuesta, caja de preguntas) y la música las pone ella a mano desde el celular. Los nº 13–16 los
+numeré yo siguiendo su regla; el artefacto solo numera hasta el 12.
 
 **Lista de clubes y academias (12-oct):** se investigaron 20 con fuentes públicas (9 de la LFF
 Apertura 2026 —el 10.º es Inter CF, el de Carlos, que ya estaba—, Cowgirls Academy,
