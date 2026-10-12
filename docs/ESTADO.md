@@ -531,6 +531,16 @@ resto dice en sus notas qué falta verificar. No se encontró nada público de "
 "Panamá City" femenino (estaban en el plan de etiquetado del Post 13). Bárbara sacó a JM Academy: son niñas muy
 chiquitas; su público son equipos con jugadoras más grandes.
 
+**Nuevo enfoque de prospectos (12-oct, decisión de Bárbara):** clubes con Sub-16 hacia arriba
+(Sub-16, Sub-18 y mayor/LFF) y clubes con masculino y femenino. Las de Sub-14 hacia abajo salen:
+jugadoras muy chiquitas, muchas sin celular. SQL suelto `crm-enfoque-sub16.sql`: quita 8 (Cowgirls,
+Golerinas y los 6 equipos de niñas de Golerinas 2018) y suma 6 (FC Chorrillo, Panamá City FC, Suárez
+Academy, Sporting San Miguelito, EFRE y Costa del Este FC). Se quedan los 10 de la LFF Apertura 2026
+y las 3 academias mixtas que llegan a 16-18 años (ADM FC, Román Torres, Level Up). Sin confirmar:
+femenino de Costa del Este (no hay nada público), si Chorrillo y EFRE siguen en la LFF, y los
+Instagram de todos. No existe un torneo Sub-18 femenino público; lo juvenil oficial es el Nacional
+Infanto Juvenil Sub-14 y Sub-16.
+
 **Pruebas con el celular (Bárbara):**
 - "No puedo" sin internet (baja prioridad): abrir la convocatoria con internet, apagar la red y
   tocar "No puedo". A los 10 s máximo debe salir error con "Reintentar" (arreglo 758ec8e, falta
