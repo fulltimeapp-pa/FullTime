@@ -215,7 +215,13 @@ Reemplaza la Tarea 1.
   `club_members` deja leer solo la fila propia; fallo anterior a hoy). Nueva función
   `club_staff_list(club)` (migración `20261012130000_lista_cuerpo_tecnico.sql`): devuelve el cuerpo
   técnico con su nombre; el correo de los demás solo para dueño o admin. No cambia reglas de tablas.
-  Probado (4 pruebas). Falta: aplicarla y probar la asignación de categorías con Pepe.
+  Probado (4 pruebas). Aplicada el 12-oct; Bárbara ya ve a Pepe en Equipo.
+- **Cómo se asigna (cambiado el 12-oct por pedido de Bárbara):** debajo de cada entrenador dice
+  "Categorías que ve: Todas / Sub-18…" y un botón "Elegir categorías" que abre una ventana con una
+  casilla por categoría y Guardar (los botoncitos de antes no se entendían). En la sección Categorías
+  cada una muestra cuántos entrenadores tiene asignados.
+- Idea de Bárbara para planes (no hecha): **límite de entrenadores por categoría** (va con los
+  límites de Plan Equipo / Plan Academia). Falta: que pruebe la ventana nueva y entre como Pepe.
 
 ### Wellness y RPE, parte 3: historial e informes (9-oct)
 - `/bienestar` ("Bienestar y carga" en el menú del cuerpo técnico): filtros por categoría y periodo

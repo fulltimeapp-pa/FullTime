@@ -234,16 +234,29 @@ function EquipoPage() {
       return (data ?? []) as { user_id: string; category_id: string }[];
     },
   });
-  const toggleCoachCatMut = useMutation({
-    mutationFn: async ({ userId, categoryId, on }: { userId: string; categoryId: string; on: boolean }) => {
-      const t = supabase.from("coach_categories" as never) as any;
-      const { error } = on
-        ? await t.insert({ user_id: userId, club_id: clubId!, category_id: categoryId })
-        : await t.delete().eq("user_id", userId).eq("category_id", categoryId);
-      if (error) throw error;
+  // Guarda la selección completa de un entrenador: agrega las nuevas y quita las que ya no lleva.
+  const [eligiendo, setEligiendo] = useState<StaffMember | null>(null);
+  const saveCoachCatsMut = useMutation({
+    mutationFn: async ({ userId, elegidas }: { userId: string; elegidas: string[] }) => {
+      const t = () => supabase.from("coach_categories" as never) as any;
+      const antes = (coachCatsQ.data ?? []).filter((c) => c.user_id === userId).map((c) => c.category_id);
+      const agregar = elegidas.filter((id) => !antes.includes(id));
+      const quitar = antes.filter((id) => !elegidas.includes(id));
+      if (agregar.length) {
+        const { error } = await t().insert(agregar.map((category_id) => ({ user_id: userId, club_id: clubId!, category_id })));
+        if (error) throw error;
+      }
+      if (quitar.length) {
+        const { error } = await t().delete().eq("user_id", userId).in("category_id", quitar);
+        if (error) throw error;
+      }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["coach-categories", clubId] }),
-    onError: (e) => toast.error(friendlyError(e, "No pudimos cambiar sus categorías. Vuelve a intentarlo.")),
+    onSuccess: () => {
+      toast.success("Categorías guardadas");
+      setEligiendo(null);
+      qc.invalidateQueries({ queryKey: ["coach-categories", clubId] });
+    },
+    onError: (e) => toast.error(friendlyError(e, "No pudimos guardar sus categorías. Vuelve a intentarlo.")),
   });
 
   const removeStaffMut = useMutation({
@@ -370,6 +383,10 @@ function EquipoPage() {
                 className="inline-flex items-center rounded-lg border-2 border-ink/15 bg-paper px-3 py-1.5 text-sm font-semibold"
               >
                 {c.name}
+                {isAdmin && (() => {
+                  const n = staff.filter((m) => m.role === "coach" && (coachCatsQ.data ?? []).some((x) => x.user_id === m.user_id && x.category_id === c.id)).length;
+                  return <span className="ml-2 text-xs font-normal text-ink/50">{n === 0 ? "sin entrenador asignado" : n === 1 ? "1 entrenador" : `${n} entrenadores`}</span>;
+                })()}
               </li>
             ))}
           </ul>
@@ -464,28 +481,19 @@ function EquipoPage() {
                 </div>
                </div>
                {isAdmin && m.role === "coach" && cats.length > 1 && (() => {
-                 const suyas = (coachCatsQ.data ?? []).filter((c) => c.user_id === m.user_id).map((c) => c.category_id);
+                 const suyas = cats.filter((c) => (coachCatsQ.data ?? []).some((x) => x.user_id === m.user_id && x.category_id === c.id));
                  return (
-                   <div className="mt-2 rounded-xl bg-ink/5 p-2.5">
-                     <p className="text-xs font-semibold text-ink/70">
-                       {suyas.length === 0 ? "Ve todas las categorías del club." : `Ve solo ${suyas.length === 1 ? "esta categoría" : "estas categorías"}:`}
+                   <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-ink/5 px-3 py-2.5">
+                     <p className="text-sm">
+                       <span className="text-ink/60">Categorías que ve: </span>
+                       <b>{suyas.length === 0 ? "Todas" : suyas.map((c) => c.name).join(", ")}</b>
                      </p>
-                     <div className="mt-1.5 flex flex-wrap gap-1.5">
-                       {cats.map((c) => {
-                         const on = suyas.includes(c.id);
-                         return (
-                           <button
-                             key={c.id} type="button" disabled={toggleCoachCatMut.isPending || coachCatsQ.isLoading}
-                             onClick={() => toggleCoachCatMut.mutate({ userId: m.user_id, categoryId: c.id, on: !on })}
-                             aria-pressed={on}
-                             className={`rounded-full border-2 px-3 py-1 text-xs font-semibold ${on ? "border-ink bg-lime" : "border-ink/20 bg-paper text-ink/60"}`}
-                           >
-                             {on ? "✓ " : ""}{c.name}
-                           </button>
-                         );
-                       })}
-                     </div>
-                     <p className="mt-1.5 text-[11px] text-ink/50">Marca las categorías que lleva. Si no marcas ninguna, ve todo el club.</p>
+                     <button
+                       type="button" onClick={() => setEligiendo(m)} disabled={coachCatsQ.isLoading}
+                       className="inline-flex items-center gap-1.5 rounded-xl border-2 border-ink bg-lime px-3 py-1.5 text-sm font-semibold hover:bg-ink hover:text-lime transition-colors"
+                     >
+                       <Pencil size={13} /> Elegir categorías
+                     </button>
                    </div>
                  );
                })()}
@@ -535,6 +543,17 @@ function EquipoPage() {
           </div>
         )}
       </section>
+
+      {eligiendo && (
+        <CoachCategoriesModal
+          name={eligiendo.display_name}
+          cats={cats}
+          initial={(coachCatsQ.data ?? []).filter((c) => c.user_id === eligiendo.user_id).map((c) => c.category_id)}
+          saving={saveCoachCatsMut.isPending}
+          onClose={() => setEligiendo(null)}
+          onSave={(elegidas) => saveCoachCatsMut.mutate({ userId: eligiendo.user_id, elegidas })}
+        />
+      )}
 
       {newInvite && (
         <StaffInviteModal
@@ -626,6 +645,57 @@ function StaffInviteModal({
         >
           Listo
         </button>
+      </div>
+    </div>
+  );
+}
+
+/** Ventana para elegir qué categorías lleva un entrenador. */
+function CoachCategoriesModal({ name, cats, initial, saving, onClose, onSave }: {
+  name: string; cats: { id: string; name: string }[]; initial: string[]; saving: boolean;
+  onClose: () => void; onSave: (elegidas: string[]) => void;
+}) {
+  const [sel, setSel] = useState<string[]>(initial);
+  const toggle = (id: string) => setSel((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  return (
+    <div className="fixed inset-0 z-50 bg-ink/40 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md rounded-2xl border-2 border-ink bg-paper p-5 shadow-[6px_6px_0_0_var(--color-ink)]">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-xl font-bold">¿Qué categorías lleva {name}?</h2>
+          <button type="button" onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
+        </div>
+        <p className="mt-1 text-sm text-ink/60">
+          Solo va a ver las jugadoras, partidos y entrenos de las categorías que marques.
+        </p>
+
+        <ul className="mt-4 space-y-2">
+          {cats.map((c) => {
+            const on = sel.includes(c.id);
+            return (
+              <li key={c.id}>
+                <label className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 font-semibold ${on ? "border-ink bg-lime/40" : "border-ink/20 bg-card"}`}>
+                  <input type="checkbox" checked={on} onChange={() => toggle(c.id)} className="h-5 w-5 accent-[var(--color-ink)]" />
+                  {c.name}
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+
+        <p className={`mt-3 rounded-lg px-3 py-2 text-sm ${sel.length === 0 ? "bg-pa-red/10 font-semibold text-pa-red" : "bg-ink/5 text-ink/60"}`}>
+          {sel.length === 0
+            ? "Sin ninguna marcada, ve TODAS las categorías del club."
+            : `Va a ver solo: ${cats.filter((c) => sel.includes(c.id)).map((c) => c.name).join(", ")}.`}
+        </p>
+
+        <div className="mt-5 flex gap-3">
+          <button type="button" disabled={saving} onClick={() => onSave(sel)} className="btn-primary">
+            {saving ? "Guardando…" : "Guardar"}
+          </button>
+          <button type="button" onClick={onClose} className="btn-ghost">Cancelar</button>
+        </div>
       </div>
     </div>
   );
