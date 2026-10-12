@@ -457,12 +457,13 @@ Para desarrollo local: `.env.local` (no se sube al repo).
   wellness/RPE y definir reglas para datos de salud de menores.
 - Los videos tutoriales quedaron para la semana del 12-oct.
 
-**Lista de clubes y academias (12-oct):** se investigaron 21 con fuentes públicas (9 de la LFF
-Apertura 2026 —el 10.º es Inter CF, el de Carlos, que ya estaba—, Cowgirls Academy, JM Academy,
+**Lista de clubes y academias (12-oct):** se investigaron 20 con fuentes públicas (9 de la LFF
+Apertura 2026 —el 10.º es Inter CF, el de Carlos, que ya estaba—, Cowgirls Academy,
 Fundación Golerinas, 3 academias mixtas y 6 equipos de niñas de Golerinas 2018) y se cargaron al CRM
 como "Contacto" con un SQL suelto. Solo dos tienen Instagram confirmado (@cowgirls507, @admfcpty); el
 resto dice en sus notas qué falta verificar. No se encontró nada público de "Suárez Academy" ni de
-"Panamá City" femenino (estaban en el plan de etiquetado del Post 13).
+"Panamá City" femenino (estaban en el plan de etiquetado del Post 13). Bárbara sacó a JM Academy: son niñas muy
+chiquitas; su público son equipos con jugadoras más grandes.
 
 **Pruebas con el celular (Bárbara):**
 - "No puedo" sin internet (baja prioridad): abrir la convocatoria con internet, apagar la red y
