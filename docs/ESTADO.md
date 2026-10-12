@@ -210,6 +210,11 @@ Reemplaza la Tarea 1.
 - Ajustes pedidos por Bárbara al probarlo (12-oct): si el tipo es "Otra", se escribe cuál (columna
   `injury_type_other`, migración `20261012160000_lesion_otro_tipo.sql`) y ese texto sale en la lista;
   la previsión de alta dice "(opcional)" y se puede quitar.
+- **Figura con músculos (12-oct):** Bárbara pidió una como la de goTeam y, si se podía, en 3D. Se le
+  explicó que la ilustración de goTeam no se puede copiar y que el 3D pide librería nueva, modelo con
+  licencia y pesa en el celular; eligió una figura propia con los grupos musculares marcados
+  (`body-regions.ts`: 16 piezas de frente y 15 de espalda, las pares se reflejan). Cada pieza se toca,
+  se resalta y da la zona y el lado exactos. Vio la imagen y la aprobó. El 3D queda como idea.
 - Tabla `player_injuries` (migración `20261012150000_lesiones.sql`). Probado en PGlite con dos
   entrenadores de categorías distintas, jugadoras y otro club (13 pruebas); lógica de zonas, lado,
   estado y días de baja probada (15 casos). Migraciones aplicadas y probado en la web real por
