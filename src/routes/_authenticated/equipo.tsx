@@ -128,35 +128,17 @@ function EquipoPage() {
     queryKey: ["staff-members", clubId],
     enabled: !!clubId,
     queryFn: async (): Promise<StaffMember[]> => {
-      const { data: members, error } = await supabase
-        .from("club_members")
-        .select("id, user_id, role, created_at")
-        .eq("club_id", clubId!)
-        .in("role", ["owner", "admin", "coach"])
-        .order("created_at", { ascending: true });
+      // La tabla solo deja leer la fila propia; la lista completa sale de esta función
+      // (nombre de todos; correo de los demás solo para dueño o admin).
+      const { data, error } = await (supabase.rpc as any)("club_staff_list", { _club_id: clubId! });
       if (error) throw error;
-      // Enrich with player fields for their display name/email (available under RLS to staff).
-      const userIds = (members ?? []).map((m) => m.user_id);
-      let names: Record<string, { full_name: string; email: string | null }> = {};
-      if (userIds.length) {
-        const { data: pl } = await supabase
-          .from("players")
-          .select("user_id, full_name, email")
-          .in("user_id", userIds);
-        (pl ?? []).forEach((p) => {
-          if (p.user_id) names[p.user_id] = { full_name: p.full_name, email: p.email };
-        });
-      }
-      return (members ?? []).map((m) => ({
+      return ((data ?? []) as any[]).map((m) => ({
         id: m.id,
         user_id: m.user_id,
         role: m.role as ClubRole,
         created_at: m.created_at,
-        display_name:
-          m.user_id === user.id
-            ? ((user.user_metadata?.full_name as string | undefined)?.trim() || user.email?.split("@")[0] || "Tú")
-            : (names[m.user_id]?.full_name || "Miembro"),
-        email: m.user_id === user.id ? (user.email ?? null) : (names[m.user_id]?.email ?? null),
+        display_name: m.display_name || "Sin nombre",
+        email: m.email ?? null,
       }));
     },
   });

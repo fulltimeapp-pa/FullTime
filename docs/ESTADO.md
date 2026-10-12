@@ -210,8 +210,12 @@ Reemplaza la Tarea 1.
   mismo que antes. Los avisos al celular ya leían la convocatoria con el permiso de quien los
   dispara, así que quedan limitados solos.
 - Probado en PGlite con dueña, dos entrenadores de categorías distintas, jugadoras y otro club (30
-  pruebas nuevas; todas las anteriores siguen pasando). Falta: aplicar la migración y probarlo en la
-  web real con Pepe (coach).
+  pruebas nuevas; todas las anteriores siguen pasando). Migración aplicada el 12-oct (pasó el seguro).
+- **Arreglo que destapó la prueba real:** en Equipo la dueña solo se veía a sí misma (la tabla
+  `club_members` deja leer solo la fila propia; fallo anterior a hoy). Nueva función
+  `club_staff_list(club)` (migración `20261012130000_lista_cuerpo_tecnico.sql`): devuelve el cuerpo
+  técnico con su nombre; el correo de los demás solo para dueño o admin. No cambia reglas de tablas.
+  Probado (4 pruebas). Falta: aplicarla y probar la asignación de categorías con Pepe.
 
 ### Wellness y RPE, parte 3: historial e informes (9-oct)
 - `/bienestar` ("Bienestar y carga" en el menú del cuerpo técnico): filtros por categoría y periodo
