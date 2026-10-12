@@ -377,7 +377,7 @@ Reemplaza la Tarea 1.
   3. Prospecto cuyo club tiene el pago al día → "Pagando".
 - `/hq/automatizaciones`: explica las 3 reglas y muestra lo que hicieron (historial en ese
   navegador). Lógica en `src/lib/hq-automatizaciones.ts`, probada con datos de ejemplo (11 casos).
-  Sin tablas nuevas. Falta: que Bárbara lo pruebe en la web real.
+  Sin tablas nuevas. Probado en la web real (12-oct): funciona.
 
 ### Sección de Ayuda (9-oct)
 - `/ayuda` (pública, no hace falta entrar): preguntas frecuentes con pestañas "Soy entrenador" y
@@ -447,10 +447,8 @@ Para desarrollo local: `.env.local` (no se sube al repo).
 ## Pendiente
 
 **Para empezar la próxima sesión (pedido de Bárbara, 9-oct):**
-- Probar Automatizaciones en la web real: entrar a HQ → Automatizaciones y tocar "Revisar ahora"
-  (debe decir "Todo al día"). Luego en el Inbox poner la conversación de Carlos en "Le toca a la
-  otra persona" con último contacto de hace 4 días y volver a "Revisar ahora": debe crear la tarea
-  "Mandar seguimiento a Carlos Rivera".
+- (Hecho 12-oct) Automatizaciones probada en la web real con un caso de verdad: a los 3 días de
+  escribirle a Carlos, la app creó sola la tarea "Mandar seguimiento a Carlos Rivera".
 - Decidir con Bárbara qué ideas de Carlos van primero (ver abajo). El 9-oct ella le escribió que
   integraría "algunas de sus ideas" en una o dos semanas y luego le ayuda a montar su equipo e
   invitar a las jugadoras (volver a escribirle ~23-oct). Antes: cambiar CLAUDE.md si se amplía
