@@ -14,6 +14,7 @@ import { addMinutesToTime, toStartEnd } from "@/lib/call-ups";
 import { WEEKDAYS, buildRepeatDates, endOfMonth, shortDayLabel, MAX_REPEAT, type Weekday } from "@/lib/repetir";
 import { DateField } from "@/components/ui/date-field";
 import { DEFAULT_FORMS, listForms, type ClubForm, type FormKind } from "@/lib/formularios";
+import { InjuredBadge, useInjured } from "@/components/injuries/InjuredBadge";
 
 export const Route = createFileRoute("/_authenticated/entrenos/new")({
   // ?repetir=1 abre directo en "Varios días" (desde el recordatorio del panel).
@@ -86,6 +87,7 @@ function NewEntreno() {
 
   const clubQ = useQuery({ queryKey: ["my-club"], queryFn: getMyActiveClub });
   const clubId = clubQ.data?.club_id;
+  const lesionadas = useInjured(clubId);
   const formsQ = useQuery({ queryKey: ["club-forms", clubId], enabled: !!clubId, queryFn: () => listForms(clubId!) });
 
   const catsQ = useQuery({
@@ -653,6 +655,7 @@ function NewEntreno() {
                         {on && <Check size={14} strokeWidth={3} />}
                       </span>
                       <span className="font-semibold flex-1">{p.full_name}</span>
+                      <InjuredBadge injury={lesionadas.get(p.id)} />
                       {p.jersey_number != null && (
                         <span className="font-mono text-xs text-ink/50">#{p.jersey_number}</span>
                       )}

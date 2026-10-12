@@ -26,6 +26,7 @@ import { Route as AuthenticatedEstadisticasRouteImport } from './routes/_authent
 import { Route as AuthenticatedFormulariosRouteImport } from './routes/_authenticated/formularios'
 import { Route as AuthenticatedHqRouteImport } from './routes/_authenticated/hq'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
+import { Route as AuthenticatedLesionesRouteImport } from './routes/_authenticated/lesiones'
 import { Route as AuthenticatedMiCalendarioRouteImport } from './routes/_authenticated/mi-calendario'
 import { Route as AuthenticatedMiPerfilRouteImport } from './routes/_authenticated/mi-perfil'
 import { Route as AuthenticatedMisConvocatoriasRouteImport } from './routes/_authenticated/mis-convocatorias'
@@ -142,6 +143,11 @@ const AuthenticatedHqRoute = AuthenticatedHqRouteImport.update({
 const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
   id: '/inicio',
   path: '/inicio',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLesionesRoute = AuthenticatedLesionesRouteImport.update({
+  id: '/lesiones',
+  path: '/lesiones',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMiCalendarioRoute =
@@ -333,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/formularios': typeof AuthenticatedFormulariosRoute
   '/hq': typeof AuthenticatedHqRouteWithChildren
   '/inicio': typeof AuthenticatedInicioRoute
+  '/lesiones': typeof AuthenticatedLesionesRoute
   '/mi-calendario': typeof AuthenticatedMiCalendarioRoute
   '/mi-perfil': typeof AuthenticatedMiPerfilRoute
   '/mis-convocatorias': typeof AuthenticatedMisConvocatoriasRoute
@@ -379,6 +386,7 @@ export interface FileRoutesByTo {
   '/estadisticas': typeof AuthenticatedEstadisticasRoute
   '/formularios': typeof AuthenticatedFormulariosRoute
   '/inicio': typeof AuthenticatedInicioRoute
+  '/lesiones': typeof AuthenticatedLesionesRoute
   '/mi-calendario': typeof AuthenticatedMiCalendarioRoute
   '/mi-perfil': typeof AuthenticatedMiPerfilRoute
   '/mis-convocatorias': typeof AuthenticatedMisConvocatoriasRoute
@@ -430,6 +438,7 @@ export interface FileRoutesById {
   '/_authenticated/formularios': typeof AuthenticatedFormulariosRoute
   '/_authenticated/hq': typeof AuthenticatedHqRouteWithChildren
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
+  '/_authenticated/lesiones': typeof AuthenticatedLesionesRoute
   '/_authenticated/mi-calendario': typeof AuthenticatedMiCalendarioRoute
   '/_authenticated/mi-perfil': typeof AuthenticatedMiPerfilRoute
   '/_authenticated/mis-convocatorias': typeof AuthenticatedMisConvocatoriasRoute
@@ -481,6 +490,7 @@ export interface FileRouteTypes {
     | '/formularios'
     | '/hq'
     | '/inicio'
+    | '/lesiones'
     | '/mi-calendario'
     | '/mi-perfil'
     | '/mis-convocatorias'
@@ -527,6 +537,7 @@ export interface FileRouteTypes {
     | '/estadisticas'
     | '/formularios'
     | '/inicio'
+    | '/lesiones'
     | '/mi-calendario'
     | '/mi-perfil'
     | '/mis-convocatorias'
@@ -577,6 +588,7 @@ export interface FileRouteTypes {
     | '/_authenticated/formularios'
     | '/_authenticated/hq'
     | '/_authenticated/inicio'
+    | '/_authenticated/lesiones'
     | '/_authenticated/mi-calendario'
     | '/_authenticated/mi-perfil'
     | '/_authenticated/mis-convocatorias'
@@ -741,6 +753,13 @@ declare module '@tanstack/react-router' {
       path: '/inicio'
       fullPath: '/inicio'
       preLoaderRoute: typeof AuthenticatedInicioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lesiones': {
+      id: '/_authenticated/lesiones'
+      path: '/lesiones'
+      fullPath: '/lesiones'
+      preLoaderRoute: typeof AuthenticatedLesionesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/mi-calendario': {
@@ -1039,6 +1058,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFormulariosRoute: typeof AuthenticatedFormulariosRoute
   AuthenticatedHqRoute: typeof AuthenticatedHqRouteWithChildren
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
+  AuthenticatedLesionesRoute: typeof AuthenticatedLesionesRoute
   AuthenticatedMiCalendarioRoute: typeof AuthenticatedMiCalendarioRoute
   AuthenticatedMiPerfilRoute: typeof AuthenticatedMiPerfilRoute
   AuthenticatedMisConvocatoriasRoute: typeof AuthenticatedMisConvocatoriasRoute
@@ -1063,6 +1083,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFormulariosRoute: AuthenticatedFormulariosRoute,
   AuthenticatedHqRoute: AuthenticatedHqRouteWithChildren,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
+  AuthenticatedLesionesRoute: AuthenticatedLesionesRoute,
   AuthenticatedMiCalendarioRoute: AuthenticatedMiCalendarioRoute,
   AuthenticatedMiPerfilRoute: AuthenticatedMiPerfilRoute,
   AuthenticatedMisConvocatoriasRoute: AuthenticatedMisConvocatoriasRoute,

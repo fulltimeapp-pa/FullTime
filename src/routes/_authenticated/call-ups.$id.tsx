@@ -17,6 +17,7 @@ import { WellnessSummary, RpeSummary } from "@/components/training/Wellness";
 import { FormFill, FormResults } from "@/components/training/FormFill";
 import { listForms, listResponses, resolveForm, saveResponse, type Answer, type FormKind } from "@/lib/formularios";
 import type { PlanActivity, PlanPart, Intensity } from "@/lib/training-plan";
+import { InjuredBadge, useInjured } from "@/components/injuries/InjuredBadge";
 
 
 export const Route = createFileRoute("/_authenticated/call-ups/$id")({
@@ -145,6 +146,7 @@ function CallUpDetail() {
   }, [rowsQ.data, user.id]);
 
   const isStaff = !!isStaffQ.data;
+  const lesionadas = useInjured(isStaffQ.data ? cuQ.data?.club_id : null);
   const isPlayer = !!myRow;
 
   useEffect(() => {
@@ -568,6 +570,7 @@ function CallUpDetail() {
                           {on && <Check size={14} strokeWidth={3} />}
                         </span>
                         <span className="font-semibold flex-1">{p.full_name}</span>
+                        <InjuredBadge injury={lesionadas.get(p.id)} />
                         {p.jersey_number != null && (
                           <span className="font-mono text-xs text-ink/50">#{p.jersey_number}</span>
                         )}

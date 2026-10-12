@@ -5,6 +5,7 @@ import { PlayerShell } from "@/components/player/PlayerShell";
 import { MiTemporada } from "@/components/match/MiTemporada";
 import { addDaysISO, dayPA, loadEntries } from "@/lib/carga";
 import { formatDayEs } from "@/components/ui/date-field";
+import { daysOut, isActive, listInjuries, typeLabel, zoneText } from "@/lib/lesiones";
 
 export const Route = createFileRoute("/_authenticated/mis-estadisticas")({
   head: () => ({ meta: [{ title: "FullTime — Mis números" }] }),
@@ -93,6 +94,7 @@ function MisNumeros() {
 
             <MiTemporada clubId={me.club_id} playerId={me.id} />
             <MiBienestar clubId={me.club_id} playerId={me.id} />
+            <MisLesiones clubId={me.club_id} playerId={me.id} />
           </div>
         )}
       </main>
@@ -143,6 +145,37 @@ function MiBienestar({ clubId, playerId }: { clubId: string; playerId: string })
           </ul>
         </>
       )}
+    </section>
+  );
+}
+
+/** Sus lesiones (solo lectura; la base solo le da las suyas). */
+function MisLesiones({ clubId, playerId }: { clubId: string; playerId: string }) {
+  const q = useQuery({ queryKey: ["my-injuries", clubId], queryFn: () => listInjuries(clubId) });
+  if (!q.isSuccess) return null;
+  const hoy = dayPA(new Date().toISOString());
+  const mine = q.data.filter((i) => i.player_id === playerId);
+  if (mine.length === 0) return null;
+  return (
+    <section className="rounded-2xl border-2 border-ink bg-card p-6 md:p-7">
+      <h2 className="font-display text-xl font-bold">Tus lesiones</h2>
+      <p className="mt-1 text-sm text-ink/60">Las anota tu cuerpo técnico. Tus compañeras no las ven.</p>
+      <ul className="mt-4 space-y-2">
+        {mine.map((i) => {
+          const act = isActive(i, hoy);
+          return (
+            <li key={i.id} className={`rounded-xl border-2 p-3 ${act ? "border-pa-red/60 bg-pa-red/5" : "border-ink/15 bg-paper"}`}>
+              <p className="font-semibold">{typeLabel(i.injury_type)} · {zoneText(i.zone, i.laterality)}</p>
+              <p className="text-xs text-ink/60">
+                Desde el {formatDayEs(i.injured_on)}
+                {act
+                  ? i.expected_return ? ` · alta prevista ${formatDayEs(i.expected_return)}` : " · todavía sin fecha de alta"
+                  : ` · alta el ${formatDayEs(i.returned_on!)} · ${daysOut(i, hoy)} días de baja`}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }

@@ -193,6 +193,24 @@ Reemplaza la Tarea 1.
   respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
 - Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
 
+### Lesiones (12-oct, pedido de Carlos; inspirado en el mapa de lesiones de goTeam)
+- Lo que hace goTeam (revisado en la cuenta de prueba): dos figuras (frente y espalda), doble clic
+  deja un punto numerado y pide tipo de lesión (texto libre), fecha de baja, previsión de alta y
+  descripción; pestañas Lesiones / Histórico / Tratamiento; a la lesionada no la deja convocar.
+- Lo que hace FullTime: `/lesiones` ("Lesiones" en el menú del cuerpo técnico). Lista de jugadoras
+  (Disponible / Lesionada, con filtro "Solo lesionadas"), figura **propia** de frente y de espalda
+  (`BodyMap`, no se copió la ilustración de goTeam): se toca la zona y la app **sugiere zona y lado**
+  (21 zonas; de frente la derecha de la jugadora queda a la izquierda de la pantalla), tipo de una
+  lista (10), fecha de baja, previsión de alta, descripción, "Dar de alta" e historial. "Zonas con
+  más lesiones" para ver patrones (goTeam no puede: escribe todo a mano).
+- Decidido con Bárbara: las ve y anota solo el cuerpo técnico de la categoría; cada jugadora ve las
+  suyas en Mis números (no las crea ni cambia); sus compañeras no. Al convocar a una lesionada la app
+  **avisa** ("🩹 Lesionada hasta…") pero deja convocarla. Tratamiento (notas del fisio): después.
+  No se hicieron los estados "duda" ni "sancionada".
+- Tabla `player_injuries` (migración `20261012150000_lesiones.sql`). Probado en PGlite con dos
+  entrenadores de categorías distintas, jugadoras y otro club (13 pruebas); lógica de zonas, lado,
+  estado y días de baja probada (15 casos). Falta: aplicar la migración y probarlo en la web real.
+
 ### Accesos por categoría (12-oct, pedido de Carlos; necesario para el Plan Academia)
 - Decidido con Bárbara: (1) un entrenador **con** categorías asignadas ve y maneja solo esas
   (jugadoras, convocatorias, entrenos, hoja de partido, wellness/RPE, asistencia, estadísticas);
