@@ -242,6 +242,28 @@ function EquipoPage() {
     onError: (e) => toast.error(friendlyError(e, "No pudimos borrar la invitación. Vuelve a intentarlo.")),
   });
 
+  // Categorías que lleva cada entrenador (solo dueño o admin las ve y las cambia).
+  const coachCatsQ = useQuery({
+    queryKey: ["coach-categories", clubId],
+    enabled: !!clubId && isAdmin,
+    queryFn: async () => {
+      const { data, error } = await (supabase.from("coach_categories" as never) as any).select("user_id, category_id").eq("club_id", clubId!);
+      if (error) throw error;
+      return (data ?? []) as { user_id: string; category_id: string }[];
+    },
+  });
+  const toggleCoachCatMut = useMutation({
+    mutationFn: async ({ userId, categoryId, on }: { userId: string; categoryId: string; on: boolean }) => {
+      const t = supabase.from("coach_categories" as never) as any;
+      const { error } = on
+        ? await t.insert({ user_id: userId, club_id: clubId!, category_id: categoryId })
+        : await t.delete().eq("user_id", userId).eq("category_id", categoryId);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["coach-categories", clubId] }),
+    onError: (e) => toast.error(friendlyError(e, "No pudimos cambiar sus categorías. Vuelve a intentarlo.")),
+  });
+
   const removeStaffMut = useMutation({
     mutationFn: async (member: StaffMember) => {
       const { error } = await supabase.from("club_members").delete().eq("id", member.id);
@@ -421,7 +443,8 @@ function EquipoPage() {
         ) : (
           <ul className="mt-4 divide-y-2 divide-ink/5">
             {staff.map((m) => (
-              <li key={m.id} className="flex items-center justify-between gap-3 py-3">
+              <li key={m.id} className="py-3">
+               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="font-semibold truncate">
                     {m.display_name}
@@ -457,6 +480,33 @@ function EquipoPage() {
                     </button>
                   )}
                 </div>
+               </div>
+               {isAdmin && m.role === "coach" && cats.length > 1 && (() => {
+                 const suyas = (coachCatsQ.data ?? []).filter((c) => c.user_id === m.user_id).map((c) => c.category_id);
+                 return (
+                   <div className="mt-2 rounded-xl bg-ink/5 p-2.5">
+                     <p className="text-xs font-semibold text-ink/70">
+                       {suyas.length === 0 ? "Ve todas las categorías del club." : `Ve solo ${suyas.length === 1 ? "esta categoría" : "estas categorías"}:`}
+                     </p>
+                     <div className="mt-1.5 flex flex-wrap gap-1.5">
+                       {cats.map((c) => {
+                         const on = suyas.includes(c.id);
+                         return (
+                           <button
+                             key={c.id} type="button" disabled={toggleCoachCatMut.isPending || coachCatsQ.isLoading}
+                             onClick={() => toggleCoachCatMut.mutate({ userId: m.user_id, categoryId: c.id, on: !on })}
+                             aria-pressed={on}
+                             className={`rounded-full border-2 px-3 py-1 text-xs font-semibold ${on ? "border-ink bg-lime" : "border-ink/20 bg-paper text-ink/60"}`}
+                           >
+                             {on ? "✓ " : ""}{c.name}
+                           </button>
+                         );
+                       })}
+                     </div>
+                     <p className="mt-1.5 text-[11px] text-ink/50">Marca las categorías que lleva. Si no marcas ninguna, ve todo el club.</p>
+                   </div>
+                 );
+               })()}
               </li>
             ))}
           </ul>

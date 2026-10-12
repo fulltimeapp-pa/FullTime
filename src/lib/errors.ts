@@ -10,6 +10,8 @@ export function translateDbError(raw: string): string {
     return "La conexión está muy lenta y no pudimos guardar. Vuelve a intentarlo.";
   if (m.includes("failed to fetch") || m.includes("network") || m.includes("load failed"))
     return "Sin conexión. Revisa tu internet y vuelve a intentarlo.";
+  if (m.includes("coach_categories_category_id_fkey"))
+    return "Esa categoría la tiene asignada un entrenador. Quítasela primero en Equipo y vuelve a intentarlo.";
   if (m.includes("row-level security") || m.includes("permission") || m.includes("403"))
     return "No tienes permiso para hacer esto en este club.";
   if (m.includes("duplicate") || m.includes("unique"))

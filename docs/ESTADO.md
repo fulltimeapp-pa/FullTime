@@ -193,6 +193,26 @@ Reemplaza la Tarea 1.
   respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
 - Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
 
+### Accesos por categoría (12-oct, pedido de Carlos; necesario para el Plan Academia)
+- Decidido con Bárbara: (1) un entrenador **con** categorías asignadas ve y maneja solo esas
+  (jugadoras, convocatorias, entrenos, hoja de partido, wellness/RPE, asistencia, estadísticas);
+  (2) un entrenador **sin** categorías asignadas sigue viendo todo el club, así nada cambia para los
+  clubes de un equipo ni para los entrenadores que ya existen; (3) solo dueño o admin asignan
+  categorías (pantalla Equipo, debajo de cada entrenador, cuando el club tiene 2 o más categorías);
+  (4) solo dueño o admin crean, renombran y borran categorías (antes cualquier entrenador).
+- No se puede borrar una categoría que un entrenador tiene asignada (mensaje: "quítasela primero en
+  Equipo"); así nadie pasa a ver todo el club por accidente.
+- Migración `20261012120000_accesos_por_categoria.sql`: tabla `coach_categories`, función
+  `is_category_staff` y reemplazo de las reglas de `players`, `call_ups`, `call_up_players`,
+  `training_activities`, `match_reports`, `match_lineup`, `match_events`, `form_responses` y
+  `categories`, más `club_attendance_stats`. Va en una sola transacción y termina con un seguro que
+  cancela todo si queda alguna regla vieja sin limitar por categoría. Dueño, admin y jugadoras ven lo
+  mismo que antes. Los avisos al celular ya leían la convocatoria con el permiso de quien los
+  dispara, así que quedan limitados solos.
+- Probado en PGlite con dueña, dos entrenadores de categorías distintas, jugadoras y otro club (30
+  pruebas nuevas; todas las anteriores siguen pasando). Falta: aplicar la migración y probarlo en la
+  web real con Pepe (coach).
+
 ### Wellness y RPE, parte 3: historial e informes (9-oct)
 - `/bienestar` ("Bienestar y carga" en el menú del cuerpo técnico): filtros por categoría y periodo
   (4 u 8 semanas, este mes o fechas a elección, ej. pretemporada). Dos gráficos de barras por semana

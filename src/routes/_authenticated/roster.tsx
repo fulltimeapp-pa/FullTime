@@ -93,6 +93,8 @@ function RosterPage() {
     queryFn: getMyActiveClub,
   });
 
+  const puedeCategorias = membershipQ.data?.role === "owner" || membershipQ.data?.role === "admin";
+
   useEffect(() => {
     if (
       membershipQ.isSuccess &&
@@ -452,6 +454,8 @@ function RosterPage() {
                 );
               })
             )}
+            {/* Crear, renombrar y borrar categorías: solo dueño o admin del club (decidido 12-oct). */}
+            {puedeCategorias && (
             <button
               onClick={() => setCatModal({ kind: "create" })}
               disabled={!clubId || catQ.isError || membershipQ.isError}
@@ -459,7 +463,8 @@ function RosterPage() {
             >
               <Plus size={16} /> Nueva categoría
             </button>
-            {selectedCat && (
+            )}
+            {puedeCategorias && selectedCat && (
               <>
                 <button
                   onClick={() => setCatModal({ kind: "rename", category: selectedCat })}
