@@ -541,6 +541,17 @@ femenino de Costa del Este (no hay nada público), si Chorrillo y EFRE siguen en
 Instagram de todos. No existe un torneo Sub-18 femenino público; lo juvenil oficial es el Nacional
 Infanto Juvenil Sub-14 y Sub-16.
 
+**Primeros contactos (12-oct):** oferta usada: "5 clubes para probarla sin costo esta temporada".
+Enviados: Tevi Coclé y Santa Fe por Instagram; Deportivo Chiriquí (deportivochiriqui@gmail.com) y
+UMECIT (prensa@umecitfc.com) por correo desde fulltimeapp.pa@gmail.com; Víctor Suárez por WhatsApp
+(Suárez Academy y femenino de Plaza Amador). Pendiente: Melanny Valencia (psicóloga de Panamá City,
+conocida de Bárbara) para entrar a Panamá City. No se pudo: UMECIT, Panamá Norte y Atlético Nacional
+no reciben mensajes de Instagram de cuentas que no siguen; asistentedirectivo@umecitfc.com no
+existe; Origen y Rayadas no tienen contacto público (pedir a Carlos). Los contactos quedaron en la
+ficha de cada prospecto (SQL suelto `crm-contactos-corregido.sql`). Bárbara quiere abrir también al
+masculino: hoy toda la app y la landing hablan en femenino; decidir cómo cuando un club masculino
+diga que sí.
+
 **Pruebas con el celular (Bárbara):**
 - "No puedo" sin internet (baja prioridad): abrir la convocatoria con internet, apagar la red y
   tocar "No puedo". A los 10 s máximo debe salir error con "Reintentar" (arreglo 758ec8e, falta
