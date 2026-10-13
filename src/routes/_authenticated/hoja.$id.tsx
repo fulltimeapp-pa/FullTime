@@ -12,6 +12,8 @@ import {
   listCompetitions, renameCompetition, saveReport, setLineup, summarizeMatch,
   type Competition, type EventKind, type LineupRole, type MatchReport,
 } from "@/lib/hoja-partido";
+import { defaultFormation, firstFreeSpot, resolveSpots, saveSpots } from "@/lib/alineacion";
+import { LineupBoard } from "@/components/match/LineupBoard";
 
 export const Route = createFileRoute("/_authenticated/hoja/$id")({
   // ?nuevo=1 cuando se acaba de crear el partido.
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/hoja/$id")({
   component: HojaDePartido,
 });
 
-type Player = { id: string; name: string; jersey: number | null; status: string };
+type Player = { id: string; name: string; jersey: number | null; position: string | null; status: string };
 
 const ORDER: EventKind[] = ["gol", "autogol_rival", "gol_contra", "amarilla", "roja", "cambio", "lesion"];
 
@@ -58,11 +60,11 @@ function HojaDePartido() {
     queryFn: async (): Promise<Player[]> => {
       const { data, error } = await supabase
         .from("call_up_players")
-        .select("status, players(id, full_name, jersey_number)")
+        .select("status, players(id, full_name, jersey_number, position)")
         .eq("call_up_id", id);
       if (error) throw error;
       return (data ?? [])
-        .map((r: any) => ({ id: r.players.id, name: r.players.full_name, jersey: r.players.jersey_number, status: r.status }))
+        .map((r: any) => ({ id: r.players.id, name: r.players.full_name, jersey: r.players.jersey_number, position: r.players.position ?? null, status: r.status }))
         .sort((a: Player, b: Player) => (a.jersey ?? 999) - (b.jersey ?? 999) || a.name.localeCompare(b.name));
     },
   });
@@ -112,6 +114,14 @@ function HojaDePartido() {
     mutationFn: async ({ playerId, role }: { playerId: string; role: LineupRole | null }) => {
       await ensureReport();
       await setLineup(id, playerId, role);
+      // La titular nueva cae en el primer lugar libre del sistema (después se puede mover).
+      if (role === "titular") {
+        const r = sheetQ.data?.report;
+        const formation = r?.formation ?? defaultFormation(r?.field_size ?? 11);
+        const ya = (sheetQ.data?.lineup ?? []).filter((l) => l.role === "titular" && l.player_id !== playerId).map((l) => ({ id: l.player_id, x: l.pos_x, y: l.pos_y }));
+        const spot = firstFreeSpot(formation, Object.values(resolveSpots(formation, ya)), playersQ.data?.find((p) => p.id === playerId)?.position ?? null);
+        if (spot) await saveSpots(id, { [playerId]: spot });
+      }
     },
     onSuccess: refresh,
     onError: (e) => toast.error(friendlyError(e, "No pudimos guardarlo. Vuelve a intentarlo.")),
@@ -292,6 +302,18 @@ function HojaDePartido() {
                   );
                 })}
               </ul>
+            )}
+            {disponibles.length > 0 && (
+              <LineupBoard
+                callUpId={id}
+                settings={sheet?.report ?? null}
+                titulares={disponibles.filter((p) => roleOf(p.id) === "titular").map((p) => {
+                  const l = sheet?.lineup.find((x) => x.player_id === p.id);
+                  return { id: p.id, name: p.name, jersey: p.jersey, position: p.position, x: l?.pos_x ?? null, y: l?.pos_y ?? null };
+                })}
+                ensureReport={ensureReport}
+                onChanged={refresh}
+              />
             )}
           </section>
 

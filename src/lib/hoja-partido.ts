@@ -4,6 +4,7 @@
  * desfasados si se corrige una incidencia.
  */
 import { supabase } from "@/integrations/supabase/client";
+import type { LineupSettings } from "@/lib/alineacion";
 
 export type LineupRole = "titular" | "suplente";
 export type EventKind = "gol" | "autogol_rival" | "gol_contra" | "amarilla" | "roja" | "cambio" | "lesion";
@@ -32,7 +33,8 @@ export type MatchReport = {
   notes: string | null;
 };
 
-export type LineupRow = { call_up_id: string; player_id: string; role: LineupRole };
+export type LineupRow = { call_up_id: string; player_id: string; role: LineupRole; pos_x: number | null; pos_y: number | null };
+export type SheetReport = MatchReport & LineupSettings;
 
 export type MatchEvent = {
   id: string;
@@ -52,16 +54,17 @@ const reports = () => supabase.from("match_reports" as never) as any;
 const lineup = () => supabase.from("match_lineup" as never) as any;
 const events = () => supabase.from("match_events" as never) as any;
 
-export async function getMatchSheet(callUpId: string): Promise<{ report: MatchReport | null; lineup: LineupRow[]; events: MatchEvent[] }> {
+export async function getMatchSheet(callUpId: string): Promise<{ report: SheetReport | null; lineup: LineupRow[]; events: MatchEvent[] }> {
   const [r, l, e] = await Promise.all([
-    reports().select("call_up_id, opponent, competition, duration_min, notes").eq("call_up_id", callUpId).maybeSingle(),
-    lineup().select("call_up_id, player_id, role").eq("call_up_id", callUpId),
+    reports().select("call_up_id, opponent, competition, duration_min, notes, field_size, formation, lineup_published").eq("call_up_id", callUpId).maybeSingle(),
+    lineup().select("call_up_id, player_id, role, pos_x, pos_y").eq("call_up_id", callUpId),
     events().select("*").eq("call_up_id", callUpId).order("minute", { ascending: true, nullsFirst: false }).order("created_at"),
   ]);
   if (r.error) throw r.error;
   if (l.error) throw l.error;
   if (e.error) throw e.error;
-  return { report: r.data as MatchReport | null, lineup: (l.data ?? []) as LineupRow[], events: (e.data ?? []) as MatchEvent[] };
+  const rows = ((l.data ?? []) as any[]).map((x) => ({ ...x, pos_x: x.pos_x == null ? null : Number(x.pos_x), pos_y: x.pos_y == null ? null : Number(x.pos_y) }));
+  return { report: r.data as SheetReport | null, lineup: rows as LineupRow[], events: (e.data ?? []) as MatchEvent[] };
 }
 
 /** Duración y competición de la última hoja de esta categoría (para no escribirlas cada vez). */
@@ -118,7 +121,10 @@ export async function saveReport(callUpId: string, input: Omit<MatchReport, "cal
 
 export async function setLineup(callUpId: string, playerId: string, role: LineupRole | null): Promise<void> {
   const { error } = role
-    ? await lineup().upsert({ call_up_id: callUpId, player_id: playerId, role, club_id: "00000000-0000-0000-0000-000000000000" })
+    ? await lineup().upsert({
+        call_up_id: callUpId, player_id: playerId, role, club_id: "00000000-0000-0000-0000-000000000000",
+        ...(role === "suplente" ? { pos_x: null, pos_y: null } : {}), // la suplente no tiene lugar en la cancha
+      })
     : await lineup().delete().eq("call_up_id", callUpId).eq("player_id", playerId);
   if (error) throw error;
 }

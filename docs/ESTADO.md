@@ -1,6 +1,6 @@
 # Estado de FullTime
 
-Última actualización: 12 de octubre de 2026.
+Última actualización: 13 de octubre de 2026.
 
 **Resumen:** las 8 tareas del plan están hechas y publicadas en https://fulltimeapp.vercel.app.
 
@@ -192,6 +192,24 @@ Reemplaza la Tarea 1.
   (migración `20261010150000_formularios_wellness_rpe.sql`). Probado en PGlite (16 pruebas). Las
   respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
 - Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
+
+### Alineación en la cancha (13-oct, último punto de la lista de Carlos)
+- Dentro de la hoja del partido, debajo de "Titulares y suplentes": se elige fútbol 11, 9 o 7 y el
+  sistema (4-3-3, 4-4-2…), y cada titular se arrastra a su lugar. "Acomodarlas según el sistema"
+  las reparte solas usando la posición de cada jugadora. Al marcar una titular cae en el primer
+  lugar libre.
+- **Decisiones de Bárbara:** el entrenador decide si la muestra ("Mostrar a las jugadoras", apagado
+  por defecto). Publicada, la ven solo las convocadas de ese partido al abrirlo: cancha con
+  titulares, suplentes y ella resaltada. No se manda aviso al celular.
+- Es la primera pantalla donde una jugadora ve a sus compañeras: sale lo mínimo (primer nombre +
+  inicial del apellido y dorsal), por una función nueva `match_lineup_shared`. Las tablas siguen
+  igual de cerradas (la jugadora solo lee su fila).
+- Migración `20261013120000_alineacion.sql`: columnas `field_size`, `formation`, `lineup_published`
+  en `match_reports` y `pos_x`, `pos_y` en `match_lineup`. No cambia ninguna regla de acceso.
+- Código: `src/lib/alineacion.ts`, `components/match/Pitch.tsx`, `LineupBoard.tsx`, `MatchSheetCard.tsx`.
+- Probado: lógica de sistemas (todos los de 11, 9 y 7), 14 pruebas de acceso con dueña, coach,
+  coach de otra categoría, convocada, no convocada y otro club, y la cancha en tamaño celular
+  (arrastre incluido) con datos de ejemplo. **Falta probarlo en la web real con una sesión.**
 
 ### Lesiones (12-oct, pedido de Carlos; inspirado en el mapa de lesiones de goTeam)
 - Lo que hace goTeam (revisado en la cuenta de prueba): dos figuras (frente y espalda), doble clic
