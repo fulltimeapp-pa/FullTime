@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Download } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { getMyActiveClub } from "@/lib/active-club";
+import { csvName, downloadCsv } from "@/lib/csv";
 
 export const Route = createFileRoute("/_authenticated/asistencia")({
   head: () => ({
@@ -92,6 +94,17 @@ function AsistenciaPage() {
 
   const stats = statsQ.data;
   const rows = stats?.jugadoras ?? [];
+  const RANGE_TXT: Record<RangeKey, string> = { todo: "toda la temporada", "30": "ultimos 30 dias", mes: "este mes" };
+
+  function descargar() {
+    const cat = (catsQ.data ?? []).find((c: any) => c.id === catId)?.name ?? null;
+    downloadCsv(
+      csvName("asistencia", cat, RANGE_TXT[range]),
+      ["Jugadora", "Categoría", "Convocatorias", "Asistió", "Faltó", "Sin marcar", "% asistencia"],
+      rows.map((r) => [r.full_name, r.category_name ?? "", r.convocada, r.asistio, r.falto, r.sin_marcar, r.pct ?? ""]),
+    );
+    toast.success("Descargado. Ábrelo en Excel o Google Sheets.");
+  }
 
   return (
     <main className="mx-auto max-w-4xl px-5 py-10">
@@ -127,6 +140,9 @@ function AsistenciaPage() {
           <option value="30">Últimos 30 días</option>
           <option value="mes">Este mes</option>
         </select>
+        {rows.length > 0 && (
+          <button type="button" onClick={descargar} className="btn-ghost !py-2"><Download size={15} /> Descargar</button>
+        )}
       </div>
 
       {statsQ.isLoading ? (

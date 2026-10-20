@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, HeartPulse, X } from "lucide-react";
+import { AlertTriangle, Download, HeartPulse, X } from "lucide-react";
+import { toast } from "sonner";
+import { csvName, downloadCsv } from "@/lib/csv";
 import { supabase } from "@/integrations/supabase/client";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { getMyActiveClub } from "@/lib/active-club";
@@ -66,6 +68,45 @@ function BienestarPage() {
   }, [namesQ.data]);
   const list = Object.values(rows).sort((a, b) => b.alerts.length - a.alerts.length || name(a.playerId).localeCompare(name(b.playerId)));
   const conAlerta = list.filter((r) => r.alerts.length > 0);
+
+  const catName = (catsQ.data ?? []).find((c) => c.id === catId)?.name ?? null;
+  const jersey = (id: string) => (namesQ.data ?? []).find((p) => p.id === id)?.jersey_number ?? "";
+  const fmtAnswer = (v: unknown) => (v === true ? "Sí" : v === false ? "No" : v == null ? "" : String(v));
+
+  function descargarResumen() {
+    downloadCsv(
+      csvName("bienestar resumen", catName, from, to),
+      ["Jugadora", "Dorsal", "Wellness promedio", "Último wellness", "RPE promedio", "Carga total", "Alertas"],
+      list.map((r) => [name(r.playerId), jersey(r.playerId), r.wellnessAvg ?? "", r.wellnessLast ?? "", r.rpeAvg ?? "", r.loadTotal || "", r.alerts.join(" · ")]),
+    );
+    toast.success("Descargado. Ábrelo en Excel o Google Sheets.");
+  }
+
+  /** Una fila por jugadora y día, con cada respuesta en su columna (para informes como la pretemporada). */
+  function descargarDias() {
+    const keys = new Map<string, null>();
+    const byDay = new Map<string, { playerId: string; day: string; w?: Entry; r?: Entry }>();
+    for (const e of period) {
+      const k = `${e.playerId}|${e.day}`;
+      const row = byDay.get(k) ?? { playerId: e.playerId, day: e.day };
+      if (e.kind === "wellness") row.w = e; else row.r = e;
+      byDay.set(k, row);
+      for (const a of e.answers ?? []) keys.set(`${e.kind === "wellness" ? "Wellness" : "RPE"}: ${a.label}`, null);
+    }
+    const extra = [...keys.keys()];
+    const filas = [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day) || name(a.playerId).localeCompare(name(b.playerId)));
+    downloadCsv(
+      csvName("bienestar dia por dia", catName, from, to),
+      ["Fecha", "Jugadora", "Dorsal", "Wellness (1-5)", "RPE (1-10)", "Minutos", "Carga", ...extra],
+      filas.map((f) => {
+        const ans = new Map<string, unknown>();
+        for (const a of f.w?.answers ?? []) ans.set(`Wellness: ${a.label}`, a.value);
+        for (const a of f.r?.answers ?? []) ans.set(`RPE: ${a.label}`, a.value);
+        return [f.day, name(f.playerId), jersey(f.playerId), f.w?.score ?? "", f.r?.score ?? "", f.r?.minutes ?? "", f.r?.load ?? "", ...extra.map((k) => fmtAnswer(ans.get(k)))];
+      }),
+    );
+    toast.success("Descargado. Ábrelo en Excel o Google Sheets.");
+  }
 
   const sel = "rounded-xl border-2 border-ink bg-paper px-3 py-2 text-sm font-semibold";
 
@@ -132,8 +173,16 @@ function BienestarPage() {
           </div>
 
           <section className="mt-6 rounded-2xl border-2 border-ink bg-card p-5">
-            <h2 className="font-display text-xl font-bold">Por jugadora</h2>
-            <p className="text-xs text-ink/50">Toca una jugadora para ver su historial día por día.</p>
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <h2 className="font-display text-xl font-bold">Por jugadora</h2>
+                <p className="text-xs text-ink/50">Toca una jugadora para ver su historial día por día.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={descargarResumen} className="btn-ghost !py-2 !text-sm"><Download size={15} /> Descargar resumen</button>
+                <button type="button" onClick={descargarDias} className="btn-ghost !py-2 !text-sm"><Download size={15} /> Día por día</button>
+              </div>
+            </div>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full min-w-[560px] text-sm">
                 <thead>

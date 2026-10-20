@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Download, Trophy } from "lucide-react";
+import { csvName, downloadCsv } from "@/lib/csv";
 import { supabase } from "@/integrations/supabase/client";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { getMyActiveClub } from "@/lib/active-club";
@@ -68,14 +69,8 @@ function EstadisticasPage() {
 
   function descargar() {
     const head = ["Jugadora", "Dorsal", "Convocatorias", "Partidos jugados", "Titular", "Suplente que jugó", "Suplente sin jugar", "Minutos", "Goles", "Amarillas", "Rojas", "Lesiones"];
-    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-    const body = rows.map((r) => [r.name, r.jersey ?? "", r.convocada, r.jugados, r.titular, r.suplenteJugo, r.suplenteNoJugo, r.minutos, r.goles, r.amarillas, r.rojas, r.lesiones].map(esc).join(","));
-    const blob = new Blob(["﻿" + [head.map(esc).join(","), ...body].join("\n")], { type: "text/csv;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `estadisticas${comp ? `-${comp}` : ""}.csv`.replace(/\s+/g, "-");
-    a.click();
-    URL.revokeObjectURL(a.href);
+    const body = rows.map((r) => [r.name, r.jersey ?? "", r.convocada, r.jugados, r.titular, r.suplenteJugo, r.suplenteNoJugo, r.minutos, r.goles, r.amarillas, r.rojas, r.lesiones]);
+    downloadCsv(csvName("estadisticas", comp), head, body);
     toast.success("Descargado. Ábrelo en Excel o Google Sheets.");
   }
 
