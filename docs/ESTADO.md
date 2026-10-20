@@ -1,6 +1,6 @@
 # Estado de FullTime
 
-Última actualización: 13 de octubre de 2026.
+Última actualización: 20 de octubre de 2026.
 
 **Resumen:** las 8 tareas del plan están hechas y publicadas en https://fulltimeapp.vercel.app.
 
@@ -192,6 +192,20 @@ Reemplaza la Tarea 1.
   (migración `20261010150000_formularios_wellness_rpe.sql`). Probado en PGlite (16 pruebas). Las
   respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
 - Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
+
+### Trabajo del 20-oct (Bárbara en clase; todo guardado, SIN publicar hasta que lo revise)
+- **Guía "Monta tu club completo"** (1 página, PDF): `docs/guias/guia-club-completo.html` y copia en
+  `~/Desktop/full time/Reuniones/Carlos Rivera/`. Para mandarle a Carlos con el mensaje del 23-oct.
+- **Ayuda:** preguntas nuevas para el entrenador (hoja de partido, alineación, wellness/RPE,
+  lesiones, categorías por entrenador) y para la jugadora (wellness/RPE, Mis números, quién ve qué).
+- **Privacidad (para que Bárbara la revise):** se agregó lesiones, datos de partido y la excepción
+  de la alineación; bienestar dice ahora "cuerpo técnico de su categoría".
+- **Descargar en Excel:** Asistencia (con los filtros elegidos) y Bienestar y carga ("Descargar
+  resumen" por jugadora y "Día por día" con cada respuesta en su columna, útil para informes de
+  pretemporada). Estadísticas ya tenía descarga; ahora las tres usan `src/lib/csv.ts`.
+- **Guiones de videos tutoriales:** `docs/videos-tutoriales.md` (8 para entrenador, 2 para jugadora).
+- Probado: TypeScript, compila, pruebas del armado del archivo, Ayuda y Privacidad en tamaño
+  celular. Las descargas no se pudieron probar con sesión (no entro con su cuenta).
 
 ### Alineación en la cancha (13-oct, último punto de la lista de Carlos)
 - Dentro de la hoja del partido, debajo de "Titulares y suplentes": se elige fútbol 11, 9 o 7 y el
