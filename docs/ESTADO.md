@@ -209,7 +209,9 @@ Reemplaza la Tarea 1.
 - Idea para después (no hecha): sugerir sanción por acumulación de amarillas.
 - **Pruebas de acceso:** la herramienta temporal se borró sola (el Mac limpia /tmp). Ahora vive en
   `~/fulltime-pgtest/run.mjs` (fuera del repo): `cd ~/fulltime-pgtest && SKIP=cron_recordatorios node run.mjs`.
-  Cubre alineación y estados; las pruebas viejas (antes del 13-oct) se perdieron.
+  Se reconstruyó completo desde el historial de las sesiones: 184 pruebas (todas las de antes +
+  alineación + duda/sanción), todas pasan con las migraciones de hoy. Comprobado que detecta
+  errores: con un permiso abierto a propósito fallan 5. Con `MIG=<carpeta>` se prueba otra carpeta.
 
 ### Trabajo del 20-oct (Bárbara en clase; todo guardado, SIN publicar hasta que lo revise)
 - **Guía "Monta tu club completo"** (1 página, PDF): `docs/guias/guia-club-completo.html` y copia en
