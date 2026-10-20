@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
 import { toMatchTimes } from "@/lib/call-ups";
 import { InjuredBadge, useInjured } from "@/components/injuries/InjuredBadge";
+import { StatusBadge, useStatuses } from "@/components/injuries/StatusBadge";
 
 export const Route = createFileRoute("/_authenticated/call-ups/new")({
   head: () => ({
@@ -55,6 +56,7 @@ function NewCallUp() {
   const clubQ = useQuery({ queryKey: ["my-club"], queryFn: getMyActiveClub });
   const clubId = clubQ.data?.club_id;
   const lesionadas = useInjured(clubId);
+  const estados = useStatuses(clubId);
 
   const catsQ = useQuery({
     queryKey: ["categories", clubId],
@@ -224,6 +226,7 @@ function NewCallUp() {
                       </span>
                       <span className="font-semibold flex-1">{p.full_name}</span>
                       <InjuredBadge injury={lesionadas.get(p.id)} />
+                      <StatusBadge status={estados.get(p.id)} />
                       {p.jersey_number != null && (
                         <span className="font-mono text-xs text-ink/50">#{p.jersey_number}</span>
                       )}

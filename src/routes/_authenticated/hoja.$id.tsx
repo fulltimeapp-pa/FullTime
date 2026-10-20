@@ -14,6 +14,7 @@ import {
 } from "@/lib/hoja-partido";
 import { defaultFormation, firstFreeSpot, resolveSpots, saveSpots } from "@/lib/alineacion";
 import { LineupBoard } from "@/components/match/LineupBoard";
+import { sancionarPorRoja } from "@/components/injuries/StatusSection";
 
 export const Route = createFileRoute("/_authenticated/hoja/$id")({
   // ?nuevo=1 cuando se acaba de crear el partido.
@@ -429,6 +430,22 @@ function HojaDePartido() {
               refresh();
               setAdding(null);
               toast.success(`${EVENT_LABEL[ev.kind]} anotado`);
+              // Roja: ofrecer marcarla sancionada (desde el día del partido, 1 partido). Ella decide.
+              if (ev.kind === "roja" && ev.player_id) {
+                const pid = ev.player_id;
+                const dia = new Date(new Date(cu.starts_at).getTime() - 5 * 3600 * 1000).toISOString().slice(0, 10);
+                toast(`¿Marcas a ${nameOf(pid)} sancionada para el próximo partido?`, {
+                  duration: 15000,
+                  action: {
+                    label: "Sí, sancionada",
+                    onClick: () => {
+                      sancionarPorRoja(pid, dia, sheet?.report?.opponent ?? (form.opponent || null))
+                        .then(() => { toast.success("Marcada sancionada. Te avisamos si la convocas."); qc.invalidateQueries({ queryKey: ["player-statuses"] }); })
+                        .catch((e) => toast.error(friendlyError(e, "No pudimos marcarla. Hazlo desde Lesiones.")));
+                    },
+                  },
+                });
+              }
             }}
           />
         )}

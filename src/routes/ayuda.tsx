@@ -189,6 +189,17 @@ const ENTRENADOR: Pregunta[] = [
       </p>
     ),
   },
+  {
+    q: "¿Cómo marco a una jugadora en duda o sancionada?",
+    a: (
+      <p>
+        En <B>Lesiones</B> elige a la jugadora y toca <B>"Marcar en duda"</B> (molestia, enferma, viaje) o{" "}
+        <B>"Marcar sancionada"</B> (con los partidos de sanción). Si anotas una roja en la hoja del partido, FullTime te
+        pregunta si la marcas sancionada. Al convocarla te sale el aviso, y cuando pueda volver tocas{" "}
+        <B>"Ya está disponible"</B>.
+      </p>
+    ),
+  },
   AVISOS_IPHONE,
   AVISOS_ANDROID,
   OLVIDE,

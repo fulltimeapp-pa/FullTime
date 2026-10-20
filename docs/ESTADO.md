@@ -193,6 +193,24 @@ Reemplaza la Tarea 1.
   respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
 - Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
 
+### En duda y sancionada (20-oct, elegido por Bárbara de la revisión de goTeam)
+- Además de "lesionada", una jugadora puede estar **en duda** (molestia, enferma, viaje) o
+  **sancionada** (con partidos de sanción opcionales). Se marca en **Lesiones** (sección "En duda o
+  sancionada" de cada jugadora), con desde, hasta opcional (pasada la fecha se quita sola) y motivo.
+  "Ya está disponible" la quita y queda en "Antes".
+- Avisa al convocar (partidos, entrenos y al sumar jugadoras), igual que las lesiones; se puede
+  convocar igual. Al anotar una **roja** en la hoja, sale "¿La marcas sancionada?" (1 partido).
+  La sanción no se descuenta sola por partidos: la quita el entrenador.
+- Mismas reglas que lesiones: solo el cuerpo técnico de su categoría y la jugadora (solo leer).
+- Migración `20261020120000_estado_duda_sancionada.sql` (tabla `player_statuses`). Código:
+  `src/lib/estados.ts`, `components/injuries/StatusBadge.tsx`, `StatusSection.tsx`.
+- Probado: 31 pruebas de acceso (incluye la alineación otra vez), lógica de fechas y textos, la
+  pantalla en tamaño celular con datos de ejemplo. Falta probarlo en la web real con sesión.
+- Idea para después (no hecha): sugerir sanción por acumulación de amarillas.
+- **Pruebas de acceso:** la herramienta temporal se borró sola (el Mac limpia /tmp). Ahora vive en
+  `~/fulltime-pgtest/run.mjs` (fuera del repo): `cd ~/fulltime-pgtest && SKIP=cron_recordatorios node run.mjs`.
+  Cubre alineación y estados; las pruebas viejas (antes del 13-oct) se perdieron.
+
 ### Trabajo del 20-oct (Bárbara en clase; todo guardado, SIN publicar hasta que lo revise)
 - **Guía "Monta tu club completo"** (1 página, PDF): `docs/guias/guia-club-completo.html` y copia en
   `~/Desktop/full time/Reuniones/Carlos Rivera/`. Para mandarle a Carlos con el mensaje del 23-oct.

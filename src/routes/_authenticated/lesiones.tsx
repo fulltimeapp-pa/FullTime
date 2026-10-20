@@ -9,6 +9,8 @@ import { getMyActiveClub } from "@/lib/active-club";
 import { friendlyError } from "@/lib/errors";
 import { DateField, formatDayEs } from "@/components/ui/date-field";
 import { BodyMap, type BodyTap } from "@/components/injuries/BodyMap";
+import { StatusSection } from "@/components/injuries/StatusSection";
+import { isStatusActive, listStatuses, statusText, STATUS_ICON, type PlayerStatus } from "@/lib/estados";
 import {
   INJURY_TYPES, ZONES, byZone, daysOut, deleteInjury, dischargeInjury, isActive, listInjuries, saveInjury, suggestZone,
   injuryTypeText, zoneText,
@@ -58,6 +60,7 @@ function LesionesPage() {
     },
   });
   const injQ = useQuery({ queryKey: ["injuries", clubId], enabled: !!clubId, queryFn: () => listInjuries(clubId!) });
+  const statusQ = useQuery({ queryKey: ["player-statuses", clubId], enabled: !!clubId, queryFn: () => listStatuses(clubId!) });
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["injuries", clubId] });
   const altaMut = useMutation({
@@ -73,12 +76,24 @@ function LesionesPage() {
     return m;
   }, [all, hoy]);
 
+  // En duda o sancionada hoy (si tiene las dos, manda la sanción).
+  const statusOf = useMemo(() => {
+    const m = new Map<string, PlayerStatus>();
+    for (const st of statusQ.data ?? []) {
+      if (!isStatusActive(st, hoy) || st.since > hoy) continue;
+      const prev = m.get(st.player_id);
+      if (!prev || (prev.status === "duda" && st.status === "sancionada")) m.set(st.player_id, st);
+    }
+    return m;
+  }, [statusQ.data, hoy]);
+  const noDisponible = (id: string) => activeOf.has(id) || statusOf.has(id);
+
   const players = (playersQ.data ?? [])
-    .filter((p) => (!catId || p.category_id === catId) && (!soloLesionadas || activeOf.has(p.id)))
-    .sort((a, b) => Number(activeOf.has(b.id)) - Number(activeOf.has(a.id)) || a.full_name.localeCompare(b.full_name));
+    .filter((p) => (!catId || p.category_id === catId) && (!soloLesionadas || noDisponible(p.id)))
+    .sort((a, b) => Number(noDisponible(b.id)) - Number(noDisponible(a.id)) || a.full_name.localeCompare(b.full_name));
   const idsVisibles = new Set((playersQ.data ?? []).filter((p) => !catId || p.category_id === catId).map((p) => p.id));
   const patrones = byZone(all.filter((i) => idsVisibles.has(i.player_id))).slice(0, 5);
-  const lesionadasHoy = [...activeOf.keys()].filter((id) => idsVisibles.has(id)).length;
+  const lesionadasHoy = [...idsVisibles].filter((id) => noDisponible(id)).length;
 
   const player = (playersQ.data ?? []).find((p) => p.id === playerId) ?? null;
   const suyas = all.filter((i) => i.player_id === playerId).sort((a, b) => b.injured_on.localeCompare(a.injured_on));
@@ -119,7 +134,7 @@ function LesionesPage() {
         </select>
         <label className="flex items-center gap-2 text-sm font-semibold">
           <input type="checkbox" checked={soloLesionadas} onChange={(e) => setSoloLesionadas(e.target.checked)} className="h-4 w-4" />
-          Solo lesionadas ({lesionadasHoy})
+          Solo las que no están disponibles ({lesionadasHoy})
         </label>
       </div>
 
@@ -149,26 +164,27 @@ function LesionesPage() {
           {playersQ.isLoading ? (
             <p className="p-3 text-sm text-ink/50">Cargando…</p>
           ) : players.length === 0 ? (
-            <p className="p-3 text-sm text-ink/60">{soloLesionadas ? "Nadie está lesionada. 🎉" : "No hay jugadoras."}</p>
+            <p className="p-3 text-sm text-ink/60">{soloLesionadas ? "Todas están disponibles. 🎉" : "No hay jugadoras."}</p>
           ) : (
             <ul className="max-h-[28rem] space-y-1 overflow-y-auto">
               {players.map((p) => {
                 const act = activeOf.get(p.id);
+                const st = statusOf.get(p.id);
                 return (
                   <li key={p.id}>
                     <button
                       onClick={() => { setPlayerId(p.id); setTab(act ? "activas" : "historial"); }}
                       className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left ${playerId === p.id ? "bg-lime/50" : "hover:bg-ink/5"}`}
                     >
-                      <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] ${act ? "bg-pa-red text-paper" : "bg-lime text-ink"}`}>
-                        {act ? "🩹" : <Check size={13} strokeWidth={3} />}
+                      <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] ${act || st?.status === "sancionada" ? "bg-pa-red text-paper" : st ? "bg-ink/15 text-ink" : "bg-lime text-ink"}`}>
+                        {act ? "🩹" : st ? STATUS_ICON[st.status] : <Check size={13} strokeWidth={3} />}
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-semibold">{p.full_name}</span>
-                        <span className={`block text-xs ${act ? "font-semibold text-pa-red" : "text-ink/50"}`}>
+                        <span className={`block text-xs ${act || st?.status === "sancionada" ? "font-semibold text-pa-red" : st ? "font-semibold text-ink/70" : "text-ink/50"}`}>
                           {act
-                            ? `Lesionada${act[0].expected_return ? ` · alta prevista ${formatDayEs(act[0].expected_return)}` : ""}`
-                            : "Disponible"}
+                            ? `Lesionada${act[0].expected_return ? ` · alta prevista ${formatDayEs(act[0].expected_return)}` : ""}${st ? ` · ${statusText(st)}` : ""}`
+                            : st ? statusText(st) : "Disponible"}
                         </span>
                       </span>
                     </button>
@@ -187,9 +203,12 @@ function LesionesPage() {
             <>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="font-display text-2xl font-bold">{player.full_name}</h2>
-                <span className={`rounded-full px-3 py-1 text-xs font-bold ${activas.length ? "bg-pa-red text-paper" : "bg-lime text-ink"}`}>
-                  {activas.length ? "Lesionada" : "Disponible"}
-                </span>
+                {(() => {
+                  const st = statusOf.get(player.id);
+                  const rojo = activas.length > 0 || st?.status === "sancionada";
+                  const txt = activas.length ? "Lesionada" : st ? (st.status === "sancionada" ? "Sancionada" : "En duda") : "Disponible";
+                  return <span className={`rounded-full px-3 py-1 text-xs font-bold ${rojo ? "bg-pa-red text-paper" : st ? "bg-ink/15 text-ink" : "bg-lime text-ink"}`}>{txt}</span>;
+                })()}
               </div>
               <p className="mt-1 text-sm text-ink/60"><b className="text-ink">Toca el músculo o la zona lesionada</b> en la figura para anotar una lesión nueva.</p>
 
@@ -239,6 +258,14 @@ function LesionesPage() {
                   })}
                 </ul>
               )}
+
+              <StatusSection
+                playerId={player.id}
+                playerName={player.full_name}
+                statuses={(statusQ.data ?? []).filter((st) => st.player_id === player.id)}
+                hoy={hoy}
+                onChanged={() => qc.invalidateQueries({ queryKey: ["player-statuses", clubId] })}
+              />
             </>
           )}
         </section>
