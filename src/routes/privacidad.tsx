@@ -62,7 +62,17 @@ function Privacidad() {
           <p>
             <strong>Datos de bienestar:</strong> si el club lo activa en un entreno, la jugadora puede
             contar cómo durmió, su energía, su ánimo, su dolor muscular y qué tan duro sintió el entreno.
-            Es información sobre su salud: solo la ve el cuerpo técnico de su club.
+            Es información sobre su salud: solo la ve el cuerpo técnico de su categoría.
+          </p>
+          <p>
+            <strong>Lesiones:</strong> el cuerpo técnico puede anotar las lesiones de una jugadora (zona,
+            tipo, fechas y una descripción). También es información sobre su salud: solo la ven el cuerpo
+            técnico de su categoría y la propia jugadora.
+          </p>
+          <p>
+            <strong>Datos de los partidos:</strong> si el club llena la hoja del partido, guardamos quién fue
+            titular o suplente, su lugar en la alineación, los minutos jugados, goles, tarjetas, cambios y
+            lesiones durante el partido.
           </p>
           <p>
             <strong>Para los avisos al celular:</strong> si activas las notificaciones, guardamos un
@@ -79,7 +89,11 @@ function Privacidad() {
           <p><strong>El cuerpo técnico del club</strong> ve los datos de las jugadoras de su club.</p>
           <p>
             <strong>Cada jugadora</strong> ve su propia ficha y sus convocatorias. No ve el correo,
-            teléfono ni fecha de nacimiento de sus compañeras.
+            teléfono ni fecha de nacimiento de sus compañeras, ni sus respuestas, bienestar o lesiones.
+          </p>
+          <p>
+            <strong>La alineación de un partido</strong> solo la ven las convocadas si el entrenador decide
+            mostrarla, y solo con el primer nombre, la inicial del apellido, el número y la posición.
           </p>
           <p><strong>Otros clubes</strong> no ven nada de tu club.</p>
         </Seccion>

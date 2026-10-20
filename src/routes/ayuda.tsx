@@ -132,9 +132,60 @@ const ENTRENADOR: Pregunta[] = [
   {
     q: "¿Puedo sumar a mi asistente o preparador?",
     a: (
+      <>
+        <p>
+          Sí. En <B>Equipo</B> toca <B>"Invitar al cuerpo técnico"</B>. Pueden crear y editar convocatorias y ver
+          respuestas, pero solo tú manejas el club y sus categorías.
+        </p>
+        <p className="mt-2">
+          Si tienes varias categorías, toca <B>"Elegir categorías"</B> junto a cada entrenador para que vea solo la suya. Si
+          no le marcas ninguna, ve todo el club.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "¿Cómo anoto lo que pasó en el partido?",
+    a: (
       <p>
-        Sí. En <B>Equipo</B> invita a tu cuerpo técnico. Pueden crear y editar convocatorias y ver respuestas, pero solo tú
-        manejas el club.
+        Abre el partido y toca <B>"Llenar hoja"</B>. Marca titulares y suplentes, y anota goles, tarjetas, cambios y lesiones
+        con su minuto. Los <B>minutos jugados</B> de cada jugadora salen solos. Con <B>"Copiar resumen"</B> lo pegas en
+        WhatsApp, y todo suma en <B>Estadísticas</B>, que puedes descargar en Excel.
+      </p>
+    ),
+  },
+  {
+    q: "¿Cómo armo la alineación?",
+    a: (
+      <>
+        <p>
+          En la hoja del partido, debajo de titulares y suplentes, elige <B>fútbol 11, 9 o 7</B> y el sistema (4-3-3,
+          4-4-2…). Las titulares se acomodan solas según su posición y puedes <B>arrastrar</B> a cada una con el dedo.
+        </p>
+        <p className="mt-2">
+          Al principio solo la ves tú. Si tocas <B>"Mostrar a las jugadoras"</B>, la ven las convocadas de ese partido al
+          abrirlo. No les llega aviso al celular.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "¿Cómo pido el wellness y el RPE?",
+    a: (
+      <p>
+        Al crear un entreno activa <B>"Pedir wellness antes del entreno"</B> y <B>"Pedir RPE después del entreno"</B>. A las
+        convocadas que no lo hayan llenado les llega un recordatorio solo. Las preguntas las cambias en{" "}
+        <B>Wellness y RPE</B>, y el historial y la carga de cada jugadora están en <B>Bienestar y carga</B>.
+      </p>
+    ),
+  },
+  {
+    q: "¿Cómo anoto una lesión?",
+    a: (
+      <p>
+        En <B>Lesiones</B> elige a la jugadora, toca el músculo o la zona en la figura y pon el tipo y la fecha. La previsión
+        de alta es opcional. Mientras siga lesionada, al convocarla te sale un aviso. Cuando vuelva, toca{" "}
+        <B>"Dar de alta"</B>. Solo la ven el cuerpo técnico de su categoría y ella.
       </p>
     ),
   },
@@ -175,16 +226,42 @@ const JUGADORA: Pregunta[] = [
       </p>
     ),
   },
+  {
+    q: "¿Qué es el wellness y el RPE?",
+    a: (
+      <p>
+        Son preguntas cortas que tu entrenador te puede pedir: el <B>wellness</B> antes del entreno (cómo dormiste, cómo
+        llegas) y el <B>RPE</B> después (qué tan duro lo sentiste, del 1 al 10). Se llenan en el mismo entreno, en menos de
+        un minuto. Si se te pasa, te llega un recordatorio.
+      </p>
+    ),
+  },
+  {
+    q: "¿Dónde veo mis números?",
+    a: (
+      <p>
+        En <B>Mis números</B> ves tu asistencia, tus partidos, minutos, goles y tarjetas, cómo te has sentido en los entrenos
+        y tus lesiones. En cada partido también ves tus números y, si tu entrenador la muestra, la alineación.
+      </p>
+    ),
+  },
   AVISOS_IPHONE,
   AVISOS_ANDROID,
   OLVIDE,
   {
     q: "¿Quién ve mis datos?",
     a: (
-      <p>
-        Solo tu entrenador y su cuerpo técnico. Tus compañeras no ven tus respuestas. Más detalles en la{" "}
-        <Link to="/privacidad" className="font-semibold underline">política de privacidad</Link>.
-      </p>
+      <>
+        <p>
+          Tus respuestas, tu wellness, tu RPE y tus lesiones solo los ven tu entrenador y el cuerpo técnico de tu categoría.
+          Tus compañeras no.
+        </p>
+        <p className="mt-2">
+          Lo único que pueden ver tus compañeras es la <B>alineación</B> de un partido, si tu entrenador decide mostrarla:
+          ahí sale tu primer nombre, la inicial de tu apellido, tu número y tu posición. Más detalles en la{" "}
+          <Link to="/privacidad" className="font-semibold underline">política de privacidad</Link>.
+        </p>
+      </>
     ),
   },
 ];
