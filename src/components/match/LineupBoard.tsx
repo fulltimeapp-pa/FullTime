@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Eye, EyeOff, Wand2 } from "lucide-react";
@@ -30,7 +31,11 @@ export function LineupBoard({ callUpId, settings, titulares, ensureReport, onCha
   const size: FieldSize = settings?.field_size ?? 11;
   const formation = settings?.formation ?? defaultFormation(size);
   const published = settings?.lineup_published ?? false;
-  const spots = resolveSpots(formation, titulares);
+  // Lugar recién movido: se muestra al tiro mientras se guarda (si no, la ficha vuelve un instante atrás).
+  const [moved, setMoved] = useState<Record<string, Spot>>({});
+  const posKey = titulares.map((t) => `${t.id}:${t.x}:${t.y}`).join("|");
+  useEffect(() => setMoved({}), [posKey]);
+  const spots = { ...resolveSpots(formation, titulares), ...moved };
   const sinLugar = titulares.filter((t) => !spots[t.id]).length;
 
   const mut = useMutation({
@@ -49,7 +54,7 @@ export function LineupBoard({ callUpId, settings, titulares, ensureReport, onCha
       if (job.settings?.lineup_published === false) toast.success("La alineación quedó solo para el cuerpo técnico");
       onChanged();
     },
-    onError: (e) => { toast.error(friendlyError(e, "No pudimos guardar la alineación. Vuelve a intentarlo.")); onChanged(); },
+    onError: (e) => { setMoved({}); toast.error(friendlyError(e, "No pudimos guardar la alineación. Vuelve a intentarlo.")); onChanged(); },
   });
 
   const chip = (on: boolean) => `rounded-full border-2 px-3 py-1.5 text-sm font-semibold ${on ? "border-ink bg-lime" : "border-ink/20 bg-paper"}`;
@@ -91,7 +96,7 @@ export function LineupBoard({ callUpId, settings, titulares, ensureReport, onCha
           <div className="mt-4">
             <Pitch
               players={titulares.filter((t) => spots[t.id]).map((t) => ({ id: t.id, name: shortName(t.name), jersey: t.jersey, ...spots[t.id] }))}
-              onMove={(id, spot) => mut.mutate({ move: { id, spot } })}
+              onMove={(id, spot) => { setMoved((m) => ({ ...m, [id]: spot })); mut.mutate({ move: { id, spot } }); }}
             />
           </div>
           <div className="mt-3 flex justify-center">

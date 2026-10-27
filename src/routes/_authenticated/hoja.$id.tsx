@@ -144,10 +144,14 @@ function HojaDePartido() {
 
   const sheet = sheetQ.data;
   const duration = sheet?.report?.duration_min ?? form.duration_min;
-  const summary = summarizeMatch(duration, sheet?.lineup ?? [], sheet?.events ?? []);
   const roleOf = (pid: string) => sheet?.lineup.find((l) => l.player_id === pid)?.role ?? null;
   const disponibles = players.filter((p) => p.status !== "declined");
   const titulares = disponibles.filter((p) => roleOf(p.id) === "titular").length;
+  // Estaba en la alineación y después respondió "No puedo": sigue guardada y hay que avisar.
+  const noVanEnAlineacion = players.filter((p) => p.status === "declined" && roleOf(p.id));
+  // Los minutos se calculan solo con las que siguen convocadas.
+  const idsDisponibles = new Set(disponibles.map((p) => p.id));
+  const summary = summarizeMatch(duration, (sheet?.lineup ?? []).filter((l) => idsDisponibles.has(l.player_id)), sheet?.events ?? []);
 
   if (cuQ.isLoading || isStaffQ.isLoading) return <StaffShell><p className="p-10 text-ink/50">Cargando…</p></StaffShell>;
   if (cuQ.isError) return <StaffShell><p className="p-10 font-semibold text-pa-red">{friendlyError(cuQ.error, "No pudimos cargar el partido.")}</p></StaffShell>;
@@ -278,6 +282,17 @@ function HojaDePartido() {
               <h2 className="font-display text-xl font-bold">2. Titulares y suplentes</h2>
               <span className="text-sm font-semibold text-ink/60">{titulares} titulares</span>
             </div>
+            {noVanEnAlineacion.map((p) => (
+              <div key={p.id} className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border-2 border-pa-red/60 bg-pa-red/5 px-3 py-2 text-sm">
+                <span className="min-w-0 flex-1">
+                  ⚠️ <b>{p.name}</b> estaba de {roleOf(p.id)} pero respondió que <b>no va</b>.
+                </span>
+                <button type="button" disabled={lineupMut.isPending} onClick={() => lineupMut.mutate({ playerId: p.id, role: null })}
+                  className="btn-primary !py-1.5 !px-3 !text-sm">
+                  Sacarla de la alineación
+                </button>
+              </div>
+            ))}
             {playersQ.isLoading ? (
               <p className="mt-3 text-sm text-ink/50">Cargando…</p>
             ) : disponibles.length === 0 ? (

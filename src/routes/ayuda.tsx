@@ -34,7 +34,7 @@ const AVISOS_IPHONE: Pregunta = {
       <ol className="mt-2 list-decimal space-y-1 pl-5">
         <li>Abre FullTime en <B>Safari</B> (no en Chrome ni dentro de WhatsApp).</li>
         <li>Toca <B>Compartir</B> (el cuadrito con la flecha) y elige <B>"Agregar a inicio"</B>.</li>
-        <li>Abre FullTime desde el ícono nuevo y toca <B>"Activar avisos"</B>.</li>
+        <li>Abre FullTime desde el ícono nuevo y toca <B>"Activar notificaciones"</B>.</li>
       </ol>
       <p className="mt-2">Necesitas iOS 16.4 o más nuevo (Ajustes → General → Información).</p>
     </>
@@ -45,7 +45,7 @@ const AVISOS_ANDROID: Pregunta = {
   q: "Uso Android y no me llegan los avisos",
   a: (
     <>
-      <p>Abre FullTime en <B>Chrome</B> y toca <B>"Activar avisos"</B> en tu pantalla de inicio de FullTime.</p>
+      <p>Abre FullTime en <B>Chrome</B> y toca <B>"Activar notificaciones"</B> en tu pantalla de inicio de FullTime.</p>
       <p className="mt-2">
         Si alguna vez tocaste "Bloquear": toca el candado junto a la dirección de la página → <B>Permisos</B> →{" "}
         <B>Notificaciones</B> → <B>Permitir</B>. Revisa también que el ahorro de batería no esté cerrando Chrome.

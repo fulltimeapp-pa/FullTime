@@ -92,7 +92,7 @@ Cómo leer los guiones: **Pantalla** es lo que haces; **Dices** es lo que hablas
 | Abres el link de invitación desde WhatsApp → se abre en Safari. | "Tu entrenador te mandó un link. Ábrelo." |
 | Creas tu contraseña. | "Creas tu contraseña y ya estás en tu equipo." |
 | **Compartir** → **Agregar a inicio**. | "Ahora lo más importante: agrégala a tu pantalla de inicio." |
-| Abres FullTime desde el ícono → **Activar avisos** → Permitir. | "Ábrela desde el ícono y activa los avisos. Así te llega cada convocatoria." |
+| Abres FullTime desde el ícono → **Activar notificaciones** → Permitir. | "Ábrela desde el ícono y activa los avisos. Así te llega cada convocatoria." |
 
 ### B. Confirma en dos toques (30 s)
 | Pantalla | Dices |

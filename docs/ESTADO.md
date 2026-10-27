@@ -209,7 +209,15 @@ Reemplaza la Tarea 1.
   recuerde sola a las que no responden. Ángulo: no competir en funciones; preguntarle cuántas le
   confirman de verdad y mostrar "la abrió / no la ha abierto" y el recordatorio.
 - Ningún club respondió por correo (Deportivo Chiriquí, UMECIT) al 27-oct.
-- Carlos: mensaje listo para el 27-oct con la guía "Monta tu club completo" adjunta.
+- Carlos: el 27-oct Bárbara le mandó el mensaje con la guía; dijo que la revisa después de entrenar.
+  Conversación "esperando" en el Inbox, próximo paso el 30-oct (SQL suelto `hq-carlos.sql`).
+- Trabajo del 27-oct mientras ella estudia (guardado, SIN publicar hasta que lo revise):
+  · Hoja: aviso "estaba de titular pero respondió que no va" con botón para sacarla (antes seguía
+    contando minutos y saliendo en la alineación publicada). La cancha ya no salta al soltar a una jugadora.
+  · Ayuda y guiones decían "Activar avisos"; el botón real dice "Activar notificaciones". Corregido.
+  · Demo al día: `supabase/demo/demo-reciente.sql` (se arma con la fecha del día; probado dos veces
+    seguidas en una base de prueba) y `docs/DEMO.md` reescrito con el ángulo "¿cuántas te confirman?".
+  · Guía de la llamada para montar un equipo: `docs/llamada-montaje.md`.
 
 ### En duda y sancionada (20-oct, elegido por Bárbara de la revisión de goTeam)
 - Además de "lesionada", una jugadora puede estar **en duda** (molestia, enferma, viaje) o
