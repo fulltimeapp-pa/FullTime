@@ -1,6 +1,6 @@
 # Estado de FullTime
 
-Última actualización: 20 de octubre de 2026.
+Última actualización: 27 de octubre de 2026.
 
 **Resumen:** las 8 tareas del plan están hechas y publicadas en https://fulltimeapp.vercel.app.
 
@@ -192,6 +192,24 @@ Reemplaza la Tarea 1.
   (migración `20261010150000_formularios_wellness_rpe.sql`). Probado en PGlite (16 pruebas). Las
   respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
 - Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
+
+### Modo escuela hasta el 13-nov (27-oct, pedido de Bárbara)
+- Bárbara está a full con la escuela y los entrenos hasta el **13 de noviembre**. Hasta esa fecha:
+  poco trabajo, cosas chicas de la app sin migraciones, y publicar solo cuando ella lo revise.
+  Desde el 16-nov se le puede poner bastante trabajo.
+- HQ (SQL suelto `hq-modo-escuela.sql`): quedaron 3 tareas suaves (Carlos hoy, David el 29-oct,
+  probar alineación y duda/sanción el 3-nov) y las otras 9 pendientes pasaron al 16-nov en adelante
+  (3 por día hábil). El contenido de Instagram sigue como estaba (programado en Meta).
+- **David Faroh**, entrenador del femenino de Panamá City (llegó por Melanny Valencia). La llamada
+  del 23-oct se pospuso por su viaje; el 27-oct Bárbara le escribió por WhatsApp para reagendar.
+  CRM: Panamá City en "Demo agendada", próximo paso 30-oct, conversación "esperando" en el Inbox
+  (SQL suelto `hq-david.sql`).
+- **Gesdep** (lo usa David): su app Gesdep Connect SÍ deja confirmar convocatorias (con clave que da
+  el club y solo desde la app de la tienda). No se encontró que muestre quién abrió el aviso ni que
+  recuerde sola a las que no responden. Ángulo: no competir en funciones; preguntarle cuántas le
+  confirman de verdad y mostrar "la abrió / no la ha abierto" y el recordatorio.
+- Ningún club respondió por correo (Deportivo Chiriquí, UMECIT) al 27-oct.
+- Carlos: mensaje listo para el 27-oct con la guía "Monta tu club completo" adjunta.
 
 ### En duda y sancionada (20-oct, elegido por Bárbara de la revisión de goTeam)
 - Además de "lesionada", una jugadora puede estar **en duda** (molestia, enferma, viaje) o
