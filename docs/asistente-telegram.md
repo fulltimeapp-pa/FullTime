@@ -37,6 +37,17 @@ Busca **@userinfobot**, escríbele cualquier cosa y te responde con tu **Id** (u
 En el HQ crea una tarea con fecha de **hoy** y una **hora dentro de 40 minutos**. En unos 15 minutos te
 llega el aviso. El resumen llega mañana desde las 7:00.
 
+## Hablarle a Jarvis (desde el 9-nov)
+Escríbele en Telegram **día + hora (opcional) + qué hacer** y crea la tarea en el HQ:
+- `hoy 5pm Llamar a Juan` · `mañana Preparar el post` · `viernes 3:30pm Meet con David` · `20/11 Escribirle a Víctor`
+- Días: hoy, mañana, pasado mañana, lunes a domingo (el próximo) o una fecha como 20/11.
+- Hora: 5pm, 3:30pm, 15:00 o "a las 3". Sin am/pm, de 1 a 6 se entiende de la tarde.
+- `/hoy`: te manda lo de hoy en el momento. `/ayuda`: te recuerda cómo escribirle.
+
+En el resumen, en los avisos y al crear una tarea salen botones: **✅** la marca hecha y **➡️ Mañana** la pasa
+al día siguiente. Solo le hace caso a tu cuenta; si otra persona le escribe, la ignora.
+Sin IA: si no entiende, te explica el formato. No cuesta nada.
+
 ## Si algo falla
 - No llega nada: revisa que le tocaste **Iniciar** al bot y que hiciste el **Redeploy**.
 - Si alguien más pudo ver la clave del bot: en @BotFather → `/revoke` te da una nueva; cámbiala en Vercel

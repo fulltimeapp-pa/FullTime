@@ -58,6 +58,7 @@ import { Route as AuthenticatedHqProyectosRouteImport } from './routes/_authenti
 import { Route as AuthenticatedHqReunionesRouteImport } from './routes/_authenticated/hq.reuniones'
 import { Route as AuthenticatedHqTareasRouteImport } from './routes/_authenticated/hq.tareas'
 import { Route as ApiPublicCronRemindersRouteImport } from './routes/api/public/cron/reminders'
+import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -321,6 +322,12 @@ const ApiPublicCronRemindersRoute = ApiPublicCronRemindersRouteImport.update({
   path: '/api/public/cron/reminders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTelegramWebhookRoute =
+  ApiPublicTelegramWebhookRouteImport.update({
+    id: '/api/public/telegram/webhook',
+    path: '/api/public/telegram/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -371,6 +378,7 @@ export interface FileRoutesByFullPath {
   '/entrenos/': typeof AuthenticatedEntrenosIndexRoute
   '/hq/': typeof AuthenticatedHqIndexRoute
   '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -418,6 +426,7 @@ export interface FileRoutesByTo {
   '/entrenos': typeof AuthenticatedEntrenosIndexRoute
   '/hq': typeof AuthenticatedHqIndexRoute
   '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -470,6 +479,7 @@ export interface FileRoutesById {
   '/_authenticated/entrenos/': typeof AuthenticatedEntrenosIndexRoute
   '/_authenticated/hq/': typeof AuthenticatedHqIndexRoute
   '/api/public/cron/reminders': typeof ApiPublicCronRemindersRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -522,6 +532,7 @@ export interface FileRouteTypes {
     | '/entrenos/'
     | '/hq/'
     | '/api/public/cron/reminders'
+    | '/api/public/telegram/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -569,6 +580,7 @@ export interface FileRouteTypes {
     | '/entrenos'
     | '/hq'
     | '/api/public/cron/reminders'
+    | '/api/public/telegram/webhook'
   id:
     | '__root__'
     | '/'
@@ -620,6 +632,7 @@ export interface FileRouteTypes {
     | '/_authenticated/entrenos/'
     | '/_authenticated/hq/'
     | '/api/public/cron/reminders'
+    | '/api/public/telegram/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -632,6 +645,7 @@ export interface RootRouteChildren {
   UnirseEquipoTokenRoute: typeof UnirseEquipoTokenRoute
   UnirseTokenRoute: typeof UnirseTokenRoute
   ApiPublicCronRemindersRoute: typeof ApiPublicCronRemindersRoute
+  ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -979,6 +993,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/telegram/webhook': {
+      id: '/api/public/telegram/webhook'
+      path: '/api/public/telegram/webhook'
+      fullPath: '/api/public/telegram/webhook'
+      preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1119,6 +1140,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnirseEquipoTokenRoute: UnirseEquipoTokenRoute,
   UnirseTokenRoute: UnirseTokenRoute,
   ApiPublicCronRemindersRoute: ApiPublicCronRemindersRoute,
+  ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

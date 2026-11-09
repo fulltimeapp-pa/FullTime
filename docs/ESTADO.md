@@ -1,6 +1,6 @@
 # Estado de FullTime
 
-Última actualización: 8 de noviembre de 2026.
+Última actualización: 9 de noviembre de 2026.
 
 **Resumen:** las 8 tareas del plan están hechas y publicadas en https://fulltimeapp.vercel.app.
 
@@ -223,6 +223,15 @@ Reemplaza la Tarea 1.
   imágenes, con tope de créditos por tarea. Decisión de Bárbara: esperar al curso (semana del 23-nov) y
   después decidir; quizá pagarlo desde Grupo Kosupa (empresa de sus papás) y usarlo para los dos
   negocios, con todo bien separado.
+
+**Jarvis escucha y tiene botones (9-nov, pedido de Bárbara):** se le escribe "día + hora + qué hacer"
+(`mañana 3pm Llamar a Juan`) y crea la tarea en el HQ; `/hoy` manda el resumen al momento. El resumen, los
+avisos y las confirmaciones traen botones ✅ (hecha) y ➡️ (a mañana). Sin IA ni costo. Telegram manda todo a
+`/api/public/telegram/webhook`, que exige una contraseña sacada de la clave del bot (sin variable nueva) y
+solo obedece a `TELEGRAM_CHAT_ID`. El webhook lo registra solo el reloj (cada 15 min) usando `VITE_SITE_URL`.
+Código: `src/lib/hq-jarvis.server.ts`. Sin migración. Probado: 33 pruebas (formatos de fecha y hora,
+botones, que ignore a otras personas, contraseña) y la ruta rechaza pedidos sin contraseña.
+El 9-nov Jarvis mandó solo el resumen de las 7:00 y el aviso de una reunión a las 3:30 p. m.
 
 **HQ limpio (8-nov, SQL suelto `hq-limpieza.sql`):** 16 tareas pendientes pasaron a "hechas", 19 clubes
 quedaron sin fecha de próximo paso (notas intactas) y 3 conversaciones en espera se cerraron. Quedan 3

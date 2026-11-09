@@ -117,16 +117,73 @@ export const enVentanaResumen = (now: Date) => {
   return h >= 7 && h < 10;
 };
 
-export async function sendTelegram(text: string): Promise<void> {
+export type Boton = { text: string; callback_data: string };
+export type Teclado = Boton[][];
+
+/** Llama a la API de Telegram con la clave del bot. */
+export async function telegram(method: string, body: Record<string, unknown>): Promise<any> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chat = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chat) throw new Error("Falta configurar Telegram");
-  const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  if (!token) throw new Error("Falta configurar Telegram");
+  const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chat, text: text.slice(0, 4000), disable_web_page_preview: true }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`Telegram respondió ${res.status}`);
+  return res.json();
+}
+
+export async function sendTelegram(text: string, teclado?: Teclado): Promise<void> {
+  const chat = process.env.TELEGRAM_CHAT_ID;
+  if (!process.env.TELEGRAM_BOT_TOKEN || !chat) throw new Error("Falta configurar Telegram");
+  await telegram("sendMessage", {
+    chat_id: chat,
+    text: text.slice(0, 4000),
+    disable_web_page_preview: true,
+    ...(teclado?.length ? { reply_markup: { inline_keyboard: teclado } } : {}),
+  });
+}
+
+const corto = (t: string, n = 22) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
+
+/** Botones "✅ Hecha" y "➡️ Mañana" por tarea (máximo 8 filas). */
+export function botonesTareas(tasks: Pick<AsistTask, "id" | "title">[]): Teclado {
+  return tasks.slice(0, MAX_ITEMS).map((t) => [
+    { text: `✅ ${corto(t.title)}`, callback_data: `h:${t.id}` },
+    { text: "➡️ Mañana", callback_data: `m:${t.id}` },
+  ]);
+}
+
+/** Las tareas del resumen, en el mismo orden en que salen en el texto. */
+export function tareasDelResumen(tasks: AsistTask[], today: string): AsistTask[] {
+  const pend = tasks.filter((t) => t.due_date);
+  return [
+    ...pend.filter((t) => t.due_date === today && t.due_time).sort((a, b) => a.due_time!.localeCompare(b.due_time!)),
+    ...pend.filter((t) => t.due_date === today && !t.due_time).sort((a, b) => Number(b.urgent) - Number(a.urgent)),
+    ...pend.filter((t) => t.due_date! < today).sort((a, b) => Number(b.urgent) - Number(a.urgent) || a.due_date!.localeCompare(b.due_date!)),
+  ];
+}
+
+/** Dirección pública del webhook (adonde Telegram manda lo que le escribes a Jarvis). */
+export const webhookUrl = () => {
+  const site = (process.env.VITE_SITE_URL ?? "").replace(/\/+$/, "");
+  return site ? `${site}/api/public/telegram/webhook` : null;
+};
+
+/** Contraseña que Telegram manda en cada mensaje al webhook. Sale de la clave del bot (no es otra variable). */
+export async function webhookSecret(): Promise<string> {
+  const data = new TextEncoder().encode(`fulltime-jarvis:${process.env.TELEGRAM_BOT_TOKEN ?? ""}`);
+  const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", data));
+  return Array.from(hash, (b) => b.toString(16).padStart(2, "0")).join("").slice(0, 48);
+}
+
+/** Deja registrado el webhook en Telegram si todavía no está (lo revisa el reloj). */
+async function asegurarWebhook(): Promise<void> {
+  const url = webhookUrl();
+  if (!url) return;
+  const info = await telegram("getWebhookInfo", {});
+  if (info?.result?.url === url) return;
+  await telegram("setWebhook", { url, secret_token: await webhookSecret(), allowed_updates: ["message", "callback_query"] });
 }
 
 type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
@@ -143,21 +200,50 @@ async function desmarcar(admin: any, kind: "resumen" | "aviso", ref: string) {
   await admin.from("hq_assistant_log").delete().eq("kind", kind).eq("ref", ref);
 }
 
+/** Tareas pendientes hasta hoy (incluye atrasadas). */
+export async function leerTareas(db: any, today: string): Promise<AsistTask[]> {
+  const { data, error } = await db
+    .from("hq_tasks")
+    .select("id, title, due_date, due_time, urgent, prospects(name)")
+    .is("done_at", null)
+    .lte("due_date", today);
+  if (error) throw error;
+  return (data ?? []).map((r: any) => ({
+    id: r.id, title: r.title, due_date: r.due_date, due_time: r.due_time, urgent: !!r.urgent, prospect: r.prospects?.name ?? null,
+  }));
+}
+
+/** Texto y botones del resumen de hoy. */
+export async function armarResumen(db: any, today: string, tasks: AsistTask[]): Promise<{ texto: string; teclado: Teclado }> {
+  const [p, c, tpl] = await Promise.all([
+    db.from("prospects").select("name, team, next_step, next_date, stage").lte("next_date", today),
+    db.from("hq_conversations").select("person, last_contact, status").eq("status", "esperando"),
+    db.from("hq_templates").select("name, body").ilike("name", "seguimiento%").limit(1),
+  ]);
+  if (p.error) throw p.error;
+  if (c.error) throw c.error;
+  const site = (process.env.VITE_SITE_URL ?? "").replace(/\/+$/, "");
+  const texto = buildResumen({
+    today, tasks, prospects: p.data ?? [], conversations: c.data ?? [],
+    seguimiento: tpl.data?.[0]?.body ?? null, hqUrl: site ? `${site}/hq` : null,
+  });
+  return { texto, teclado: botonesTareas(tareasDelResumen(tasks, today)) };
+}
+
 /** Lo corre el reloj. Devuelve qué mandó (o por qué no). */
 export async function runHqAsistente(admin: Admin, now: Date = new Date()): Promise<{ resumen: boolean; avisos: number; estado: string }> {
   if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) return { resumen: false, avisos: 0, estado: "sin_configurar" };
   const db = admin as any;
   const today = fechaPA(now);
 
-  const { data: tRows, error: tErr } = await db
-    .from("hq_tasks")
-    .select("id, title, due_date, due_time, urgent, prospects(name)")
-    .is("done_at", null)
-    .lte("due_date", today);
-  if (tErr) throw tErr;
-  const tasks: AsistTask[] = (tRows ?? []).map((r: any) => ({
-    id: r.id, title: r.title, due_date: r.due_date, due_time: r.due_time, urgent: !!r.urgent, prospect: r.prospects?.name ?? null,
-  }));
+  // Que Telegram sepa adónde mandar lo que le escribes a Jarvis. Si falla, igual sigue con los avisos.
+  try {
+    await asegurarWebhook();
+  } catch (e) {
+    console.error("Webhook de Jarvis:", e);
+  }
+
+  const tasks = await leerTareas(db, today);
 
   // Avisos 1 hora antes. Primero se marca (así dos relojes no lo mandan dos veces); si Telegram
   // falla, se desmarca para reintentar en 15 minutos.
@@ -165,7 +251,7 @@ export async function runHqAsistente(admin: Admin, now: Date = new Date()): Prom
   for (const a of avisosPendientes(tasks, now)) {
     if (!(await marcar(db, "aviso", a.ref))) continue;
     try {
-      await sendTelegram(buildAviso(a.task, a.minutos));
+      await sendTelegram(buildAviso(a.task, a.minutos), botonesTareas([a.task]));
       avisos++;
     } catch (e) {
       await desmarcar(db, "aviso", a.ref);
@@ -176,18 +262,8 @@ export async function runHqAsistente(admin: Admin, now: Date = new Date()): Prom
   let resumen = false;
   if (enVentanaResumen(now) && (await marcar(db, "resumen", today))) {
     try {
-      const [p, c, tpl] = await Promise.all([
-        db.from("prospects").select("name, team, next_step, next_date, stage").lte("next_date", today),
-        db.from("hq_conversations").select("person, last_contact, status").eq("status", "esperando"),
-        db.from("hq_templates").select("name, body").ilike("name", "seguimiento%").limit(1),
-      ]);
-      if (p.error) throw p.error;
-      if (c.error) throw c.error;
-      const site = (process.env.VITE_SITE_URL ?? "").replace(/\/+$/, "");
-      await sendTelegram(buildResumen({
-        today, tasks, prospects: p.data ?? [], conversations: c.data ?? [],
-        seguimiento: tpl.data?.[0]?.body ?? null, hqUrl: site ? `${site}/hq` : null,
-      }));
+      const r = await armarResumen(db, today, tasks);
+      await sendTelegram(r.texto, r.teclado);
       resumen = true;
     } catch (e) {
       await desmarcar(db, "resumen", today);
