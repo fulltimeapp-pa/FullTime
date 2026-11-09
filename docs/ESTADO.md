@@ -218,6 +218,11 @@ Reemplaza la Tarea 1.
 - Para revisar si corrió: en Supabase, `net._http_response` guarda la respuesta del reloj, con
   `"asistente": "resumen:si/no avisos:N"`, `sin_configurar` o `error`; `hq_assistant_log` registra lo enviado.
 - Los demás agentes (etapa 2) llevarán nombres de personajes de Marvel, como Jarvis (pedido de Bárbara).
+- **Magnific (8-nov):** desde abril de 2026 es el nuevo nombre de Freepik (imágenes y video con IA + banco
+  de recursos). Premium ~$14.50/mes pagando el año. Ederland lo usa conectado a Claude para un agente de
+  imágenes, con tope de créditos por tarea. Decisión de Bárbara: esperar al curso (semana del 23-nov) y
+  después decidir; quizá pagarlo desde Grupo Kosupa (empresa de sus papás) y usarlo para los dos
+  negocios, con todo bien separado.
 
 **HQ limpio (8-nov, SQL suelto `hq-limpieza.sql`):** 16 tareas pendientes pasaron a "hechas", 19 clubes
 quedaron sin fecha de próximo paso (notas intactas) y 3 conversaciones en espera se cerraron. Quedan 3
