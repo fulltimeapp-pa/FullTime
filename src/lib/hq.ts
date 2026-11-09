@@ -155,6 +155,7 @@ export type HqTask = {
   created_at: string;
   title: string;
   due_date: string | null; // YYYY-MM-DD
+  due_time?: string | null; // "15:00:00" (opcional; para llamadas y reuniones, avisa el asistente)
   urgent: boolean;
   prospect_id: string | null;
   project_id: string | null;
@@ -164,6 +165,7 @@ export type HqTask = {
 
 /** project_id y position son opcionales: si no vienen, al editar no se tocan. */
 export type HqTaskInput = Pick<HqTask, "title" | "due_date" | "urgent" | "prospect_id"> & {
+  due_time?: string | null;
   project_id?: string | null;
   position?: number | null;
 };
@@ -178,6 +180,8 @@ export async function listTasks(): Promise<HqTask[]> {
 
 export async function saveTask(input: HqTaskInput, id?: string): Promise<void> {
   const clean = { ...input, title: input.title.trim(), due_date: input.due_date || null };
+  // La hora solo tiene sentido con fecha. Si no viene, no se toca.
+  if ("due_time" in input) clean.due_time = clean.due_date ? input.due_time || null : null;
   if (!clean.title) throw new Error("Escribe qué tienes que hacer.");
   const { error } = await (id ? tasks().update(clean).eq("id", id) : tasks().insert(clean));
   if (error) throw error;

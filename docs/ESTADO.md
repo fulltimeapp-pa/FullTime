@@ -1,6 +1,6 @@
 # Estado de FullTime
 
-Última actualización: 27 de octubre de 2026.
+Última actualización: 8 de noviembre de 2026.
 
 **Resumen:** las 8 tareas del plan están hechas y publicadas en https://fulltimeapp.vercel.app.
 
@@ -192,6 +192,32 @@ Reemplaza la Tarea 1.
   (migración `20261010150000_formularios_wellness_rpe.sql`). Probado en PGlite (16 pruebas). Las
   respuestas viejas (columnas wellness_* y rpe) se siguen mostrando.
 - Falta: aplicar la migración, probarlo en la web real, parte 2 (recordatorios) y parte 3 (historial).
+
+### Asistente del HQ por Telegram, etapa 1 (8-nov, pedido de Bárbara)
+- Idea de Bárbara a partir de un video de Ederland ("Equipo de agentes de IA", repo
+  `ederland/Agentes_IA_3D`, MIT): tablero con humanos y agentes, coordinador por Telegram, "nada se
+  publica sin aprobación". Ese proyecto usa Firebase y solo trabaja con la PC prendida; se decidió
+  construirlo dentro del HQ, por etapas y con $0. Bárbara trabaja sola. Se anotó al curso gratis de
+  Ederland (semana del 23-nov): la etapa 2 (agentes con IA de redes y textos) espera a eso.
+- Bárbara quiere personajes estilo Avengers en bloques: se le avisó del riesgo de marca (Marvel/LEGO);
+  propuesta: personajes inspirados, nombres de pila y estilo propio. Queda para la etapa 3.
+- Etapa 1 hecha (guardada, SIN publicar): resumen diario a las 7:00 por Telegram (tareas de hoy y
+  atrasadas, llamadas con hora, clubes con próximo paso, conversaciones "esperando" 3+ días con la
+  plantilla de seguimiento llena) y aviso 1 hora antes de cada tarea con hora. Sin IA, reglas fijas.
+  Corre dentro del reloj de recordatorios (cada 15 min); si falla, no frena los recordatorios.
+- Migración `20261108120000_hq_asistente_telegram.sql`: `hq_tasks.due_time` y tabla `hq_assistant_log`
+  (solo la dueña la lee; solo el servidor escribe). Variables nuevas: `TELEGRAM_BOT_TOKEN` (secreta) y
+  `TELEGRAM_CHAT_ID`. Sin ellas no hace nada. Código: `src/lib/hq-asistente.server.ts`; hora en el
+  formulario de Tareas. Pasos para activarlo: `docs/asistente-telegram.md`.
+- Probado: textos del resumen, avisos a la hora correcta, nunca repite, reintenta si Telegram falla, y
+  pruebas de acceso (191 en `~/fulltime-pgtest`). No probado: el formulario del HQ con sesión y un
+  mensaje real a Telegram (falta el bot).
+
+**Contactos al 8-nov:** Juan (UMECIT): la llamada del 30-oct no se hizo, se le pasó. Víctor Suárez
+(Suárez/Plaza): ya tienen su propia app desde hace 4 meses; quiere ayudar. Aliado, no cliente;
+escribirle después del 20-nov. Carlos (Inter): dijo que sí a montar el equipo, pero están en
+semifinales (vuelta el 11-nov). David (Panamá City): la llamada del 13 no se hizo; se le propuso un
+Meet entre el 16 y el 19, de 12 a 5 p. m. Exámenes de Bárbara del 16 al 19-nov.
 
 ### Modo escuela hasta el 13-nov (27-oct, pedido de Bárbara)
 - Bárbara está a full con la escuela y los entrenos hasta el **13 de noviembre**. Hasta esa fecha:

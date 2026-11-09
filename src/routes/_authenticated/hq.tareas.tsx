@@ -68,7 +68,7 @@ function HqTareas() {
             {t.title}
           </p>
           <p className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-ink/60">
-            {t.due_date && <span className={late ? "font-semibold text-pa-red" : ""}>{formatDayEs(t.due_date)}</span>}
+            {t.due_date && <span className={late ? "font-semibold text-pa-red" : ""}>{formatDayEs(t.due_date)}{t.due_time ? ` · ${horaCorta(t.due_time)}` : ""}</span>}
             {nombre(t.prospect_id) && <span>· {nombre(t.prospect_id)}</span>}
             {proyecto(t.project_id) && <span className="rounded-full bg-ink/10 px-1.5 font-semibold">📁 {proyecto(t.project_id)}</span>}
           </p>
@@ -142,11 +142,17 @@ function HqTareas() {
 
 const inputCls = "mt-1 w-full rounded-xl border-2 border-ink/20 focus:border-ink bg-paper px-3 py-2.5 outline-none font-normal";
 
+/** "15:00:00" → "3:00 p. m." */
+function horaCorta(t: string): string {
+  const [h, m] = t.split(":").map(Number);
+  return `${h % 12 === 0 ? 12 : h % 12}:${String(m).padStart(2, "0")} ${h < 12 ? "a. m." : "p. m."}`;
+}
+
 function TaskModal({ task, prospects, projects, onClose, onSaved }: {
   task: HqTask; prospects: Prospect[]; projects: HqProject[]; onClose: () => void; onSaved: () => void;
 }) {
   const [v, setV] = useState<HqTaskInput>({
-    title: task.title, due_date: task.due_date, urgent: task.urgent, prospect_id: task.prospect_id, project_id: task.project_id,
+    title: task.title, due_date: task.due_date, due_time: task.due_time?.slice(0, 5) ?? null, urgent: task.urgent, prospect_id: task.prospect_id, project_id: task.project_id,
   });
   const set = (patch: Partial<HqTaskInput>) => setV((prev) => ({ ...prev, ...patch }));
   const [error, setError] = useState("");
@@ -181,11 +187,17 @@ function TaskModal({ task, prospects, projects, onClose, onSaved }: {
           <div>Para cuándo
             <DateField value={v.due_date ?? ""} onChange={(d) => set({ due_date: d || null })} ariaLabel="Para cuándo" className={inputCls} />
             {v.due_date && (
-              <button type="button" onClick={() => set({ due_date: null })} className="mt-1 text-xs font-semibold underline text-ink/60">
+              <button type="button" onClick={() => set({ due_date: null, due_time: null })} className="mt-1 text-xs font-semibold underline text-ink/60">
                 Quitar fecha
               </button>
             )}
           </div>
+          {v.due_date && (
+            <label className="block">Hora <span className="font-normal text-ink/50">(opcional, para llamadas y reuniones)</span>
+              <input type="time" className={inputCls} value={v.due_time ?? ""} onChange={(e) => set({ due_time: e.target.value || null })} />
+              <span className="mt-1 block text-xs font-normal text-ink/50">Con hora, el asistente te avisa por Telegram 1 hora antes.</span>
+            </label>
+          )}
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={v.urgent} onChange={(e) => set({ urgent: e.target.checked })} className="h-4 w-4" />
             Urgente 🔥

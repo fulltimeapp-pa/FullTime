@@ -260,6 +260,7 @@ export async function runReminders(now: Date = new Date()): Promise<{
   night_sent: number;
   wellness_sent: number;
   rpe_sent: number;
+  asistente: string;
 }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const admin = supabaseAdmin as Admin;
@@ -336,5 +337,16 @@ export async function runReminders(now: Date = new Date()): Promise<{
     buildRpeMessage,
   );
 
-  return { soon_sent, night_sent, wellness_sent, rpe_sent };
+  // (E) Asistente del HQ por Telegram (solo para la dueña). Si falla, no frena los recordatorios.
+  let asistente = "ok";
+  try {
+    const { runHqAsistente } = await import("./hq-asistente.server");
+    const r = await runHqAsistente(admin, now);
+    asistente = r.estado === "ok" ? `resumen:${r.resumen ? "si" : "no"} avisos:${r.avisos}` : r.estado;
+  } catch (e) {
+    console.error("Asistente del HQ:", e);
+    asistente = "error";
+  }
+
+  return { soon_sent, night_sent, wellness_sent, rpe_sent, asistente };
 }
