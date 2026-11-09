@@ -210,8 +210,19 @@ Reemplaza la Tarea 1.
   `TELEGRAM_CHAT_ID`. Sin ellas no hace nada. Código: `src/lib/hq-asistente.server.ts`; hora en el
   formulario de Tareas. Pasos para activarlo: `docs/asistente-telegram.md`.
 - Probado: textos del resumen, avisos a la hora correcta, nunca repite, reintenta si Telegram falla, y
-  pruebas de acceso (191 en `~/fulltime-pgtest`). No probado: el formulario del HQ con sesión y un
-  mensaje real a Telegram (falta el bot).
+  pruebas de acceso (191 en `~/fulltime-pgtest`).
+- **Activado el 8-nov (publicado 969fcc4).** El bot se llama **Jarvis** (`@jarvis_fulltime_bot`), en la
+  cuenta personal de Telegram de Bárbara. Prueba real: tarea con hora 9:08 p. m. → aviso enviado a las
+  8:45 p. m. y recibido. La primera vuelta (8:30) dio "sin_configurar" porque el Redeploy no había
+  terminado. Bárbara pegó la clave por error en el chat: se revocó con /revoke y se usó una nueva.
+- Para revisar si corrió: en Supabase, `net._http_response` guarda la respuesta del reloj, con
+  `"asistente": "resumen:si/no avisos:N"`, `sin_configurar` o `error`; `hq_assistant_log` registra lo enviado.
+- Los demás agentes (etapa 2) llevarán nombres de personajes de Marvel, como Jarvis (pedido de Bárbara).
+
+**HQ limpio (8-nov, SQL suelto `hq-limpieza.sql`):** 16 tareas pendientes pasaron a "hechas", 19 clubes
+quedaron sin fecha de próximo paso (notas intactas) y 3 conversaciones en espera se cerraron. Quedan 3
+tareas: seguimiento a David Faroh (9-nov), a Juan de UMECIT (11-nov) y escribirle a Víctor Suárez (20-nov).
+Desde ahí se agregan cosas de a poco.
 
 **Contactos al 8-nov:** Juan (UMECIT): la llamada del 30-oct no se hizo, se le pasó. Víctor Suárez
 (Suárez/Plaza): ya tienen su propia app desde hace 4 meses; quiere ayudar. Aliado, no cliente;
